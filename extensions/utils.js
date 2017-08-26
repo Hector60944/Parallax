@@ -76,7 +76,7 @@ module.exports = {
 
 const template = {
 	modlog: {
-		mod : "",
+		actions : "",
 		join : "",
 		leave : ""
 	},
