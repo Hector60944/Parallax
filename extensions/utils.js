@@ -75,7 +75,7 @@ module.exports = {
 }
 
 const template = {
-	modlog: {
+	channels: {
 		actions : "",
 		join : "",
 		leave : ""
