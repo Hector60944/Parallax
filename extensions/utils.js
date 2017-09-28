@@ -5,7 +5,6 @@ module.exports = {
 
     time: (time, formal) => {
 
-        try {
         let days = Math.floor(time % 31536000 / 86400),
         hours    = Math.floor(time % 31536000 % 86400 / 3600),
         minutes  = Math.floor(time % 31536000 % 86400 % 3600 / 60),
@@ -18,9 +17,6 @@ module.exports = {
             return `${days > 0 ? `${days} days, ` : ``}${(hours || days) > 0 ? `${hours} hours, ` : ``}${minutes} minutes and ${seconds} seconds`
         else
             return `${days > 0 ? `${days}:` : ``}${(hours || days) > 0 ? `${hours}:` : ``}${minutes}:${seconds}`
-        }catch(e){
-            console.error(e);
-        }
 
     },
 
