@@ -27,7 +27,6 @@ module.exports = {
 		} else {
 			messages.length = messages.length > messagecount + 1 ? messagecount + 1 : messages.length
 		}
-		
 
 		if (messages.length < 2) messages.map(m => m.delete());
 		else ctx.channel.bulkDelete(messages);
