@@ -3,10 +3,10 @@ exports.start = (runtime) => {
 	runtime.client.on('guildMemberAdd', (member) => {
 		const sdb = runtime.db[member.guild.id];
 
-		if (sdb && sdb.modlog.join && runtime.client.channels.has(sdb.modlog.join)) {
+		if (sdb && sdb.channels.join && runtime.client.channels.has(sdb.channels.join)) {
 
 			let creation = runtime.utils.time(new Date().getTime() - member.user.createdAt.getTime(), true);
-			runtime.client.channels.get(sdb.modlog.join).send({ embed: {
+			runtime.client.channels.get(sdb.channels.join).send({ embed: {
 				color: 0xFF4500,
 				author: {
 					name: `${member.user.tag} (${member.user.id})`,
@@ -28,9 +28,9 @@ exports.start = (runtime) => {
 	runtime.client.on('guildMemberRemove', (member) => {
 		const sdb = runtime.db[member.guild.id];
 		
-		if (sdb && sdb.modlog.leave && runtime.client.channels.has(sdb.modlog.leave)) {
+		if (sdb && sdb.channels.leave && runtime.client.channels.has(sdb.channels.leave)) {
 		
-			runtime.client.channels.get(sdb.modlog.join).send({ embed: {
+			runtime.client.channels.get(sdb.channels.join).send({ embed: {
 				color: 0xFF4500,
 				author: {
 					name: `${member.user.tag} (${member.user.id})`,
@@ -42,5 +42,5 @@ exports.start = (runtime) => {
 		
 		}
 	});
-
+	
 }

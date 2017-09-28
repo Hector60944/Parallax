@@ -59,6 +59,14 @@ module.exports = {
             return client.users.filter(u => u.username === search).first();
 
     },
+    
+    canInteract: (user1, user2) => {
+        return user1.id === user1.guild.ownerID || user1.highestRole.comparePositionTo(user2.highestRole) > 0
+    },
+
+    channelCheck: (channel, user, permissions) => {
+        return channel.permissionsFor(user).has(permissions)
+    },
 
     log: (type, content) => {
 

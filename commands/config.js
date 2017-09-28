@@ -1,143 +1,133 @@
 module.exports = {
 	
 	run: async (ctx) => {
+
 		if (ctx.args.length === 0)
 			return ctx.channel.send({ embed: { 
 				color: 0xbe2f2f, 
 				description: `All options need to be prefixed with \`${ctx.sdb.prefix}${ctx.command}\`\n\n` +
-				`**prefix** - Set a new server-wide prefix\n` +
-				`**events** - Set logging channels for specific events\n` + 
-				`**modlog** - Set a logging channel for moderation actions\n` +
-				`**autorole** - Configure auto-roles for users/bots upon joining\n` +
-				`**antiping** - Discipline users who try ping everyone/here\n` + 
-				`**assignable** - Setup self-assignable roles for users\n` +
-				`**invites** - Toggles whether invites are allowed in the server\n` +
-				`**raidpro** - Toggles raid protection (BETA)`
+				`\`\`\`\n` +
+				`prefix     - Set a new server-wide prefix\n` +
+				`channels   - Set logging channels\n` + 
+				`autorole   - Configure auto-roles for new members\n` +
+				`assignable - Setup self-assignable roles\n` +
+				`invites    - Toggles auto invite deletion\n` +
+				`raidpro    - Toggles raid protection (BETA)` +
+				`\n\`\`\``
 			}});
 
-		if (args[0] === "prefix") {
-			if (!args[1])
-				return module.exports.sendHelp(ctx, 'prefix', '{{p}}{{c}} {{s}} <prefix>')
-			ctx.sdb.prefix = args[1];
-			module.exports.changeSuccess(ctx, 'prefix', args[1]);
+		if (ctx.args[0] === 'prefix') {
+			if (!ctx.args[1])
+				return module.exports.sendHelp(ctx, 'prefix', '{{p}}{{c}} {{s}} <prefix>', 'Change the prefix of the bot for the entire server');
+			ctx.sdb.prefix = ctx.args[1];
+			module.exports.changeSuccess(ctx, `Set the prefix to \`${ctx.args[1]}\``);
 		}
 
-		if (args[0] === "channels") {
-			if (!args[1])
-				return module.exports.sendHelp(ctx, 'events', '{{p}}{{c}} {{s}} <join|leave|actions> [clear]\n\nParallax will use the current channel as the target.')
+		if (ctx.args[0] === 'channels') {
+			if (!ctx.args[1] || ctx.sdb.channels[ctx.args[1]] === undefined)
+				return module.exports.sendHelp(ctx, 'channels', '{{p}}{{c}} {{s}} < join | leave | actions > [clear]', 'Link the current channel with the specified event');
 
-			if (!ctx.sdb.channels[args[1]]) 
-				return module.exports.sendHelp(ctx, 'events', '{{p}}{{c}} {{s}} <join|leave|actions> [clear]\n\nParallax will use the current channel as the target.')
-
-			let channel = args[2] === 'clear' ? '' : ctx.channel.id
-			ctx.sdb.modlog[args[1]] = channel
-			module.exports.changeSuccess(ctx, `Events (${args[1]})`, (channel ? `<#${ctx.channel.id}>` : 'empty.'));
+			let channel = (ctx.args[2] && ctx.args[2] === 'clear' ? '' : ctx.channel.id)
+			ctx.sdb.channels[ctx.args[1]] = channel
+			module.exports.changeSuccess(ctx, (channel ? `<#${ctx.channel.id}> is now the \`${ctx.args[1]}\` channel` : `Cleared the \`${ctx.args[1]}\` channel`));
 
 		}
 
-		if (args[0] === "assignable") {
-			if (!args[1]) 
-				return msg.channel.send({ embed: { color: 0xbe2f2f, title: "Self-Assignable Roles", description: "You can manage self-assignable roles by doing `-manage assignable < add | remove > role name`" }});
-			if (!args[2]) 
-				return msg.channel.send({ embed: { color: 0xbe2f2f, title: "Self-Assignable Roles", description: "You must specify a role name" }});
+		if (ctx.args[0] === 'assignable') {
+			if (ctx.args.length < 3 || (ctx.args[1] !== 'add' && ctx.args[1] !== 'remove'))
+					return module.exports.sendHelp(ctx, 'assignable', '{{p}}{{c}} {{s}} <add|remove> <role name>', 'Make roles self-assignable by users');
 
-			let role = msg.guild.roles.find("name", args.slice(2).join(" "));
-			if (args[1] === "add") {
-				if (!role) 
-					return msg.channel.send({ embed: { color: 0xbe2f2f, title: "Self-Assignable Roles", description: "No role with that name was found." }});
-				if (db.assignable.includes(role.id)) 
-					return msg.channel.send({ embed: { color: 0xbe2f2f, title: "Self-Assignable Roles", description: "That role is already self-assignable." }});
-				db.assignable.push(role.id)
-				utils.db.updateDB(msg.guild.id, db);
-				msg.channel.send({ embed: { color: 0xbe2f2f, title: `Server Settings Updated` }});
-			} else if (args[1] === "remove") {
-				if (!role) 
-					return msg.channel.send({ embed: { color: 0xbe2f2f, title: "Self-Assignable Roles", description: "No role with that name was found." }});
-				if (!db.assignable.includes(role.id)) 
-					return msg.channel.send({ embed: { color: 0xbe2f2f, title: "Self-Assignable Roles", description: "That role is not self-assignable." }});
-				db.assignable.splice(db.assignable.indexOf(role.id), 1)
-				utils.db.updateDB(msg.guild.id, db);
-				msg.channel.send({ embed: { color: 0xbe2f2f, title: `Server Settings Updated` }});
-			} else {
-				return msg.channel.send('Invalid method. (add/remove)')
+			const role = ctx.guild.roles.find('name', ctx.args.slice(2).join(' '));
+			if (!role)
+				return ctx.channel.send({ embed: {
+					color: 0xbe2f2f,
+					title: 'Self-Assignable Roles',
+					description: 'A role with that name wasn\'t found'
+				}});
+			
+			if (ctx.args[1] === 'add') {
+				if (ctx.sdb.assignable.includes(role.id)) 
+					return ctx.channel.send({ embed: { color: 0xbe2f2f, title: 'Self-Assignable Roles', description: 'That role is already self-assignable.' }});
+				ctx.sdb.assignable.push(role.id)
+				module.exports.changeSuccess(ctx, `Added \`${role.name}\` to self-assignable roles`);
+			} else if (ctx.args[1] === 'remove') {
+				if (!ctx.sdb.assignable.includes(role.id)) 
+					return ctx.channel.send({ embed: { color: 0xbe2f2f, title: 'Self-Assignable Roles', description: 'That role is not currently self-assignable.' }});
+				ctx.sdb.assignable.splice(ctx.sdb.assignable.indexOf(role.id), 1)
+				module.exports.changeSuccess(ctx, `Removed \`${role.name}\` from self-assignable roles`);
 			}
 		}
 
-		if (args[0] === "autorole") {
-			if (!args[1]) 
-				return msg.channel.send({ embed: { color: 0xbe2f2f, title: "AutoRole", description: "You can manage autoroles by doing `-manage autorole < bots | users > < add | remove > role name`" }});
-			if (!args[2]) 
-				return msg.channel.send({ embed: { color: 0xbe2f2f, title: "AutoRole", description: "No method specified. (< add | remove >)" }});
-			if (!args[3]) 
-				return msg.channel.send({ embed: { color: 0xbe2f2f, title: "AutoRole", description: "No role name specified." }});
+		if (ctx.args[0] === 'autorole') {
+			if (ctx.args.length < 4 || (ctx.args[1] !== 'bots' && ctx.args[1] !== 'users') || (ctx.args[2] !== 'add' && ctx.args[2] !== 'remove'))
+				return module.exports.sendHelp(ctx, 'autorole', '{{p}}{{c}} {{s}} < bots | users > < add | remove > <role name>', 'Change what roles are assigned to bots/users upon joining');
 
-			let role = msg.guild.roles.find("name", args.slice(3).join(" "))
-			if (!role) 
-				return msg.channel.send({ embed: { color: 0xbe2f2f, title: "AutoRole", description: "No role with that name found." }});
+			const role = ctx.guild.roles.find('name', ctx.args.slice(3).join(' '));
+			if (!role)
+				return ctx.channel.send({ embed: {
+					color: 0xbe2f2f,
+					title: 'AutoRole',
+					description: 'A role with that name wasn\'t found'
+				}});
 
-			if (args[1] === "bots" || args[1] === "users") {
-				if (args[2] === "add") {
-					if (db.activeModules.autorole[args[1]].indexOf(role.id) !== -1) 
-						return msg.channel.send({ embed: { color: 0xbe2f2f, title: "AutoRole", description: "That role is currently being assigned." }});
-					db.activeModules.autorole[args[1]].push(role.id);
-					utils.db.updateDB(msg.guild.id, db);
-					msg.channel.send({ embed: { color: 0xbe2f2f, title: "AutoRole", description: `Auto-Role: Added **${role.name}** to ${args[1]}` }});
-				} else if (args[2] === "remove") {
-					if (db.activeModules.autorole[args[1]].indexOf(role.id) === -1) 
-						return msg.channel.send({ embed: { color: 0xbe2f2f, title: "AutoRole", description: "That role isn't currently being assigned." }});
-					db.activeModules.autorole[args[1]].splice(db.activeModules.autorole[args[1]].indexOf(role.id), 1)
-					utils.db.updateDB(msg.guild.id, db);
-					msg.channel.send({ embed: { color: 0xbe2f2f, title: "AutoRole", description: `Auto-Role: Removed **${role.name}** from ${args[1]}` }});
-				}
-			} else {
-				return msg.channel.send('Invalid category. (bots/users)')
+			if (ctx.args[2] === 'add') {
+				if (ctx.sdb.autorole[ctx.args[1]].includes(role.id))
+					return ctx.channel.send({ embed: { color: 0xbe2f2f, title: 'AutoRole', description: 'That role is currently active.' }});
+				ctx.sdb.autorole[ctx.args[1]].push(role.id);
+				ctx.channel.send({ embed: { color: 0xbe2f2f, title: 'AutoRole', description: `Added \`${role.name}\` to ${ctx.args[1]}` }});
+			} else if (ctx.args[2] === 'remove') {
+				if (!ctx.sdb.autorole[ctx.args[1]].includes(role.id))
+					return msg.channel.send({ embed: { color: 0xbe2f2f, title: 'AutoRole', description: 'That role isn\'t currently being assigned.' }});
+				ctx.sdb.autorole[ctx.args[1]].splice(ctx.sdb.autorole[ctx.args[1]].indexOf(role.id), 1)
+				ctx.channel.send({ embed: { color: 0xbe2f2f, title: 'AutoRole', description: `Removed \`${role.name}\` from ${ctx.args[1]}` }});
 			}
 		}
 
-		if (args[0] === "antiping") {
-			if (!args[1]) 
-				return msg.channel.send({ embed: { color: 0xbe2f2f, title: "AntiPing", description: "Anti-Ping can automatically ban/kick anyone who tries to ping everyone/here\n\n`-manage antiping < kick | ban | off >`" }});
+		if (ctx.args[0] === 'invites') {
+			if (ctx.args.length !== 2 || (ctx.args[1] !== 'on' && ctx.args[1] !== 'off'))
+				return module.exports.sendHelp(ctx, 'invites', '{{p}}{{c}} {{s}} < on | off >', 'Toggles deletion of Discord invite links');
+
+			let option = ctx.args[1] === 'on';
+			ctx.sdb.invites = option;
+			module.exports.sendHelp(ctx, `Anti-Invite ${option ? 'enabled' : 'disabled'}`);			
+		}
+
+		if (ctx.args[0] === 'raidpro') {
+			if (ctx.args.length !== 2 || (ctx.args[1] !== 'on' && ctx.args[1] !== 'off'))
+				return module.exports.sendHelp(ctx, 'raidpro', '{{p}}{{c}} {{s}} < on | off >', 'Toggles server raid protection');
+
+			let option = ctx.args[1] === 'on';
+			ctx.sdb.raid = option;
+			module.exports.sendHelp(ctx, `Raid Protection ${option ? 'enabled' : 'disabled'}`);			
+		}
 		
-			if (args[1] === "off") {
-				db.activeModules.antiping = 0;
-				utils.db.updateDB(msg.guild.id, db);
-				msg.channel.send({ embed: { color: 0xbe2f2f, title: `Server Settings Updated` }});
-			} else if (args[1] === "kick") {
-				db.activeModules.antiping = 1;
-				utils.db.updateDB(msg.guild.id, db);
-				msg.channel.send({ embed: { color: 0xbe2f2f, title: `Server Settings Updated` }});
-			} else if (args[1] === "ban") {
-				db.activeModules.antiping = 2;
-				utils.db.updateDB(msg.guild.id, db);
-				msg.channel.send({ embed: { color: 0xbe2f2f, title: `Server Settings Updated` }});
-			} else {
-				return msg.channel.send('Invalid action. (off/kick/ban)')
-			}
-		}
 	},
 
-	sendHelp: async (ctx, category, description) => {
+	sendHelp: async (ctx, category, usage, description) => {
+		description = description.replace(/\{\{p\}\}/g, ctx.sdb.prefix).replace(/\{\{c\}\}/g, ctx.command).replace(/\{\{s\}\}/g, category)
 		await ctx.channel.send({
 			embed: {
 				color: 0xbe2f2f,
 				title: `Help for ${category}`,
-				description: description.replace(/\{\{p\}\}/g, ctx.sdb.prefix).replace(/\{\{c\}\}/g, ctx.command).replace(/\{\{s\}\}/g, category)
+				description: `\`${usage}\`\n\n${description}`
 			}
 		})
 	},
 
-	changeSuccess: async (ctx, category, newSetting) => {
+	changeSuccess: async (ctx, description) => {
 		await ctx.channel.send({
 			embed: {
 				color: 0xbe2f2f,
 				title: `Server Settings Updated`,
-				description: `${category} is now \`${newSetting}\``
+				description: description
 			}
 		})
 	},
 
 	developerOnly: false,
 	serverOwnerOnly: false,
-	permissions: ['MANAGE_GUILD']
+	permissions: ['MANAGE_GUILD'],
+	aliases: [],
+	usage: ''
 
 }

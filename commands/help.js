@@ -22,10 +22,31 @@ module.exports = {
 
 		} else {
 
-			if (ctx.client.commands.has(ctx.args[0]))
-				ctx.channel.send(ctx.client.commands.get(ctx.args[0]).help || 'No help is available for this command.');
-			else
+			if (ctx.client.commands.has(ctx.args[0])) {
+
+				if (!ctx.client.commands.get(ctx.args[0]).help)
+					return ctx.channel.send({ embed: {
+						color: 0xbe2f2f,
+						title: 'No help available',
+						description: 'No help documentation was found for that command.'
+					}});
+
+				const command = ctx.client.commands.get(ctx.args[0]);
+
+				ctx.channel.send({ embed: {
+					color: 0xbe2f2f,
+					title: `Help for ${ctx.args[0].toLowerCase()}`,
+					description: 
+					`**Usage:** ${ctx.sdb.prefix}${ctx.args[0].toLowerCase()} ${command.usage}\n` +
+					`**Description:**${command.desc}\n` +
+					`**Aliases:** ${command.aliases.join('\n') || 'None'}`
+				}})
+
+			} else {
+
 				ctx.channel.send(`Invalid command specified. Use \`${ctx.sdb.prefix}help\` to view available commands.`);
+
+			}
 
 
 		}
@@ -33,7 +54,9 @@ module.exports = {
 	},
 
 	developerOnly: false,
-
-	permissions: []
+	serverOwnerOnly: false,
+	permissions: [],
+	aliases: ['h'],
+	usage: '[command]'
 
 }

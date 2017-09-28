@@ -30,7 +30,9 @@ client.once('ready', () => {
 client.on('ready', () => client.user.setPresence({ game: { name: `${settings.prefix}help | v${settings.version}`, type: 0 } }) );
 
 client.on('guildCreate', g => {
-	if (g.members.filter(m => m.user.bot).size / g.members.size > 0.65 || g.members.filter(m => !m.user.bot).size < 5) return g.leave();
+	if (g.members.filter(m => m.user.bot).size / g.members.size > 0.65 || g.members.filter(m => !m.user.bot).size < 5) 
+		return g.leave();
+	
 	if (!db[g.id])
 		utils.createDB(g.id, db);
 });
@@ -41,9 +43,9 @@ client.on('guildDelete', g => {
 });
 
 client.on('message', ctx => {
-	if (ctx.author.bot || !ctx.guild || !ctx.member || ctx.channel.id === '110373943822540800' || !db[ctx.guild.id]) return;
+	if (ctx.author.bot || !ctx.guild || !ctx.member || !db[ctx.guild.id]) return;
 
-	if (ctx.mentions.users.size > 0) {
+	if (ctx.channel.id !== '110373943822540800' && ctx.mentions.users.size > 0) {
 		ctx.mentions.users.filter(u => afk[u.id] && afk[u.id].afk).map(u => {
 			ctx.channel.send({ embed: { 
 				color: 0xbe2f2f, 
@@ -60,15 +62,29 @@ client.on('message', ctx => {
 	let sdb = db[ctx.guild.id];
 
 	if (ctx.isMentioned(client.user.id) && ctx.content.toLowerCase().includes('help'))
-		return ctx.channel.send({ embed: { color: 0xbe2f2f, title: 'Mention Help', description: `Server Prefix: ${sdb.prefix}\n\nTo view my commands, send ${sdb.prefix}help`}});
+		return ctx.channel.send({ embed: { 
+			color: 0xbe2f2f, 
+			title: 'Mention Help', 
+			description: `Server Prefix: ${sdb.prefix}\n\nTo view my commands, send ${sdb.prefix}help`
+		}});
 
 	//if (db.activeModules.invites)  modules.invite(client, msg, db);
 	//if (db.activeModules.raid)     modules.raid(client, msg, db, Discord);
 
 	if (!ctx.content.toLowerCase().startsWith(sdb.prefix)) return;
 
-	ctx.command = ctx.content.toLowerCase().substring(sdb.prefix.length).split(' ')[0];
-	ctx.args    = ctx.content.trim().split(' ').slice(1);
+	ctx.command  = ctx.content.toLowerCase().substring(sdb.prefix.length).split(' ')[0];
+	ctx.args     = ctx.content.trim().split(' ').slice(1).filter(a => !a.startsWith('-'));
+	ctx.switches = resolveSwitches(ctx.content.trim().split(' ').slice(1));
+
+	if (!client.commands.has(ctx.command)) return;
+
+	if (!ctx.guild.me.permissions.has('ADMINISTRATOR'))
+		return ctx.channel.send({ embed: {
+			color: 0xbe2f2f,
+			title: 'Missing Permissions',
+			description: 'Parallax requires `ADMINISTRATOR` permissions to run.'
+		}});
 
 	ctx.Discord  = Discord;
 	ctx.client   = client;
@@ -76,32 +92,27 @@ client.on('message', ctx => {
 	ctx.utils    = utils;
 	ctx.sdb      = sdb;
 
-	if (client.commands.has(ctx.command)) {
+	const command = client.commands.get(ctx.command);
+	const missing = ctx.channel.permissionsFor(ctx.member).missing(command.permissions);
 
-		let command = client.commands.get(ctx.command);
+	if (command.developerOnly && ctx.author.id !== settings.ownerid)
+		missing.push('BOT_OWNER');
 
-		let missing = ctx.channel.permissionsFor(ctx.member).missing(command.permissions);
+	if (command.serverOwnerOnly && ctx.author.id !== ctx.guild.ownerID)
+		missing.push('SERVER_OWNER');
 
-		if (command.developerOnly && ctx.author.id !== settings.ownerid)
-			missing.push('BOT_OWNER');
-
-		if (command.serverOwnerOnly && ctx.author.id !== ctx.guild.ownerID)
-			missing.push('SERVER_OWNER');
-
-		if (missing.length > 0)
-			return ctx.channel.send({ embed: {
-				color: 0xbe2f2f,
-				title: 'Missing Required Permissions',
-				description: `You are missing the following permissions:\n${missing.join('\n')}`
-			}});
+	if (missing.length > 0)
+		return ctx.channel.send({ embed: {
+			color: 0xbe2f2f,
+			title: 'Missing Required Permissions',
+			description: missing.join('\n')
+		}});
 		
-		try {
-			command.run(ctx);
-		} catch(e) {
-			utils.log('error', `Command ${ctx.command} failed. ${ctx.args ? `Parameters: ${ctx.args.join(' ')}` : ''}\nStack: ${e.stack.split('\n').slice(0, 3).join('\n')}`)
-			ctx.channel.send('An error has occurred while processing the command. The error has been logged.');
-		}
-
+	try {
+		command.run(ctx);
+	} catch(e) {
+		utils.log('error', `Command ${ctx.command} failed. ${ctx.args ? `Parameters: ${ctx.args.join(' ')}` : ''}\nStack: ${e.stack.split('\n').slice(0, 3).join('\n')}`)
+		ctx.channel.send('An error has occurred while processing the command. The error has been logged.');
 	}
 
 });
@@ -111,8 +122,8 @@ fs.readdir('./commands/', (err, files) => {
 	if (err)
 		return utils.log('error', 'Failed to read command directory!')
 
-	for (let file in files) {
-		file = files[file].split('.')[0];
+	for (let file of files) {
+		file = file.split('.')[0];
 		try {
 			client.commands.set(file, require(`./commands/${file}`));
 			delete require.cache[require.resolve(`./commands/${file}`)];
@@ -123,25 +134,13 @@ fs.readdir('./commands/', (err, files) => {
 
 });
 
-/*
-client.on('guildMemberAdd', member => {
-	if (!utils.db.hasDB(member.guild.id)) return;
-	let db = utils.db.getDB(member.guild.id);
-
-	modules.gevents(client, member, db, 'join');
-
-	if (db.activeModules.autorole.bots.length > 0 || db.activeModules.autorole.users.length > 0)
-		modules.role(client, member, db, Discord);
-});
-
-client.on('guildMemberRemove', member => {
-	if (!utils.db.hasDB(member.guild.id)) return;
-	let db = utils.db.getDB(member.guild.id);
-
-	modules.gevents(client, member, db, 'leave');
-		
-});
-*/
+function resolveSwitches(args) {
+	let switches = {}
+	args
+	.filter(a => a.startsWith('--') || a.startsWith('-'))
+	.map(a => switches[a.replace(/\-/g, '').toLowerCase()] = true);
+	return switches;
+}
 
 /*
 setInterval(() => {

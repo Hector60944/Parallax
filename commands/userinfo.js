@@ -48,6 +48,8 @@ module.exports = {
 
     developerOnly: false,
 	serverOwnerOnly: false,
-	permissions: []
+    permissions: [],
+    aliases: ['ui'],
+	usage: '<user>'
 
 }

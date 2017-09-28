@@ -2,9 +2,6 @@ module.exports = {
 
     run: (ctx) => {
 
-        if (ctx.author.id !== ctx.settings.ownerid)
-            return ctx.channel.send(":warning: :eyes:");
-
         let command = ctx.args[0];
 
         if (!command)
@@ -27,7 +24,9 @@ module.exports = {
     },
 
     developerOnly: true,
-    serverOwnerOnly: true,
-    permissions: []
+    serverOwnerOnly: false,
+    permissions: [],
+    aliases: [],
+	usage: '[module]'
 
 }

@@ -1,39 +1,54 @@
-exports.run = async function(client, msg, args, db, Discord) {
-    if (!msg.member.permissions.has('BAN_MEMBERS'))
-        return msg.channel.send({ embed: { color: 0xbe2f2f, title: 'Permissions Error', description: 'You don\'t have permission to use this command.' }});
-    if (!msg.guild.me.permissions.has('MANAGE_ROLES'))
-        return msg.channel.send({ embed: { color: 0xbe2f2f, title: 'Permissions Error', description: 'I don\'t have permission to manage roles.' }});
-	if (msg.mentions.users.size === 0) 
-        return msg.channel.sendMessage('No users specified.');
+const mentionDetection = /<@!?\d+>/g
 
-   	if (!msg.guild.roles.find('name', 'Muted')) {
-		let role = await msg.guild.createRole({
-			name: 'Muted',
-			permissions: []
-		});
-		msg.guild.channels.filter(c => c.type === 'text').map(c => c.overwritePermissions(role, { SEND_MESSAGES: false }) );
-	}
+module.exports = {
+	
+	run: async (ctx) => {
 
-	let reason = args[msg.mentions.users.size] ? args.slice(msg.mentions.users.size).join(' ') : 'Unspecified';
+		if (ctx.mentions.users.size === 0)	
+			return ctx.channel.send({ embed: {
+				color: 0xbe2f2f,
+				title: 'Missing Mentions',
+				description: 'Mention the users you\'d like to mute.'
+			}});
 
-	msg.react('☑');
+		if (!ctx.guild.roles.find('name', 'Muted')) {
+			let role = await ctx.guild.createRole({
+				name: 'Muted',
+				permissions: []
+			});
+			ctx.guild.channels
+			.filter(c => c.type === 'text')
+			.map(c => c.overwritePermissions(role, { SEND_MESSAGES: false }) );
+		}
 
-	msg.mentions.users.forEach(u => {
-		msg.guild.member(u).addRole(msg.guild.roles.find('name', 'Muted'));
-	});
+		const reason = `${ctx.author.tag}: ${ctx.args.join(' ').replace(mentionDetection, '') || 'Unspecified'}`;
+		const user = ctx.mentions.users.first();
 
-	if (db.modlog.channel && client.channels.has(db.modlog.channel))
-		client.channels.get(db.modlog.channel).send({ embed: {
-			color: 0xbe2f2f,
-			title: 'Action: Mute',
-			fields: [
-				{ name: 'User(s)', value: `${msg.mentions.users.map(u => `${u.tag} (${u.id})`).join('\n')}`, inline: false },
-				{ name: 'Reason', value: reason, inline: false }
-			],
-			footer: {
-				text: `Action performed by ${msg.author.tag}`
-			},
-			timestamp: new Date()
-		}});
+		if (!ctx.utils.canInteract(ctx.member, ctx.guild.member(user)))
+			return ctx.channel.send({ embed: {
+				color: 0xbe2f2f,
+				title: 'Unable to Mute',
+				description: 'The target user has an equivalent or higher role than you'
+			}});
+
+		ctx.guild.member(user).addRole(ctx.guild.roles.find('name', 'Muted'), reason);
+
+		if (ctx.sdb.channels.actions && client.channels.has(ctx.sdb.channels.actions))
+			client.channels.get(ctx.sdb.channels.actions).send({ embed: {
+				color: 0xbe2f2f,
+				description: `**User Muted**\n**Target:** ${user.tag} (${user.id})\n**Reason:** ${reason}`,
+				footer: {
+					text: `Action performed by ${ctx.author.tag}`
+				},
+				timestamp: new Date()
+			}});
+	
+	},
+
+	developerOnly: false,
+	serverOwnerOnly: false,
+	permissions: ['KICK_MEMBERS'],
+	aliases: ['m'],
+	usage: '<users> [reason]'
 
 }

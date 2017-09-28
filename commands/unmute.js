@@ -1,33 +1,51 @@
-exports.run = function(client, msg, args, db, Discord) {
-    if (!msg.member.permissions.has("BAN_MEMBERS"))
-        return msg.channel.send({ embed: { color: 0xbe2f2f, title: "Permissions Error", description: "You don't have permission to use this command." }});
-    if (!msg.guild.me.permissions.has("MANAGE_ROLES"))
-        return msg.channel.send({ embed: { color: 0xbe2f2f, title: "Permissions Error", description: "I don't have permission to manage roles." }});
-	if (msg.mentions.users.size === 0) 
-        return msg.channel.sendMessage("No users specified.");
-   	if (!msg.guild.roles.find("name", "Muted"))
-		return msg.channel.send({ embed: { color: 0xbe2f2f, title: "Missing Role", description: "This server doesn't have a 'Muted' role." }});
+const mentionDetection = /<@!?\d+>/g
 
-	let reason = args[msg.mentions.users.size] ? args.slice(msg.mentions.users.size).join(" ") : "Unspecified";
+module.exports = {
+	
+	run: (ctx) => {
 
-	msg.react("☑");
+		if (ctx.mentions.users.size === 0)	
+			return ctx.channel.send({ embed: {
+				color: 0xbe2f2f,
+				title: 'Missing Mentions',
+				description: 'Mention the user you\'d like to unmute.'
+			}});
 
-	msg.mentions.users.forEach(u => {
-		msg.guild.member(u).removeRole(msg.guild.roles.find("name", "Muted"));
-	});
+		if (!ctx.guild.roles.find('name', 'Muted'))
+			return ctx.channel.send({ embed: {
+				color: 0xbe2f2f,
+				title: 'Missing \'Muted\' Role',
+				description: 'This server doesn\'t have a `Muted` role.\n\nParallax will automatically create a `Muted` role upon using the `mute` command.	'
+			}});
 
-	if (db.modlog.channel && client.channels.has(db.modlog.channel))
-		client.channels.get(db.modlog.channel).send({ embed: {
-			color: 0xbe2f2f,
-			title: "Action: Unmute",
-			fields: [
-				{ name: "User(s)", value: `${msg.mentions.users.map(u => `${u.tag} (${u.id})`).join("\n")}`, inline: false },
-				{ name: "Reason", value: reason, inline: false }
-			],
-			footer: {
-				text: `Action performed by ${msg.author.tag}`
-			},
-			timestamp: new Date()
-		}});
+		const reason = `${ctx.author.tag}: ${ctx.args.join(' ').replace(mentionDetection, '') || 'Unspecified'}`;
+		const user = ctx.mentions.users.first();
+
+		if (!ctx.utils.canInteract(ctx.member, ctx.guild.member(user)))
+			return ctx.channel.send({ embed: {
+				color: 0xbe2f2f,
+				title: 'Unable to Mute',
+				description: 'The target user has an equivalent or higher role than you'
+			}});
+
+		ctx.guild.member(user).removeRole(ctx.guild.roles.find('name', 'Muted'), reason);
+
+		if (ctx.sdb.channels.actions && client.channels.has(ctx.sdb.channels.actions))
+			client.channels.get(ctx.sdb.channels.actions).send({ embed: {
+				color: 0xbe2f2f,
+				description: `**User Unmuted**\n**Target:** ${user.tag} (${user.id})\n**Reason:** ${reason}`,
+				footer: {
+					text: `Action performed by ${ctx.author.tag}`
+				},
+				timestamp: new Date()
+			}});
+	
+	},
+
+	developerOnly: false,
+	serverOwnerOnly: false,
+	permissions: ['KICK_MEMBERS'],
+	aliases: ['um'],
+	usage: '<users> [reason]'
 
 }

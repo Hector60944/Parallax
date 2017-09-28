@@ -10,7 +10,9 @@ module.exports = {
 	},
 
 	developerOnly: true,
-
-	permissions: []
+	serverOwnerOnly: false,
+	permissions: [],
+	aliases: [],
+	usage: ''
 
 }
