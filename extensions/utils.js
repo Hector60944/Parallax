@@ -5,19 +5,22 @@ module.exports = {
 
     time: (time, formal) => {
 
-        time = time / 1000;
-        let days    = Math.floor(time % 31536000 / 86400),
-        hours   = Math.floor(time % 31536000 % 86400 / 3600),
-        minutes = Math.floor(time % 31536000 % 86400 % 3600 / 60),
-        seconds = Math.round(time % 31536000 % 86400 % 3600 % 60);
-        days    = days    > 9 ? days    : "0" + days
-        hours   = hours   > 9 ? hours   : "0" + hours
-        minutes = minutes > 9 ? minutes : "0" + minutes
-        seconds = seconds > 9 ? seconds : "0" + seconds
+        try {
+        let days = Math.floor(time % 31536000 / 86400),
+        hours    = Math.floor(time % 31536000 % 86400 / 3600),
+        minutes  = Math.floor(time % 31536000 % 86400 % 3600 / 60),
+        seconds  = Math.round(time % 31536000 % 86400 % 3600 % 60);
+        days     = days    > 9 ? days    : "0" + days
+        hours    = hours   > 9 ? hours   : "0" + hours
+        minutes  = minutes > 9 ? minutes : "0" + minutes
+        seconds  = seconds > 9 ? seconds : "0" + seconds
         if (formal)
             return `${days > 0 ? `${days} days, ` : ``}${(hours || days) > 0 ? `${hours} hours, ` : ``}${minutes} minutes and ${seconds} seconds`
         else
             return `${days > 0 ? `${days}:` : ``}${(hours || days) > 0 ? `${hours}:` : ``}${minutes}:${seconds}`
+        }catch(e){
+            console.error(e);
+        }
 
     },
 
@@ -42,7 +45,7 @@ module.exports = {
 
     },
 
-    resolveUser: (client, ctx, search) => {
+    resolveUser: (ctx, search) => {
         
         if (ctx.mentions.users.size > 0)
             return ctx.mentions.users.first();
@@ -51,12 +54,12 @@ module.exports = {
             return undefined;
 
         if (!isNaN(search)) 
-            return client.users.get(search);
+            return ctx.client.users.get(search);
 
         if (search.includes('#'))
-            return client.users.filter(u => u.tag === search).first();
+            return ctx.client.users.filter(u => u.tag === search).first();
         else
-            return client.users.filter(u => u.username === search).first();
+            return ctx.client.users.filter(u => u.username === search).first();
 
     },
     

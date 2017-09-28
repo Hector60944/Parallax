@@ -20,7 +20,7 @@ module.exports = {
 		Promise.all(tasks).then(() => {
 			channel.delete();
 			msg.react("☑");
-		})
+		});
 		
 	},
 

@@ -59,10 +59,3 @@ exports.run = async (runtime) => {
 }
 
 exports.help = 'succ';
-
-function dumpafkusers(afkusers) {
-	fs.writeFile("./storage/afk.json", JSON.stringify(afkusers, "", "\t"), 'utf8', err => {
-		if (err) 
-			console.warn("AFK DB update failed");
-	})
-}

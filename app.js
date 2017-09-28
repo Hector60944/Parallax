@@ -74,10 +74,18 @@ client.on('message', ctx => {
 	if (!ctx.content.toLowerCase().startsWith(sdb.prefix)) return;
 
 	ctx.command  = ctx.content.toLowerCase().substring(sdb.prefix.length).split(' ')[0];
-	ctx.args     = ctx.content.trim().split(' ').slice(1).filter(a => !a.startsWith('-'));
+	ctx.args     = ctx.content.trim().split(' ').slice(1);
+	ctx.filtered = ctx.content.trim().split(' ').slice(1).filter(a => !a.startsWith('-'));
 	ctx.switches = resolveSwitches(ctx.content.trim().split(' ').slice(1));
 
-	if (!client.commands.has(ctx.command)) return;
+	if (!client.commands.has(ctx.command)) {
+		const findByAlias = client.commands.findKey(cmd => cmd.aliases && cmd.aliases.includes(ctx.command));
+		if (!findByAlias)
+			return;
+
+		ctx.invokedCommand = ctx.command;
+		ctx.command = findByAlias;
+	}
 
 	if (!ctx.guild.me.permissions.has('ADMINISTRATOR'))
 		return ctx.channel.send({ embed: {
@@ -137,7 +145,7 @@ fs.readdir('./commands/', (err, files) => {
 function resolveSwitches(args) {
 	let switches = {}
 	args
-	.filter(a => a.startsWith('--') || a.startsWith('-'))
+	.filter(a => (a.startsWith('--') && a.length > 2) || (a.startsWith('-') && a.length > 1))
 	.map(a => switches[a.replace(/\-/g, '').toLowerCase()] = true);
 	return switches;
 }
