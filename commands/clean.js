@@ -7,12 +7,11 @@ module.exports = {
 
 		const messagecount = parseInt(ctx.args[0]);
 
-		if (!messagecount)
+		if (!messagecount || messagecount < 1 || messagecount > 100)
 			return ctx.channel.send("Invalid amount specified.");
 
 		let messages = (await ctx.channel.fetchMessages({ limit: 100 })).array();
 		let mentions = ctx.mentions.users.size > 0 ? ctx.mentions.users.array().map(u => u.id) : [];
-		//messages = messages.array();
 
 		if (mentions.length > 0) 
 			messages = messages.filter(m => mentions.includes(m.author.id));
