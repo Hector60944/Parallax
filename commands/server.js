@@ -30,7 +30,8 @@ module.exports = {
 	permissions: [],
 	requires: [],
 	aliases: [],
-    usage: ''
+    usage: '',
+	description: 'Displays server information'
     
 }
 

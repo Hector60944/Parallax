@@ -36,7 +36,8 @@ module.exports = {
 	serverOwnerOnly: false,
 	permissions: ['MANAGE_MESSAGES'],
 	requires: ['MANAGE_MESSAGES'],
-	aliases: ['d', 'purge', 'prune', 'clear', 'delete'],
-	usage: '<amount> [-bot|-user]'
+	aliases: ['d', 'purge', 'prune', 'clear', 'delete', 'remove'],
+	usage: '<amount> [-bot|-user]',
+	description: 'Removes the specified amount of messages from the channel'
 
 }

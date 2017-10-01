@@ -37,9 +37,9 @@ module.exports = {
 					color: 0xbe2f2f,
 					title: `Help for ${ctx.args[0].toLowerCase()}`,
 					description: 
-					`**Usage:** ${ctx.sdb.prefix}${ctx.args[0].toLowerCase()} ${command.usage}\n` +
-					`**Description:** ${command.desc || 'No description'}\n` +
-					`**Aliases:** ${command.aliases.join('\n') || 'None'}`
+					`**Usage:** \`${ctx.sdb.prefix}${ctx.args[0].toLowerCase()} ${command.usage}\`\n` +
+					`**Description:** ${command.description || 'No description'}\n` +
+					`**Aliases:** \`${command.aliases.join(' ') || 'None'}\``
 				}})
 
 			} else {
@@ -58,6 +58,7 @@ module.exports = {
 	permissions: [],
 	requires: [],
 	aliases: ['h'],
-	usage: '[command]'
+	usage: '[command]',
+	description: 'Displays commands or per-command help'
 
 }

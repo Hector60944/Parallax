@@ -14,6 +14,7 @@ module.exports = {
 	permissions: [],
 	requires: [],
 	aliases: [],
-	usage: ''
+	usage: '',
+	description: 'Reboots the bot'
 
 }

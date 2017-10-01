@@ -29,6 +29,7 @@ module.exports = {
 	permissions: ['MOVE_MEMBERS'],
 	requires: ['MOVE_MEMBERS', 'MANAGE_CHANNELS'],
 	aliases: ['vk'],
-	usage: '<users>'
+	usage: '<users>',
+	description: 'Boots the specified users from their voicechannels'
 
 }

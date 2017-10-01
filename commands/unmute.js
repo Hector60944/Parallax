@@ -49,6 +49,7 @@ module.exports = {
 	permissions: ['KICK_MEMBERS'],
 	requires: ['MANAGE_ROLES'],
 	aliases: ['um'],
-	usage: '<user> [reason]'
+	usage: '<user> [reason]',
+	description: 'Allows the specified user to talk in the server'
 
 }

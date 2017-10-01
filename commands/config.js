@@ -129,6 +129,7 @@ module.exports = {
 	permissions: ['MANAGE_GUILD'],
 	requires: [],
 	aliases: [],
-	usage: ''
+	usage: '',
+	description: 'Allows changing of the bot configuration for this server'
 
 }

@@ -28,6 +28,7 @@ module.exports = {
     permissions: [],
     requires: [],
     aliases: [],
-	usage: '<module>'
+	usage: '<module>',
+	description: 'Reloads the specified module'
 
 }

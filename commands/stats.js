@@ -22,6 +22,7 @@ module.exports = {
 	permissions: [],
 	requires: [],
 	aliases: [],
-	usage: ''
+	usage: '',
+	description: 'Displays bot statistics'
 
 }

@@ -16,6 +16,7 @@ module.exports = {
 	permissions: [],
 	requires: [],
 	aliases: [],
-    usage: ''
+    usage: '',
+	description: 'Displays the relevant invite links for the bot'
     
 }

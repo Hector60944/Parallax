@@ -31,6 +31,7 @@ module.exports = {
 	permissions: ['MANAGE_GUILD'],
 	requires: [],
 	aliases: [],
-	usage: ''
+	usage: '',
+	description: 'Displays the current bot configuration for the server'
 	
 }

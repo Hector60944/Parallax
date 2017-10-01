@@ -28,7 +28,8 @@ module.exports = {
 	permissions: [],
 	requires: [],
 	aliases: ['e'],
-	usage: '<code>'
+	usage: '<code>',
+	description: 'Evaluates given JavaScript code'
 
 
 }

@@ -52,6 +52,7 @@ module.exports = {
 	permissions: ['KICK_MEMBERS'],
 	requires: ['MANAGE_ROLES'],
 	aliases: ['m'],
-	usage: '<user> [reason]'
+	usage: '<user> [reason]',
+	description: 'Prevents the specified user from talking in the server'
 
 }

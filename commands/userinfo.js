@@ -57,6 +57,7 @@ module.exports = {
     permissions: [],
     requires: [],
     aliases: ['ui'],
-	usage: '<user>'
+	usage: '<user>',
+	description: 'Displays information about the specified user'
 
 }

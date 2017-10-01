@@ -45,6 +45,7 @@ module.exports = {
 	permissions: ['BAN_MEMBERS'],
 	requires: ['BAN_MEMBERS'],
 	aliases: ['ub'],
-	usage: '<user> [reason]'
+	usage: '<user> [reason]',
+	description: 'Removes the ban for the specified user'
 
 }
