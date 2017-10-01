@@ -29,6 +29,7 @@ module.exports = {
 	developerOnly: false,
     serverOwnerOnly: false,
 	permissions: ['MANAGE_GUILD'],
+	requires: [],
 	aliases: [],
 	usage: ''
 	

@@ -95,20 +95,29 @@ client.on('message', ctx => {
 	ctx.sdb      = sdb;
 
 	const command = client.commands.get(ctx.command);
-	const missing = ctx.channel.permissionsFor(ctx.member).missing(command.permissions);
+	const uMissing = ctx.channel.permissionsFor(ctx.member).missing(command.permissions);
+	const bMissing = ctx.channel.permissionsFor(ctx.guild.me).missing(command.requires)
 
 	if (command.developerOnly && !settings.owners.includes(ctx.author.id))
-		missing.push('BOT_OWNER');
+		uMissing.push('BOT_OWNER');
 
 	if (command.serverOwnerOnly && ctx.author.id !== ctx.guild.ownerID)
-		missing.push('SERVER_OWNER');
+		uMissing.push('SERVER_OWNER');
 
-	if (missing.length > 0)
+	if (uMissing.length > 0)
 		return ctx.channel.send({ embed: {
 			color: 0xbe2f2f,
-			title: 'User Missing Required Permissions',
-			description: missing.join('\n')
+			title: 'Missing Required Permissions',
+			description: uMissing.join('\n')
 		}});
+
+	if (bMissing.length > 0) {
+		return ctx.channel.send({ embed: {
+			color: 0xbe2f2f,
+			title: 'Parallax needs the following permissions',
+			description: bMissing.join('\n')
+		}});
+	}
 		
 	try {
 		command.run(ctx);

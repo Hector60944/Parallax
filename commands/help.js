@@ -56,6 +56,7 @@ module.exports = {
 	developerOnly: false,
 	serverOwnerOnly: false,
 	permissions: [],
+	requires: [],
 	aliases: ['h'],
 	usage: '[command]'
 

@@ -35,7 +35,8 @@ module.exports = {
 	developerOnly: false,
 	serverOwnerOnly: false,
 	permissions: ['MANAGE_MESSAGES'],
+	requires: ['MANAGE_MESSAGES'],
 	aliases: ['d', 'purge', 'prune', 'clear', 'delete'],
-	usage: '<amount> [--bot|--user]'
+	usage: '<amount> [-bot|-user]'
 
 }

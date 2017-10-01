@@ -26,7 +26,8 @@ module.exports = {
     developerOnly: true,
     serverOwnerOnly: false,
     permissions: [],
+    requires: [],
     aliases: [],
-	usage: '[module]'
+	usage: '<module>'
 
 }

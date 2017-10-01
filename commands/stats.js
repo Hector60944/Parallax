@@ -20,6 +20,7 @@ module.exports = {
 	developerOnly: false,
 	serverOwnerOnly: false,
 	permissions: [],
+	requires: [],
 	aliases: [],
 	usage: ''
 

@@ -55,6 +55,7 @@ module.exports = {
     developerOnly: false,
 	serverOwnerOnly: false,
     permissions: [],
+    requires: [],
     aliases: ['ui'],
 	usage: '<user>'
 

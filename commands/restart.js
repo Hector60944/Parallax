@@ -12,6 +12,7 @@ module.exports = {
 	developerOnly: true,
 	serverOwnerOnly: false,
 	permissions: [],
+	requires: [],
 	aliases: [],
 	usage: ''
 

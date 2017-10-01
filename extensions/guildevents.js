@@ -5,7 +5,7 @@ exports.start = (runtime) => {
 
 		if (sdb && sdb.channels.join && runtime.client.channels.has(sdb.channels.join)) {
 
-			let creation = runtime.utils.time(new Date().getTime() - member.user.createdAt.getTime(), true);
+			let creation = runtime.utils.time((new Date().getTime() - member.user.createdAt.getTime()) / 1000, true);
 			runtime.client.channels.get(sdb.channels.join).send({ embed: {
 				color: 0xFF4500,
 				author: {

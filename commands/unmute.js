@@ -15,10 +15,10 @@ module.exports = {
 			return ctx.channel.send({ embed: {
 				color: 0xbe2f2f,
 				title: 'Missing \'Muted\' Role',
-				description: 'This server doesn\'t have a `Muted` role.\n\nParallax will automatically create a `Muted` role upon using the `mute` command.	'
+				description: 'This server doesn\'t have a `Muted` role.\n\nParallax will automatically create a `Muted` role upon using the `mute` command.'
 			}});
 
-		const reason = `${ctx.author.tag}: ${ctx.args.join(' ').replace(mentionDetection, '') || 'Unspecified'}`;
+		const reason = ctx.args.join(' ').replace(mentionDetection, '') || 'Unspecified';
 		const user = ctx.mentions.users.first();
 
 		if (!ctx.utils.canInteract(ctx.member, ctx.guild.member(user)))
@@ -29,23 +29,26 @@ module.exports = {
 			}});
 
 		ctx.guild.member(user).removeRole(ctx.guild.roles.find('name', 'Muted'), reason);
-
-		if (ctx.sdb.channels.actions && client.channels.has(ctx.sdb.channels.actions))
-			client.channels.get(ctx.sdb.channels.actions).send({ embed: {
-				color: 0xbe2f2f,
-				description: `**User Unmuted**\n**Target:** ${user.tag} (${user.id})\n**Reason:** ${reason}`,
-				footer: {
-					text: `Action performed by ${ctx.author.tag}`
-				},
-				timestamp: new Date()
-			}});
+		ctx.react("☑");
+		
+		if (ctx.sdb.channels.actions && ctx.client.channels.has(ctx.sdb.channels.actions))
+				ctx.client.channels.get(ctx.sdb.channels.actions).send({ embed: {
+					color: ctx.settings.colours.ACTION_MINOR,
+					description: `[**Unmuted**]()\n**Target:** ${user.tag} (${user.id})\n**Reason:**${reason}`,
+					timestamp: new Date(),
+					footer: {
+						text: `Performed by ${ctx.author.tag}`,
+						icon_url: ctx.author.displayAvatarURL
+					}
+				}});
 	
 	},
 
 	developerOnly: false,
 	serverOwnerOnly: false,
 	permissions: ['KICK_MEMBERS'],
+	requires: ['MANAGE_ROLES'],
 	aliases: ['um'],
-	usage: '<users> [reason]'
+	usage: '<user> [reason]'
 
 }
