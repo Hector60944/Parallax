@@ -1,8 +1,6 @@
 const timeRX = /^\d+[a-z]\b/
 
 exports.run = function(client, msg, args, gdb) {
-	if (!msg.guild.member(client.user).hasPermission("BAN_MEMBERS")) 
-		return msg.channel.send({ embed: { color: 0xbe2f2f, title: "Permissions Error", description: "I don't have permission to ban members." }});
 	
 	if (msg.mentions.users.size === 0) 
 		return msg.channel.send("No users specified.");

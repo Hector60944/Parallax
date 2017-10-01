@@ -1,7 +1,13 @@
 const jsonw = require('./jsonw.js');
 const chalk = require('chalk');
 
+let settings;
+
 module.exports = {
+
+    init: (c) => {
+        settings = c;
+    },
 
     time: (time, formal) => {
 
@@ -22,7 +28,23 @@ module.exports = {
 
     createDB: (id, db) => {
         
-        db[id] = template;
+        db[id] = {
+            channels: {
+                actions : "",
+                join : "",
+                leave : ""
+            },
+            raid: false,
+            invites: false,
+            autorole: {
+                bots: [],
+                users: []
+            },
+            assignable: [],
+            bans: [],
+            mutes: [],
+            prefix: settings.prefix,
+        };
         
     },
         
@@ -79,22 +101,4 @@ module.exports = {
             console.log(chalk.white(`[${new Date().toLocaleTimeString()}] [INFO] ${content}`));
     }
 
-}
-
-const template = {
-	channels: {
-		actions : "",
-		join : "",
-		leave : ""
-	},
-	raid: false,
-	invites: false,
-	autorole: {
-		bots: [],
-		users: []
-    },
-    assignable: [],
-    bans: [],
-    mutes: [],
-    prefix: require("../storage/settings.json").prefix,
 }

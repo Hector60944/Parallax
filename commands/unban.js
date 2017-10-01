@@ -5,33 +5,37 @@ module.exports = {
 	run: async (ctx) => {
 
 		if (ctx.args.length === 0 || isNaN(ctx.args[0]))
-			return msg.channel.send({ embed: {
+			return ctx.channel.send({ embed: {
 				color: 0xbe2f2f,
-				title: 'Unban',
+				title: 'Unban User',
 				description: 'You need to specify an ID'
 			}});
 
-		const user = await ctx.guild.unban(ctx.args[0])
-		.catch(err => {
+		let user;
+
+		try {
+			user = await ctx.guild.unban(ctx.args[0])
+		} catch(err) {
 			return ctx.channel.send({ embed: {
 				color: 0xbe2f2f,
 				title: 'Cannot Unban User',
 				description: `Discord returned: \`${err.message}\``
 			}})
-		});
+		}
 
-		msg.react('☑');
+		ctx.react('☑');
 
-		const reason = `${ctx.author.tag}: ${ctx.args.replace(mentionDetection, '').join(' ') || 'Unspecified'}`;
+		const reason = ctx.args.slice(1).join(' ') || 'Unspecified';
 
-		if (ctx.sdb.channels.actions && client.channels.has(ctx.sdb.channels.actions))
-			client.channels.get(ctx.sdb.channels.actions).send({ embed: {
-				color: 0xbe2f2f,
-				description: `**User Unbanned**\n**Target:** ${user.tag} (${user.id})\n**Reason:** ${reason}`,
+		if (ctx.sdb.channels.actions && ctx.client.channels.has(ctx.sdb.channels.actions))
+			ctx.client.channels.get(ctx.sdb.channels.actions).send({ embed: {
+				color: ctx.settings.colours.ACTION_INFO,
+				description: `[**Unban**]()\n**Target:** ${user.tag} (${user.id})\n**Reason:** ${reason}`,
+				timestamp: new Date(),
 				footer: {
-					text: `Action performed by ${ctx.author.tag}`
-				},
-				timestamp: new Date()
+					text: `Performed by ${ctx.author.tag}`,
+					icon_url: ctx.author.displayAvatarURL
+				}
 			}});
 
 		/*

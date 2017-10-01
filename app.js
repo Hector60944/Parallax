@@ -1,7 +1,8 @@
-const utils    = require('./extensions/utils.js');
 const settings = require('./storage/settings.json');
+const utils    = require('./extensions/utils.js');
 const fs       = require('fs');
 
+utils.init(settings);
 utils.log('info', 'Initialising Parallax');
 
 const Discord  = require('discord.js');
@@ -75,7 +76,7 @@ client.on('message', ctx => {
 
 	ctx.command  = ctx.content.toLowerCase().substring(sdb.prefix.length).split(' ')[0];
 	ctx.args     = ctx.content.trim().split(' ').slice(1);
-	ctx.filtered = ctx.content.trim().split(' ').slice(1).filter(a => !a.startsWith('-'));
+	ctx.filtered = ctx.content.trim().split(' ').slice(1).filter(a => (a.length > 1 && !a.startsWith('-')));
 	ctx.switches = resolveSwitches(ctx.content.trim().split(' ').slice(1));
 
 	if (!client.commands.has(ctx.command)) {
@@ -87,13 +88,6 @@ client.on('message', ctx => {
 		ctx.command = findByAlias;
 	}
 
-	if (!ctx.guild.me.permissions.has('ADMINISTRATOR'))
-		return ctx.channel.send({ embed: {
-			color: 0xbe2f2f,
-			title: 'Missing Permissions',
-			description: 'Parallax requires `ADMINISTRATOR` permissions to run.'
-		}});
-
 	ctx.Discord  = Discord;
 	ctx.client   = client;
 	ctx.settings = settings;
@@ -103,7 +97,7 @@ client.on('message', ctx => {
 	const command = client.commands.get(ctx.command);
 	const missing = ctx.channel.permissionsFor(ctx.member).missing(command.permissions);
 
-	if (command.developerOnly && ctx.author.id !== settings.ownerid)
+	if (command.developerOnly && !settings.owners.includes(ctx.author.id))
 		missing.push('BOT_OWNER');
 
 	if (command.serverOwnerOnly && ctx.author.id !== ctx.guild.ownerID)
@@ -112,7 +106,7 @@ client.on('message', ctx => {
 	if (missing.length > 0)
 		return ctx.channel.send({ embed: {
 			color: 0xbe2f2f,
-			title: 'Missing Required Permissions',
+			title: 'User Missing Required Permissions',
 			description: missing.join('\n')
 		}});
 		
@@ -145,7 +139,7 @@ fs.readdir('./commands/', (err, files) => {
 function resolveSwitches(args) {
 	let switches = {}
 	args
-	.filter(a => (a.startsWith('--') && a.length > 2) || (a.startsWith('-') && a.length > 1))
+	.filter(a => a.startsWith('-') && a.length > 1)
 	.map(a => switches[a.replace(/\-/g, '').toLowerCase()] = true);
 	return switches;
 }
@@ -173,4 +167,4 @@ setInterval(() => {
 }, 10000);
 */
 
-client.login(settings.token);
+client.login(settings.keys.discord);

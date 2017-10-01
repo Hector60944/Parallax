@@ -104,7 +104,7 @@ module.exports = {
 	},
 
 	sendHelp: async (ctx, category, usage, description) => {
-		description = description.replace(/\{\{p\}\}/g, ctx.sdb.prefix).replace(/\{\{c\}\}/g, ctx.command).replace(/\{\{s\}\}/g, category)
+		usage = usage.replace(/\{\{p\}\}/g, ctx.sdb.prefix).replace(/\{\{c\}\}/g, ctx.command).replace(/\{\{s\}\}/g, category)
 		await ctx.channel.send({
 			embed: {
 				color: 0xbe2f2f,

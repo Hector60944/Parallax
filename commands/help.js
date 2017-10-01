@@ -6,7 +6,7 @@ module.exports = {
 
 			let cmds;
 		
-			if (ctx.author.id === ctx.settings.ownerid)
+			if (ctx.settings.owners.includes(ctx.author.id))
 				cmds = Array.from(ctx.client.commands.keys());
 			else
 				cmds = Array.from(ctx.client.commands.filter(c => !c.developerOnly).keys());
