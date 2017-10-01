@@ -21,7 +21,7 @@ module.exports = {
 				description: 'The target user has an equivalent or higher role than you'
 			}});
 
-		ctx.guild.member(user).kick(reason);
+		ctx.guild.member(user).kick(`[ ${ctx.author.tag} ] ${reason}`);
 		ctx.react("☑");
 		
 		if (ctx.sdb.channels.actions && ctx.client.channels.has(ctx.sdb.channels.actions))

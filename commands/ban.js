@@ -46,7 +46,7 @@ module.exports = {
 		*/
 
 		let banOptions = {
-			reason: reason,
+			reason: `[ ${ctx.author.tag} ] ${reason}`,
 			days: (ctx.switches.d || ctx.switches.delete ? 7 : 0)
 		}
 
