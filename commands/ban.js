@@ -76,7 +76,7 @@ module.exports = {
 	permissions: ['BAN_MEMBERS'],
 	requires: ['BAN_MEMBERS'],
 	aliases: ['b'],
-	usage: '<user> [reason]',
+	usage: '<user> [reason] [time]',
 	description: 'Bans the specified user from the server'
 
 }

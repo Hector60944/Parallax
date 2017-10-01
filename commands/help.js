@@ -9,7 +9,11 @@ module.exports = {
 			if (ctx.settings.owners.includes(ctx.author.id))
 				cmds = Array.from(ctx.client.commands.keys());
 			else
-				cmds = Array.from(ctx.client.commands.filter(c => !c.developerOnly).keys());
+				cmds = Array.from(
+					ctx.client.commands
+					.filter(c => !c.developerOnly && ctx.channel.permissionsFor(ctx.member).missing(c.permissions).length === 0)
+					.keys()
+				);
 
 			ctx.channel.send({ embed: {
 				color: 0xbe2f2f,
