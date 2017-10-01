@@ -50,7 +50,7 @@ module.exports = {
 			days: (ctx.switches.d || ctx.switches.delete ? 7 : 0)
 		}
 
-		//ctx.guild.ban(user, banOptions);
+		ctx.guild.ban(user, banOptions);
 		ctx.react("☑");
 
 		let embed = {
