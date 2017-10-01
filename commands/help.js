@@ -24,7 +24,7 @@ module.exports = {
 
 			if (ctx.client.commands.has(ctx.args[0])) {
 
-				if (!ctx.client.commands.get(ctx.args[0]).help)
+				if (!ctx.client.commands.get(ctx.args[0]).usage)
 					return ctx.channel.send({ embed: {
 						color: 0xbe2f2f,
 						title: 'No help available',
@@ -38,7 +38,7 @@ module.exports = {
 					title: `Help for ${ctx.args[0].toLowerCase()}`,
 					description: 
 					`**Usage:** ${ctx.sdb.prefix}${ctx.args[0].toLowerCase()} ${command.usage}\n` +
-					`**Description:**${command.desc}\n` +
+					`**Description:** ${command.desc || 'No description'}\n` +
 					`**Aliases:** ${command.aliases.join('\n') || 'None'}`
 				}})
 
