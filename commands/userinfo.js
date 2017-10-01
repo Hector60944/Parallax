@@ -31,7 +31,10 @@ module.exports = {
             ]
         };
 
-        let member = await ctx.guild.fetchMember(user.id);
+        let member = await ctx.guild.fetchMember(user.id)
+        .catch(err => {
+            return undefined; 
+        });
 
         if (member) {
             let kicks = await ctx.guild.fetchAuditLogs({ type: 20 })
@@ -46,7 +49,7 @@ module.exports = {
             embed.fields.push({ name: 'Joined', value: new Date(member.joinedTimestamp).toUTCString(), inline: false })
         }
 
-        embed.fields.push({ name: 'Created', value: `${Math.floor((Date.now() - member.user.createdTimestamp) / 8.64e7)} days ago`, inline: false });
+        embed.fields.push({ name: 'Created', value: `${Math.floor((Date.now() - user.createdTimestamp) / 8.64e7)} days ago`, inline: false });
 
         ctx.channel.send({ embed });
 
