@@ -28,7 +28,7 @@ module.exports = {
 
 			if (ctx.client.commands.has(ctx.args[0])) {
 
-				if (!ctx.client.commands.get(ctx.args[0]).usage)
+				if (ctx.client.commands.get(ctx.args[0]).usage === undefined)
 					return ctx.channel.send({ embed: {
 						color: 0xbe2f2f,
 						title: 'No help available',

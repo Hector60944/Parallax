@@ -130,6 +130,6 @@ module.exports = {
 	requires: [],
 	aliases: [],
 	usage: '',
-	description: 'Allows changing of the bot configuration for this server'
+	description: 'Provides tools to change the bot configuration for this server'
 
 }
