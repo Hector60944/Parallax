@@ -7,7 +7,11 @@ module.exports = {
 			let cmds;
 		
 			if (ctx.settings.owners.includes(ctx.author.id))
-				cmds = Array.from(ctx.client.commands.keys());
+				cmds = Array.from(
+					ctx.client.commands
+					.filter(c => ctx.channel.permissionsFor(ctx.member).missing(c.permissions).length === 0)
+					.keys()
+				);
 			else
 				cmds = Array.from(
 					ctx.client.commands
