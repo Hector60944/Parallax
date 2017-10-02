@@ -153,6 +153,13 @@ function resolveSwitches(args) {
 	return switches;
 }
 
+setInterval(() => {
+	fs.writeFile('./storage/db.json', JSON.stringify(db, '', '\t'), (err) => {
+		if (err)
+			utils.log('error', `Failed to write database. ${err.message}`);
+	});
+}, 30000)
+
 /*
 setInterval(() => {
 

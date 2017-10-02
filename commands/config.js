@@ -74,12 +74,12 @@ module.exports = {
 				if (ctx.sdb.autorole[ctx.args[1]].includes(role.id))
 					return ctx.channel.send({ embed: { color: 0xbe2f2f, title: 'AutoRole', description: 'That role is currently active.' }});
 				ctx.sdb.autorole[ctx.args[1]].push(role.id);
-				ctx.channel.send({ embed: { color: 0xbe2f2f, title: 'AutoRole', description: `Added \`${role.name}\` to ${ctx.args[1]}` }});
+				ctx.channel.changeSuccess(ctx, `AutoRole: Added \`${role.name}\` to ${ctx.args[1]}`);
 			} else if (ctx.args[2] === 'remove') {
 				if (!ctx.sdb.autorole[ctx.args[1]].includes(role.id))
 					return msg.channel.send({ embed: { color: 0xbe2f2f, title: 'AutoRole', description: 'That role isn\'t currently being assigned.' }});
 				ctx.sdb.autorole[ctx.args[1]].splice(ctx.sdb.autorole[ctx.args[1]].indexOf(role.id), 1)
-				ctx.channel.send({ embed: { color: 0xbe2f2f, title: 'AutoRole', description: `Removed \`${role.name}\` from ${ctx.args[1]}` }});
+				ctx.channel.changeSuccess(ctx, `AutoRole: Removed \`${role.name}\` from ${ctx.args[1]}`);
 			}
 		}
 
@@ -89,7 +89,7 @@ module.exports = {
 
 			let option = ctx.args[1] === 'on';
 			ctx.sdb.invites = option;
-			module.exports.sendHelp(ctx, `Anti-Invite ${option ? 'enabled' : 'disabled'}`);			
+			module.exports.changeSuccess(ctx, `Anti-Invite ${option ? 'enabled' : 'disabled'}`);	
 		}
 
 		if (ctx.args[0] === 'raidpro') {
@@ -98,7 +98,7 @@ module.exports = {
 
 			let option = ctx.args[1] === 'on';
 			ctx.sdb.raid = option;
-			module.exports.sendHelp(ctx, `Raid Protection ${option ? 'enabled' : 'disabled'}`);			
+			module.exports.changeSuccess(ctx, `Raid Protection ${option ? 'enabled' : 'disabled'}`);			
 		}
 		
 	},
