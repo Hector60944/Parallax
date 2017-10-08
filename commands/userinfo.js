@@ -10,11 +10,15 @@ module.exports = {
             }}); 
 
         let user = ctx.utils.resolveUser(ctx, ctx.args.join(' '));
+        
+        if (!user && !isNaN(ctx.args.join(' '))) 
+            user = await ctx.client.fetchUser(ctx.args.join(' '))
+                .catch(err => { return undefined; });
 
-        if (!user)
+        if (!user) 
             return ctx.channel.send({ embed: {
                 color: 0xbe2f2f,
-                title: 'Failed to resolve user',
+                title: 'Unknown User',
                 description: 'Specify a mention, user ID, username or username#discrim'
             }});
 
@@ -32,15 +36,13 @@ module.exports = {
         };
 
         let member = await ctx.guild.fetchMember(user.id)
-        .catch(err => {
-            return undefined; 
-        });
+            .catch(err => { return undefined; });
 
         if (member) {
             let kicks = await ctx.guild.fetchAuditLogs({ type: 20 })
-            .catch(console.warn);
+                .catch(err => { return undefined; });
             let bans  = await ctx.guild.fetchAuditLogs({ type: 22 })
-            .catch(console.warn);
+                .catch(err => { return undefined; });
 
             kicks = kicks ? kicks.entries.filter(e => e.targetType === 'USER' && e.target.id === user.id).size : 'None';
             bans  = bans  ? bans.entries.filter(e => e.targetType === 'USER' && e.target.id === user.id).size  : 'None';
