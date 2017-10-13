@@ -76,8 +76,8 @@ module.exports = {
 	permissions: ['BAN_MEMBERS'],
 	requires: ['BAN_MEMBERS'],
 	aliases: ['b'],
-	usage: '<user> [reason] [time]',
-	description: 'Bans the specified user from the server'
+	usage: '<user> [reason] [-d|-delete] [time]',
+	description: 'Bans the specified user from the server\n\nSpecifying `-d|-delete` will delete all of the user\'s messages'
 
 }
 
