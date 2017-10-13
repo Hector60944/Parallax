@@ -17,7 +17,7 @@ module.exports = {
 
 		invites[ctx.author.id]++;
 
-		let action = invites % 2 === 0 ? 'Kicked' : (invites % 3 === 0 ? 'Banned' : undefined);
+		let action = invites[ctx.author.id] % 2 === 0 ? 'Kicked' : (invites[ctx.author.id] % 3 === 0 ? 'Banned' : undefined);
 
 		if (invites[ctx.author.id] % 2 === 0) 
 			ctx.member.kick();
@@ -27,7 +27,7 @@ module.exports = {
 
 		if (action && ctx.sdb.channels.actions && ctx.client.channels.has(ctx.sdb.channels.actions))
 			ctx.client.channels.get(ctx.sdb.channels.actions).send({ embed: {
-				color: (invites % 2 === 0 ? ctx.settings.colours.ACTION_MODERATE : ctx.settings.colours.ACTION_SEVERE),
+				color: (invites[ctx.author.id] % 2 === 0 ? ctx.settings.colours.ACTION_MODERATE : ctx.settings.colours.ACTION_SEVERE),
 				description: `[**${action}**]()\n**Target:** ${ctx.author.tag} (${ctx.author.id})\n**Reason:** Auto-${action} for advertising`,
 				timestamp: new Date(),
 				footer: {

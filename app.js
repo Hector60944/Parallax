@@ -69,7 +69,7 @@ client.on('message', ctx => {
 	ctx.settings = settings;
 
 	if (sdb.invites)
-		modules.invite(ctx);
+		extensions.invite(ctx);
 
 	if (ctx.isMentioned(client.user.id) && ctx.content.toLowerCase().includes('help'))
 		return ctx.channel.send({ embed: { 
