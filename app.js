@@ -62,6 +62,15 @@ client.on('message', ctx => {
 
 	let sdb = db[ctx.guild.id];
 
+	ctx.Discord  = Discord;
+	ctx.client = client;
+	ctx.utils  = utils;
+	ctx.sdb    = sdb;
+	ctx.settings = settings;
+
+	if (sdb.invites)
+		modules.invite(client, msg, db);
+
 	if (ctx.isMentioned(client.user.id) && ctx.content.toLowerCase().includes('help'))
 		return ctx.channel.send({ embed: { 
 			color: 0xbe2f2f, 
@@ -69,7 +78,7 @@ client.on('message', ctx => {
 			description: `Server Prefix: ${sdb.prefix}\n\nTo view my commands, send ${sdb.prefix}help`
 		}});
 
-	//if (db.activeModules.invites)  modules.invite(client, msg, db);
+	
 	//if (db.activeModules.raid)     modules.raid(client, msg, db, Discord);
 
 	if (!ctx.content.toLowerCase().startsWith(sdb.prefix)) return;
@@ -87,12 +96,6 @@ client.on('message', ctx => {
 		ctx.invokedCommand = ctx.command;
 		ctx.command = findByAlias;
 	}
-
-	ctx.Discord  = Discord;
-	ctx.client   = client;
-	ctx.settings = settings;
-	ctx.utils    = utils;
-	ctx.sdb      = sdb;
 
 	const command = client.commands.get(ctx.command);
 	const uMissing = ctx.channel.permissionsFor(ctx.member).missing(command.permissions);
