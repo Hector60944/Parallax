@@ -74,12 +74,12 @@ module.exports = {
 				if (ctx.sdb.autorole[ctx.args[1]].includes(role.id))
 					return ctx.channel.send({ embed: { color: 0xbe2f2f, title: 'AutoRole', description: 'That role is currently active.' }});
 				ctx.sdb.autorole[ctx.args[1]].push(role.id);
-				ctx.channel.changeSuccess(ctx, `AutoRole: Added \`${role.name}\` to ${ctx.args[1]}`);
+				module.exports.changeSuccess(ctx, `AutoRole: Added \`${role.name}\` to ${ctx.args[1]}`);
 			} else if (ctx.args[2] === 'remove') {
 				if (!ctx.sdb.autorole[ctx.args[1]].includes(role.id))
 					return msg.channel.send({ embed: { color: 0xbe2f2f, title: 'AutoRole', description: 'That role isn\'t currently being assigned.' }});
 				ctx.sdb.autorole[ctx.args[1]].splice(ctx.sdb.autorole[ctx.args[1]].indexOf(role.id), 1)
-				ctx.channel.changeSuccess(ctx, `AutoRole: Removed \`${role.name}\` from ${ctx.args[1]}`);
+				module.exports.changeSuccess(ctx, `AutoRole: Removed \`${role.name}\` from ${ctx.args[1]}`);
 			}
 		}
 
