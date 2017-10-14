@@ -17,6 +17,7 @@ const extensions = {
 }
 
 client.commands = new Discord.Collection();
+client.Discord = Discord;
 
 client.once('ready', () => {
 	utils.log('info', `Logged in as ${client.user.username}`);
@@ -62,8 +63,6 @@ client.on('message', ctx => {
 
 	let sdb = db[ctx.guild.id];
 
-	ctx.Discord  = Discord;
-	ctx.client = client;
 	ctx.utils  = utils;
 	ctx.sdb    = sdb;
 	ctx.settings = settings;
