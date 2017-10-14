@@ -31,6 +31,7 @@ module.exports = {
             description: user.id,
             fields: [
                 { name: 'Bot', value: (user.bot ? 'Yes' : 'No'), inline: true },
+                { name: 'Created', value: `${Math.floor((Date.now() - user.createdTimestamp) / 8.64e7)} days ago`, inline: true },
                 { name: 'Playing', value: (user.presence.game ? user.presence.game.name : 'Nothing'), inline: true }
             ]
         };
@@ -50,8 +51,6 @@ module.exports = {
             embed.fields.push({ name: 'History', value: `Bans: ${bans}\nKicks: ${kicks}`, inline: true });
             embed.fields.push({ name: 'Joined', value: new Date(member.joinedTimestamp).toUTCString(), inline: false })
         }
-
-        embed.fields.push({ name: 'Created', value: `${Math.floor((Date.now() - user.createdTimestamp) / 8.64e7)} days ago`, inline: false });
 
         ctx.channel.send({ embed });
 
