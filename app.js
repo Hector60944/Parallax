@@ -44,7 +44,7 @@ client.on('guildDelete', g => {
 		delete db[g.id];
 });
 
-client.on('message', ctx => {
+client.on('message', async ctx => {
 	if (ctx.author.bot || !ctx.guild || !ctx.member || !db[ctx.guild.id]) return;
 
 	if (ctx.channel.id !== '110373943822540800' && ctx.mentions.users.size > 0) {
@@ -122,7 +122,7 @@ client.on('message', ctx => {
 	}
 		
 	try {
-		command.run(ctx);
+		await command.run(ctx);
 	} catch(e) {
 		utils.log('error', `Command ${ctx.command} failed. ${ctx.args ? `Parameters: ${ctx.args.join(' ')}` : ''}\nStack: ${e.stack.split('\n').slice(0, 3).join('\n')}`)
 		ctx.channel.send('An error has occurred while processing the command. The error has been logged.');
