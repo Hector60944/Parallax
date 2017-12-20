@@ -7,7 +7,6 @@ class Moderation:
     def __init__(self, bot):
         self.bot = bot
 
-
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
@@ -39,25 +38,36 @@ class Moderation:
     @commands.command(aliases=['d', 'purge', 'prune', 'clear', 'delete', 'remove'])
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def clean(self, ctx, amount: int, filter: str=None):
-        """ Deletes messages in a channel """
+    async def clean(self, ctx, amount: int, predicate: str=None, *users: discord.Member):
+        """ Deletes messages in a channel 
+        
+        You can remove messages sent by bots by specifying 'bot' as the filter.
+        You can remove messages by users by specifying 'user' as the filter.
+        You can remove messages by specific users by mentioning them after specifying 'user' as the filter.
+        """
         pred = None
 
-        if filter:
-            if '-bot' in filter:
+        if predicate:
+            if 'bot' in predicate:
                 pred = lambda m: m.author.bot
-            if '-users' in filter:
-                pred = lambda m: m.author.bot is False
-        if amount <= 0:
-            return await ctx.send("Who you tryna fool?")
+            if 'user' in predicate:
+                if users:
+                    pred = lambda m: any([m.author.id == u.id for u in users])
+                else:
+                    pred = lambda m: not m.author.bot
 
-        if amount >= 1000:
+        if amount <= 0:
+            return await ctx.send("Who you tryna fool? (Amount needs to be higher than 0)")
+
+        if amount > 1000:
             amount = 1000
 
         try:
             await ctx.channel.purge(limit=amount + 1, check=pred)
         except discord.HTTPException:
-            await ctx.send("An unkown error occurred while cleaning the channel.")
+            await ctx.send("An unknown error occurred while cleaning the channel.")
+        except discord.NotFound:
+            await ctx.send("An error occurred while deleting: Tried to delete a message that doesn't exist within the channel.")
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
