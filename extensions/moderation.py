@@ -57,7 +57,7 @@ class Moderation:
         try:
             await ctx.channel.purge(limit=amount + 1, check=pred)
         except discord.HTTPException:
-            await ctx.send("The bot is missing permissions to delete messages.")
+            await ctx.send("An unkown error occurred while cleaning the channel.")
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
