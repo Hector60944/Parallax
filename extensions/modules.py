@@ -1,7 +1,7 @@
 import re
 
 import discord
-from utils import interaction
+from .utils import interaction
 
 invite_rx = re.compile("discord(?:app)?\.(?:gg|com\/invite)\/([a-z0-9]{3,16})", re.IGNORECASE)
 
@@ -30,7 +30,7 @@ class Modules:
         
         if attempts % 3 == 0:
             await ctx.author.ban(reason='[ Parallax AutoBan ] Advertising', days=7)
-            await ctx.channel.send(f'**AutoBanned {ctx.author} for advertising**')
+            await ctx.channel.send(f'AutoBanned {ctx.author} for advertising')
         else:
             await ctx.channel.send(f'{ctx.author.mention} Do not advertise here ({attempts % 3}/3)')
 
