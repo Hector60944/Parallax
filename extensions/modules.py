@@ -1,7 +1,7 @@
 import re
 
 import discord
-from .utils import interaction
+from utils import interaction
 
 invite_rx = re.compile("discord(?:app)?\.(?:gg|com\/invite)\/([a-z0-9]{3,16})", re.IGNORECASE)
 
