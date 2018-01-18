@@ -38,7 +38,7 @@ class Moderation:
     @commands.command(aliases=['d', 'purge', 'prune', 'clear', 'delete', 'remove'])
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def clean(self, ctx, amount: int, predicate: str=None, *users: discord.Member):
+    async def clean(self, ctx, amount: int, options: str=None, *users: discord.Member):
         """ Deletes messages in a channel
 
         You can remove messages sent by bots by specifying 'bot' as the filter.
@@ -47,27 +47,65 @@ class Moderation:
         """
         pred = None
 
-        if predicate:
-            if 'bot' in predicate:
+        if options:
+            if 'bot' in options:
                 pred = lambda m: m.author.bot  # noqa: E731
-            if 'user' in predicate:
+            if 'user' in options:
                 if users:
-                    pred = lambda m: any([m.author.id == u.id for u in users])  # noqa: E731
+                    pred = lambda m: any(m.author.id == u.id for u in users)  # noqa: E731
                 else:
                     pred = lambda m: not m.author.bot  # noqa: E731
 
         if amount <= 0:
-            return await ctx.send("Who you tryna fool? (Amount needs to be higher than 0)")
+            return await ctx.send("Specify an amount above 0")
 
         if amount > 1000:
             amount = 1000
 
         try:
-            await ctx.channel.purge(limit=amount + 1, check=pred)
+            await ctx.channel.purge(limit=amount, check=pred)
         except discord.HTTPException:
             await ctx.send("An unknown error occurred while cleaning the channel.")
         except discord.NotFound:
-            await ctx.send("An error occurred while deleting: Tried to delete a message that doesn't exist within the channel.")
+            pass
+
+    @commands.command(aliases=['w'])
+    @commands.has_permission(ban_members=True)
+    async def warn(self, ctx, user: discord.Member, reason: str='None specified')::
+        """ Issues a warning to the given user """
+        if not interaction.check_hierarchy(ctx.guild.me, member):
+            return await ctx.send("Role hierarchy prevents me from doing that.")
+
+        if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
+            return await ctx.send("Role hierarchy prevents you from doing that.")
+        # TODO. Requires RethinkDB first
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True)
+    async def mute(self, ctx, user: discord.Member, reason: str='None specified', time: str=None):
+        """ Mutes the specified user """
+        if not interaction.check_hierarchy(ctx.guild.me, member):
+            return await ctx.send("Role hierarchy prevents me from doing that.")
+
+        if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
+            return await ctx.send("Role hierarchy prevents you from doing that.")
+
+        # Also TODO
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True)
+    async def unmute(self, ctx, user: discord.Member, reason: str='None specified'):
+        """ Unmutes the specified user """
+        if not interaction.check_hierarchy(ctx.guild.me, member):
+            return await ctx.send("Role hierarchy prevents me from doing that.")
+
+        if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
+            return await ctx.send("Role hierarchy prevents you from doing that.")
+
+        # Also TODO
+
 
 
 def setup(bot):
