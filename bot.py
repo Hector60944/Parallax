@@ -21,7 +21,7 @@ if __name__ == '__main__':
                 bot.load_extension(f'extensions.{f[:-3]}')
             except SyntaxError as exception:
                 print(f'Failed to load {f}: {exception}')
-    
+
     @bot.event
     async def on_message(message):
         if not bot.is_ready() or message.author.bot:

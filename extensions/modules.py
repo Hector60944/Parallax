@@ -10,6 +10,9 @@ class Helpers:
     def __init__(self, bot):
         self.bot = bot
 
+    async def anti_invite(self, guild_id: int):
+        return (await self.bot.r.table('settings').get(str(guild_id)).default({'antiInvite': False}).run(self.bot.connection))['antiInvite']
+
     async def get_invites(self, user: int):
         invites = await self.bot.r.table('invites').get(str(user)).default({'invites': 0}).run(self.bot.connection)
         return invites['invites']
@@ -24,14 +27,12 @@ class Modules:
         self.helpers = Helpers(bot)
 
     async def on_message(self, message):
-        # if check for anti_invite module
-        await self.anti_invite(message)
+        if await self.helpers.anti_invite(message.guild.id):
+            await self.anti_invite(message)
 
     async def anti_invite(self, ctx):
-        print(f"{type(ctx.channel)} > {ctx.content}")
-
         if isinstance(ctx.channel, discord.DMChannel) or \
-                not interaction.check_bot_has(ctx, manage_messages=True, ban_members=True) or \
+                not interaction.check_bot_has(ctx, manage_messages=True) or \
                 not interaction.check_hierarchy(ctx.guild.me, ctx.author) or interaction.check_user_has(ctx, manage_messages=True) or \
                 not invite_rx.search(ctx.content):
             return
@@ -45,8 +46,9 @@ class Modules:
         await self.helpers.set_invites(ctx.author.id, attempts)
 
         if attempts % 3 == 0:
-            await ctx.author.ban(reason='[ Parallax AutoBan ] Advertising', delete_message_days=7)
-            await ctx.channel.send(f'AutoBanned {ctx.author} for advertising')
+            if interation.check_bot_has(ctx, ban_members=True):
+                await ctx.author.ban(reason='[ Parallax AutoBan ] Advertising', delete_message_days=7)
+                await ctx.channel.send(f'AutoBanned {ctx.author} for advertising')
         else:
             await ctx.channel.send(f'{ctx.author.mention} Do not advertise here ({attempts % 3}/3)')
 

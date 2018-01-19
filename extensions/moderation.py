@@ -7,12 +7,19 @@ class Helpers:
     def __init__(self, bot):
         self.bot = bot
 
+    async def get_config(self, guild_id: int):
+        return await self.bot.r.table('settings').get(str(guild_id)).default({'warnThreshold': 0}).run(self.bot.connection)
+
     async def get_warns(self, user: int):
         warns = await self.bot.r.table('warns').get(str(user)).default({'warns': 0}).run(self.bot.connection)
         return warns['warns']
 
     async def set_warns(self, user: int, warns: int):
         await self.bot.r.table('warns').insert({'id': str(user), 'warns': warns}, conflict='replace').run(self.bot.connection)
+
+    async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str):
+        pass
+        # TODO: Pull guild settings, check if modlog channel assigned, post to it.
 
 
 class Moderation:
@@ -31,7 +38,7 @@ class Moderation:
         if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
             return await ctx.send("Role hierarchy prevents you from doing that.")
 
-        await member.ban(reason=f'[ {ctx.author} ] {reason}')
+        await member.ban(reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
         await ctx.message.add_reaction('🔨')
 
     @commands.command()
@@ -92,11 +99,21 @@ class Moderation:
         if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
             return await ctx.send("Role hierarchy prevents you from doing that.")
 
-        warns = await self.helpers.get_warns(member.id) + 1
-        await self.helpers.set_warns(member.id, warns)
-        await ctx.send(f"Warned **{member}** for **{reason}** (Warnings: {warns})")
+        threshold = (await self.helpers.get_config(ctx.guild.id))['warnThreshold']
+        current_warns = await self.helpers.get_warns(member.id) + 1
 
-        # Eventually this will check against the server's settings. If warns > threshold then: kick or ban. **TODO
+        if threshold != 0:
+            amount = current_warns % threshold 
+
+            if amount == 0:
+                await member.ban(reason=f'[ {ctx.author} ] Too many warnings', delete_message_days=7)
+                await ctx.send(f'Banned **{member.name}** for hitting the warning limit ({threshold}/{threshold})')
+            else:
+                await ctx.send(f'Warned **{member}** for **{reason}** (Warnings: {amount}/{threshold})')
+        else:
+            await ctx.send(f'Warned **{member}** for **{reason}** (Warnings: {current_warns})')
+
+        await self.helpers.set_warns(member.id, current_warns)
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
