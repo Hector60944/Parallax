@@ -46,7 +46,7 @@ class Modules:
         await self.helpers.set_invites(ctx.author.id, attempts)
 
         if attempts % 3 == 0:
-            if interation.check_bot_has(ctx, ban_members=True):
+            if interaction.check_bot_has(ctx, ban_members=True):
                 await ctx.author.ban(reason='[ Parallax AutoBan ] Advertising', delete_message_days=7)
                 await ctx.channel.send(f'AutoBanned {ctx.author} for advertising')
         else:
