@@ -3,9 +3,22 @@ from discord.ext import commands
 from utils import interaction
 
 
+class Helpers:
+    def __init__(self, bot):
+        self.bot = bot
+
+    async def get_warns(self, user: int):
+        warns = await self.bot.r.table('warns').get(str(user)).default({'warns': 0}).run(self.bot.connection)
+        return warns['warns']
+
+    async def set_warns(self, user: int, warns: int):
+        await self.bot.r.table('warns').insert({'id': str(user), 'warns': warns}, conflict='replace').run(self.bot.connection)
+
+
 class Moderation:
     def __init__(self, bot):
         self.bot = bot
+        self.helpers = Helpers(bot)
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -24,7 +37,7 @@ class Moderation:
     @commands.command()
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
-    async def kick(self, ctx, member: discord.Member, reason: str='None specified'):
+    async def kick(self, ctx, member: discord.Member, *, reason: str='None specified'):
         """ Kicks a user from the server """
         if not interaction.check_hierarchy(ctx.guild.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
@@ -70,20 +83,25 @@ class Moderation:
             pass
 
     @commands.command(aliases=['w'])
-    @commands.has_permission(ban_members=True)
-    async def warn(self, ctx, user: discord.Member, reason: str='None specified')::
+    @commands.has_permissions(ban_members=True)
+    async def warn(self, ctx, member: discord.Member, *, reason: str='None specified'):
         """ Issues a warning to the given user """
         if not interaction.check_hierarchy(ctx.guild.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
 
         if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
             return await ctx.send("Role hierarchy prevents you from doing that.")
-        # TODO. Requires RethinkDB first
+
+        warns = await self.helpers.get_warns(member.id) + 1
+        await self.helpers.set_warns(member.id, warns)
+        await ctx.send(f"Warned **{member}** for **{reason}** (Warnings: {warns})")
+
+        # Eventually this will check against the server's settings. If warns > threshold then: kick or ban. **TODO
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
-    async def mute(self, ctx, user: discord.Member, reason: str='None specified', time: str=None):
+    async def mute(self, ctx, member: discord.Member, reason: str='None specified', time: str=None):
         """ Mutes the specified user """
         if not interaction.check_hierarchy(ctx.guild.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
@@ -96,16 +114,13 @@ class Moderation:
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
-    async def unmute(self, ctx, user: discord.Member, reason: str='None specified'):
+    async def unmute(self, ctx, member: discord.Member, *, reason: str='None specified'):
         """ Unmutes the specified user """
         if not interaction.check_hierarchy(ctx.guild.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
 
         if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
             return await ctx.send("Role hierarchy prevents you from doing that.")
-
-        # Also TODO
-
 
 
 def setup(bot):

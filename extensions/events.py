@@ -14,7 +14,7 @@ class Events:
         print(f'Logged in as {self.bot.user.name}\nBot invite link: {self.invite_url}')
 
     async def on_command_error(self, ctx, error):
-        if isinstance(error, errors.MissingRequiredArgument):
+        if isinstance(error, (errors.MissingRequiredArgument, errors.BadArgument)):
             command = ctx.invoked_subcommand or ctx.command
             _help = await ctx.bot.formatter.format_help_for(ctx, command)
 
