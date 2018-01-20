@@ -13,9 +13,8 @@ class Core:
             self.bot.unload_extension(f'extensions.{module}')
             self.bot.load_extension(f'extensions.{module}')
             await ctx.send('Module reloaded!')
-        except SyntaxError as exception:
-            print(f'Module {module} failed to load: {exception}')
-            return await ctx.send(f'Module **{module}** failed to load. See console for more details.')
+        except (SyntaxError, ModuleNotFoundError) as exception:
+            await ctx.send(f'Module **{module}** failed to load: `{exception}`')
 
     @commands.command()
     @commands.is_owner()
@@ -24,9 +23,8 @@ class Core:
         try:
             self.bot.load_extension(f'extensions.{module}')
             await ctx.send('Module reloaded!')
-        except SyntaxError as exception:
-            print(f'Module {module} failed to load: {exception}')
-            return await ctx.send(f'Module {module} failed to load. See console for more details.')
+        except (SyntaxError, ModuleNotFoundError) as exception:
+            await ctx.send(f'Module **{module}** failed to load: `{exception}`')
 
 
 def setup(bot):
