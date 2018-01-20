@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import discord
 from discord.ext import commands
 from utils import interaction
@@ -10,7 +12,7 @@ class Helpers:
     async def get_config(self, guild_id: int):
         return await self.bot.r.table('settings') \
             .get(str(guild_id)) \
-            .default({'warnThreshold': 0, 'mutedRole': None}) \
+            .default({'warnThreshold': 0, 'mutedRole': None, 'logChannel': None}) \
             .run(self.bot.connection)
 
     async def get_warns(self, user: int):
@@ -25,8 +27,20 @@ class Helpers:
             .run(self.bot.connection)
 
     async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str):
-        pass
-        # TODO: Pull guild settings, check if modlog channel assigned, post to it.
+        config = await self.get_config(guild_id)
+
+        if config['logChannel']:
+            channel = self.bot.get_channel(int(config['logChannel']))
+            if channel:
+                permissions = channel.permissions_for(channel.guild.me)
+                if permissions.send_messages and permissions.embed_links:
+                    embed = discord.Embed(color=0xbe2f2f,
+                                          title=f'**User {action}**',
+                                          description=f'**Target:** {target} ({target.id})\n'
+                                                      f'**Reason:** {reason}',
+                                          timestamp=datetime.now())
+                    embed.set_footer(text=f'Performed by {moderator}', icon_url=moderator.avatar_url_as(format='png'))
+                    await channel.send(embed=embed)
 
 
 class Moderation:
@@ -48,6 +62,7 @@ class Moderation:
 
         await member.ban(reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
         await ctx.message.add_reaction('🔨')
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason)
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
@@ -63,6 +78,7 @@ class Moderation:
 
         await member.kick(reason=f'[ {ctx.author} ] {reason}')
         await ctx.message.add_reaction('👢')
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Kicked', member, ctx.author, reason)
 
     @commands.command(aliases=['d', 'purge', 'prune', 'clear', 'delete', 'remove'])
     @commands.has_permissions(manage_messages=True)
@@ -125,6 +141,7 @@ class Moderation:
             await ctx.send(f'Warned **{member}** for **{reason}** (Warnings: {current_warns})')
 
         await self.helpers.set_warns(member.id, current_warns)
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Warned', member, ctx.author, reason)
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -154,6 +171,7 @@ class Moderation:
 
         await member.add_roles(role, reason=f'[ {ctx.author} ] {reason}')
         await ctx.send('Muted')
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Muted', member, ctx.author, reason)
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -183,6 +201,7 @@ class Moderation:
 
         await member.remove_roles(role, reason=f'[ {ctx.author} ] {reason}')
         await ctx.send('Unmuted')
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Unmuted', member, ctx.author, reason)
 
 
 def setup(bot):

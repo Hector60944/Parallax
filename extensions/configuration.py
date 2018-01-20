@@ -6,10 +6,17 @@ class Helpers:
     def __init__(self, bot):
         self.bot = bot
 
+        self.default_config = {
+            'warnThreshold': 0,
+            'antiInvite': False,
+            'mutedRole': None,
+            'logChannel': None
+        }
+
     async def get_config(self, guild_id: int):
         return await self.bot.r.table('settings') \
             .get(str(guild_id)) \
-            .default({'warnThreshold': 0, 'antiInvite': False, 'mutedRole': None}) \
+            .default(self.default_config) \
             .run(self.bot.connection)
 
     async def set_config(self, guild_id: int, config: dict):
@@ -17,6 +24,9 @@ class Helpers:
         await self.bot.r.table('settings') \
             .insert(config, conflict='replace') \
             .run(self.bot.connection)
+
+    async def delete_config(self, guild_id: int):
+        await self.bot.r.table('settings').get(str(guild_id)).delete().run(self.bot.connection)
 
     async def get_warns(self, user: int):
         return (await self.bot.r.table('warns')
@@ -44,6 +54,21 @@ class Configuration:
 
             for page in _help:
                 await ctx.send(page)
+
+    @config.command()
+    async def reset(self, ctx, setting: str=None):
+        """ Resets the specified setting in the config, or the entire config if no setting specified """
+        if not setting:
+            await self.helpers.delete_config(ctx.guild.id)
+            await ctx.send('All settings reset')
+        else:
+            config = await self.helpers.get_config(ctx.guild.id)
+            if setting in config:
+                config[setting] = self.helpers.default_config[setting]
+                await self.helpers.set_config(ctx.guild.id, config)
+                await ctx.send(f'Successfully reset `{setting}`')
+            else:
+                await ctx.send(f'Invalid setting provided. View available settings with `{ctx.prefix}config`')
 
     @config.command()
     async def warnings(self, ctx, warn_threshold: int=None):
@@ -101,6 +126,24 @@ class Configuration:
                 config['mutedRole'] = str(role.id)
                 await self.helpers.set_config(ctx.guild.id, config)
                 await ctx.send(f'Muted role set to **{role.name}**')
+
+    @config.command()
+    async def logs(self, ctx, channel: discord.TextChannel=None):
+        """ Sets the channel to post bans/kicks/mutes etc to """
+        config = await self.helpers.get_config(ctx.guild.id)
+        if not channel:
+            if not config['logChannel']:
+                return await ctx.send('A log channel hasn\'t been configured for this server')
+            else:
+                channel = self.bot.get_channel(int(config['logChannel']))
+                if channel:
+                    await ctx.send(f'The current log channel is **{channel.name}**')
+                else:
+                    await ctx.send('A log channel was configured for this server but no longer exists.')
+        else:
+            config['logChannel'] = str(channel.id)
+            await self.helpers.set_config(ctx.guild.id, config)
+            await ctx.send(f'Log channel set to **{channel.name}**')
 
 
 def setup(bot):

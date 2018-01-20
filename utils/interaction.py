@@ -9,7 +9,7 @@ def check_hierarchy(member, member2, owner_check=False):
 
 
 def check_bot_has(ctx, **permissions):
-    channel_permissions = ctx.channel.permissions_for(ctx.me)
+    channel_permissions = ctx.channel.permissions_for(ctx.guild.me)
     return all(getattr(channel_permissions, k, None) is v for k, v in permissions.items())
 
 

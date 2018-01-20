@@ -29,16 +29,12 @@ class Events:
                 await ctx.send('You can use this command in {0:.0f} seconds.'.format(error.retry_after))
 
             elif isinstance(error, errors.MissingPermissions):
-                embed = discord.Embed(title='You need the following permissions:',
-                                      description='\n'.join(p.title().replace('_', ' ') for p in error.missing_perms),
-                                      color=0xbe2f2f)
-                await ctx.send(embed=embed)
+                permissions = '\n'.join(f'- {p.title().replace("_", " ")}' for p in error.missing_perms)
+                await ctx.send(f'**You need the following permissions:**\n{permissions}')
 
             elif isinstance(error, errors.BotMissingPermissions):
-                embed = discord.Embed(title='Missing required permissions:',
-                                      description='\n'.join(p.title().replace('_', ' ') for p in error.missing_perms),
-                                      color=0xbe2f2f)
-                await ctx.send(embed=embed)
+                permissions = '\n'.join(f'- {p.title().replace("_", " ")}' for p in error.missing_perms)
+                await ctx.send(f'**Missing required permissions:**\n{permissions}')
 
             else:
                 pass
