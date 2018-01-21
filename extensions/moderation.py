@@ -15,15 +15,17 @@ class Helpers:
             .default({'warnThreshold': 0, 'mutedRole': None, 'logChannel': None}) \
             .run(self.bot.connection)
 
-    async def get_warns(self, user: int):
-        return (await self.bot.r.table('warns')
-                .get(str(user))
-                .default({'warns': 0})
-                .run(self.bot.connection))['warns']
+    async def get_warns(self, user: int, guild_id: int):
+        warns = await self.bot.r.table('warns').get(str(user)).run(self.bot.connection)
 
-    async def set_warns(self, user: int, warns: int):
+        if warns and str(guild_id) in warns:
+            return warns[str(guild_id)]
+
+        return 0
+
+    async def set_warns(self, user: int, guild_id: int, warns: int):
         await self.bot.r.table('warns') \
-            .insert({'id': str(user), 'warns': warns}, conflict='replace') \
+            .insert({'id': str(user), str(guild_id): warns}, conflict='update') \
             .run(self.bot.connection)
 
     async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str):
@@ -127,7 +129,10 @@ class Moderation:
             return await ctx.send("Role hierarchy prevents you from doing that.")
 
         threshold = (await self.helpers.get_config(ctx.guild.id))['warnThreshold']
-        current_warns = await self.helpers.get_warns(member.id) + 1
+        try:
+            current_warns = await self.helpers.get_warns(member.id, ctx.guild.id) + 1
+        except:
+            return await ctx.send("Can't get current_warns")
 
         if threshold != 0:
             amount = current_warns % threshold
@@ -140,8 +145,11 @@ class Moderation:
         else:
             await ctx.send(f'Warned **{member}** for **{reason}** (Warnings: {current_warns})')
 
-        await self.helpers.set_warns(member.id, current_warns)
-        await self.helpers.post_modlog_entry(ctx.guild.id, 'Warned', member, ctx.author, reason)
+        try:
+            await self.helpers.set_warns(member.id, ctx.guild.id, current_warns)
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Warned', member, ctx.author, reason)
+        except:
+            await ctx.send("Can't set warns")
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
