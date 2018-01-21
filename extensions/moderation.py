@@ -54,7 +54,7 @@ class Moderation:
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     @commands.guild_only()
-    async def ban(self, ctx, member: discord.Member, reason: str='None specified', time: str=None):
+    async def ban(self, ctx, member: discord.Member, reason: commands.clean_content(fix_channel_mentions=True)='None specified', time: str=None):
         """ Bans a user from the server """
         if not interaction.check_hierarchy(ctx.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
@@ -70,7 +70,7 @@ class Moderation:
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
     @commands.guild_only()
-    async def kick(self, ctx, member: discord.Member, *, reason: str='None specified'):
+    async def kick(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Kicks a user from the server """
         if not interaction.check_hierarchy(ctx.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
@@ -120,7 +120,7 @@ class Moderation:
     @commands.command(aliases=['w'])
     @commands.has_permissions(ban_members=True)
     @commands.guild_only()
-    async def warn(self, ctx, member: discord.Member, *, reason: str='None specified'):
+    async def warn(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Issues a warning to the given user """
         if not interaction.check_hierarchy(ctx.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
@@ -155,7 +155,7 @@ class Moderation:
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
-    async def mute(self, ctx, member: discord.Member, reason: str='None specified', time: str=None):
+    async def mute(self, ctx, member: discord.Member, reason: commands.clean_content(fix_channel_mentions=True)='None specified', time: str=None):
         """ Mutes the specified user """
         if not interaction.check_hierarchy(ctx.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
@@ -185,7 +185,7 @@ class Moderation:
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
-    async def unmute(self, ctx, member: discord.Member, *, reason: str='None specified'):
+    async def unmute(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Unmutes the specified user """
         if not interaction.check_hierarchy(ctx.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
