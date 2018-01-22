@@ -9,12 +9,6 @@ class Helpers:
     def __init__(self, bot):
         self.bot = bot
 
-    async def get_config(self, guild_id: int):
-        return await self.bot.r.table('settings') \
-            .get(str(guild_id)) \
-            .default({'warnThreshold': 0, 'mutedRole': None, 'logChannel': None}) \
-            .run(self.bot.connection)
-
     async def get_warns(self, user: int, guild_id: int):
         warns = await self.bot.r.table('warns').get(str(user)).run(self.bot.connection)
 
@@ -29,7 +23,7 @@ class Helpers:
             .run(self.bot.connection)
 
     async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str):
-        config = await self.get_config(guild_id)
+        config = await self.bot.db.get_config(guild_id)
 
         if config['logChannel']:
             channel = self.bot.get_channel(int(config['logChannel']))
@@ -128,7 +122,7 @@ class Moderation:
         if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
             return await ctx.send("Role hierarchy prevents you from doing that.")
 
-        threshold = (await self.helpers.get_config(ctx.guild.id))['warnThreshold']
+        threshold = (await self.bot.db.get_config(ctx.guild.id))['warnThreshold']
         current_warns = await self.helpers.get_warns(member.id, ctx.guild.id) + 1
 
         if threshold != 0:
@@ -157,7 +151,7 @@ class Moderation:
         if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
             return await ctx.send("Role hierarchy prevents you from doing that.")
 
-        config = await self.helpers.get_config(ctx.guild.id)
+        config = await self.bot.db.get_config(ctx.guild.id)
         if not config['mutedRole']:
             return await ctx.send('A muted role hasn\'t been configured for this server. '
                                   'You can change the role by using the `config` command.')
@@ -187,7 +181,7 @@ class Moderation:
         if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
             return await ctx.send("Role hierarchy prevents you from doing that.")
 
-        config = await self.helpers.get_config(ctx.guild.id)
+        config = await self.bot.db.get_config(ctx.guild.id)
         if not config['mutedRole']:
             return await ctx.send('A muted role hasn\'t been configured for this server. '
                                   'You can change the role by using the `config` command.')

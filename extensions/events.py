@@ -12,6 +12,22 @@ class Events:
         self.bot.invite_url = discord.utils.oauth_url(app_info.id, discord.Permissions(8))
         print(f'Logged in as {self.bot.user.name}\nBot invite link: {self.bot.invite_url}')
 
+    async def on_member_join(self, member):
+        config = await self.bot.db.get_config(member.guild.id)
+        category = 'bots' if member.bot else 'users'
+
+        assigned = config['autorole'][category]
+
+        if assigned:
+            if not member.guild.me.guild_permissions.manage_roles:
+                return
+
+            roles = [discord.utils.get(member.guild.roles, id=int(r)) for r in assigned if discord.utils.get(member.guild.roles, id=int(r))]
+            try:
+                await member.add_roles(*roles, reason='[ Parallax AutoRole ]')
+            except (discord.Forbidden, discord.HTTPException):
+                pass
+
     async def on_command_error(self, ctx, error):
         try:
             if isinstance(error, (errors.MissingRequiredArgument, errors.BadArgument)):

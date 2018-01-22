@@ -14,10 +14,52 @@ def f_time(time):
     return "%02d:%02d:%02d:%02d" % (d, h, m, s)
 
 
+def as_number(number):
+    try:
+        return int(number)
+    except ValueError:
+        return None
+
+
 class Misc:
     def __init__(self, bot):
         self.bot = bot
         self.process = psutil.Process(os.getpid())
+
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def userinfo(self, ctx, user: str=''):
+        """ Returns information about a user 
+
+        Accepted searching methods: user[#discrim] | id
+        """
+        _id = as_number(user)
+        _user = ctx.message.mentions[0] if ctx.message.mentions else None # failsafe in case I missed some logic
+        
+        if not _user and user:
+            if _id:
+                _user = self.bot.get_user(_id)
+                if not _user:
+                    _user = await self.bot.get_user_info(_id)
+            else:
+                if len(user) > 5 and user[-5] == '#':
+                    _user = discord.utils.find(lambda u: str(u) == user, ctx.bot.users)
+                else:
+                    _user = discord.utils.get(self.bot.users, name=user)
+        else:
+            _user = ctx.author
+
+        if not _user:
+            return await ctx.send('No users found matching that query.')
+
+        member = ctx.guild.get_member(_user.id) or _user # Try to resolve the user in the server
+
+        embed = discord.Embed(color=0xbe2f2f,
+                              description=f'Playing: `{member.game.name if hasattr(member, "game") and member.game else "Unknown"}`')
+        embed.set_author(name=f'{member} ({member.id})', icon_url=member.avatar_url)
+        embed.add_field(name='Account Type', value='User' if not member.bot else 'Bot', inline=True)
+
+        await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()

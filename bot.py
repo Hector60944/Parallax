@@ -6,6 +6,25 @@ import rethinkdb as r
 from discord.ext.commands import AutoShardedBot, when_mentioned_or
 
 
+class Database:
+    def __init__(self, bot):
+        self.bot = bot
+
+    async def get_config(self, guild_id: int):
+        return await self.bot.r.table('settings') \
+            .get(str(guild_id)) \
+            .default({
+                'warnThreshold': 0,
+                'antiInvite': False,
+                'mutedRole': None,
+                'logChannel': None,
+                'autorole': {
+                    'bots': [],
+                    'users': []
+                }
+            }).run(self.bot.connection)
+
+
 if __name__ == '__main__':
     r.set_loop_type('asyncio')
 
@@ -16,6 +35,7 @@ if __name__ == '__main__':
     bot.startup = datetime.now()
     bot.version = config['version']
     bot.messages_seen = 0
+    bot.db = Database(bot)
     bot.connection = bot.loop.run_until_complete(r.connect(db='parallax'))
     bot.r = r
 
