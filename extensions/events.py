@@ -9,8 +9,8 @@ class Events:
     async def on_ready(self):
         await self.bot.change_presence(game=discord.Game(name='-help'))
         app_info = await self.bot.application_info()
-        self.invite_url = discord.utils.oauth_url(app_info.id)
-        print(f'Logged in as {self.bot.user.name}\nBot invite link: {self.invite_url}')
+        self.bot.invite_url = discord.utils.oauth_url(app_info.id, discord.Permissions(8))
+        print(f'Logged in as {self.bot.user.name}\nBot invite link: {self.bot.invite_url}')
 
     async def on_command_error(self, ctx, error):
         try:

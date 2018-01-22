@@ -6,6 +6,10 @@ class Core:
         self.bot = bot
 
     @commands.command()
+    async def invite(self, ctx):
+        await ctx.send(f'Add me to your server with this URL: **<{self.bot.invite_url}>**')
+
+    @commands.command()
     @commands.is_owner()
     async def reload(self, ctx, module: str):
         """ Reload an extension """

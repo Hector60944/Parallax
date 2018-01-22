@@ -1,0 +1,62 @@
+import os
+from datetime import datetime
+
+import discord
+import psutil
+from discord.ext import commands
+
+
+def f_time(time):
+    h, r = divmod(int(time.total_seconds()), 3600)
+    m, s = divmod(r, 60)
+    d, h = divmod(h, 24)
+
+    return "%02d:%02d:%02d:%02d" % (d, h, m, s)
+
+
+class Misc:
+    def __init__(self, bot):
+        self.bot = bot
+        self.process = psutil.Process(os.getpid())
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.bot_has_permissions(embed_links=True)
+    async def server(self, ctx):
+        bots = sum(1 for m in ctx.guild.members if m.bot)
+        bot_percent = bots / len(ctx.guild.members) * 100
+        embed = discord.Embed(color=0xbe2f2f,
+                              title=f'Server Info | {ctx.guild.name} ({ctx.guild.id})',
+                              description=f'**Owner:** {ctx.guild.owner}',
+                              timestamp=ctx.guild.created_at)
+        embed.set_thumbnail(url=ctx.guild.icon_url)
+        embed.add_field(name='Members', value=f'Bots: {bots} ({bot_percent:.2f}%)\nTotal: {len(ctx.guild.members)}', inline=True)
+        embed.add_field(name='Region', value=ctx.guild.region, inline=True)
+        embed.add_field(name='Verification Level', value=ctx.guild.verification_level.name.title(), inline=True)
+        embed.add_field(name='Content Filter', value=ctx.guild.explicit_content_filter.name.title(), inline=True)
+        embed.set_footer(text='Created on')
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def stats(self, ctx):
+        uptime = f_time(datetime.now() - self.bot.startup)
+        ram = self.process.memory_full_info().rss / 1024**2
+        threads = psutil.Process().num_threads()
+
+        embed = discord.Embed(color=0xbe2f2f,
+                              title=f'Parallax | Version {self.bot.version}',
+                              description='**Developer:** Kromatic#0387')
+        embed.add_field(name='Uptime', value=uptime, inline=True)
+        embed.add_field(name='RAM Usage', value=f'{ram:.2f} MB', inline=True)
+        embed.add_field(name='Threads', value=threads, inline=True)
+        embed.add_field(name='Servers', value=len(self.bot.guilds), inline=True)
+        embed.add_field(name='Users', value=len(self.bot.users), inline=True)
+        embed.add_field(name='Messages Seen', value=self.bot.messages_seen, inline=True)
+
+        await ctx.send(embed=embed)
+
+
+def setup(bot):
+    bot.add_cog(Misc(bot))

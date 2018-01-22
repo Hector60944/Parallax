@@ -1,8 +1,9 @@
 import json
 import os
+from datetime import datetime
 
 import rethinkdb as r
-from discord.ext.commands import AutoShardedBot
+from discord.ext.commands import AutoShardedBot, when_mentioned_or
 
 
 if __name__ == '__main__':
@@ -11,7 +12,10 @@ if __name__ == '__main__':
     with open('config.json') as f:
         config = json.load(f)
 
-    bot = AutoShardedBot(command_prefix=config.get('prefixes'))
+    bot = AutoShardedBot(command_prefix=when_mentioned_or(*config.get('prefixes')))
+    bot.startup = datetime.now()
+    bot.version = config['version']
+    bot.messages_seen = 0
     bot.connection = bot.loop.run_until_complete(r.connect(db='parallax'))
     bot.r = r
 
@@ -24,6 +28,7 @@ if __name__ == '__main__':
 
     @bot.event
     async def on_message(message):
+        bot.messages_seen += 1
         if not bot.is_ready() or message.author.bot:
             return
 
