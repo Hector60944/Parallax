@@ -129,10 +129,7 @@ class Moderation:
             return await ctx.send("Role hierarchy prevents you from doing that.")
 
         threshold = (await self.helpers.get_config(ctx.guild.id))['warnThreshold']
-        try:
-            current_warns = await self.helpers.get_warns(member.id, ctx.guild.id) + 1
-        except:
-            return await ctx.send("Can't get current_warns")
+        current_warns = await self.helpers.get_warns(member.id, ctx.guild.id) + 1
 
         if threshold != 0:
             amount = current_warns % threshold
@@ -145,11 +142,8 @@ class Moderation:
         else:
             await ctx.send(f'Warned **{member}** for **{reason}** (Warnings: {current_warns})')
 
-        try:
-            await self.helpers.set_warns(member.id, ctx.guild.id, current_warns)
-            await self.helpers.post_modlog_entry(ctx.guild.id, 'Warned', member, ctx.author, reason)
-        except:
-            await ctx.send("Can't set warns")
+        await self.helpers.set_warns(member.id, ctx.guild.id, current_warns)
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Warned', member, ctx.author, reason)
 
     @commands.command()
     @commands.has_permissions(ban_members=True)

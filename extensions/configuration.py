@@ -110,7 +110,7 @@ class Configuration:
             config['logChannel'] = str(channel.id)
             await self.helpers.set_config(ctx.guild.id, config)
             await ctx.send(f'Log channel set to **{channel.name}**')
-    
+
     @config.command(aliases=['overview'])
     async def show(self, ctx):
         """ Displays current server configuration """
