@@ -100,8 +100,8 @@ class Configuration:
 
     @config.command()
     async def autorole(self, ctx, category: str, method: str, role: discord.Role):
-        """ Setup autorole for members that join your server 
-        
+        """ Setup autorole for members that join your server
+
         category: users | bots
         method  : add   | remove
         role    : id or name of a role in your server.
@@ -132,7 +132,6 @@ class Configuration:
 
             await ctx.send(f'**{role.name}** will no longer be automatically assigned')
 
-
     @config.command(aliases=['overview'])
     async def show(self, ctx):
         """ Displays current server configuration """
@@ -148,8 +147,8 @@ Muted Role   : {mute_role.name if mute_role else 'unknown'}
 Log Channel  : {log_channel.name if log_channel else 'unknown'}
 Warning Limit: {config['warnThreshold']}
 Autorole
-  ╚ Bots     : {" ".join(config["autorole"]["bots"])} 
-  ╚ Users    : {" ".join(config["autorole"]["users"])} 
+  ╚ Bots     : {" ".join(config["autorole"]["bots"])}
+  ╚ Users    : {" ".join(config["autorole"]["users"])}
 ```
         '''
 

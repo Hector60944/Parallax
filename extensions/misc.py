@@ -29,13 +29,13 @@ class Misc:
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def userinfo(self, ctx, user: str=''):
-        """ Returns information about a user 
+        """ Returns information about a user
 
         Accepted searching methods: user[#discrim] | id
         """
         _id = as_number(user)
-        _user = ctx.message.mentions[0] if ctx.message.mentions else None # failsafe in case I missed some logic
-        
+        _user = ctx.message.mentions[0] if ctx.message.mentions else None  # failsafe in case I missed some logic
+
         if not _user and user:
             if _id:
                 _user = self.bot.get_user(_id)
@@ -52,7 +52,7 @@ class Misc:
         if not _user:
             return await ctx.send('No users found matching that query.')
 
-        member = ctx.guild.get_member(_user.id) or _user # Try to resolve the user in the server
+        member = ctx.guild.get_member(_user.id) or _user  # Try to resolve the user in the server
 
         embed = discord.Embed(color=0xbe2f2f,
                               description=f'Playing: `{member.game.name if hasattr(member, "game") and member.game else "Unknown"}`')
