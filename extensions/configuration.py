@@ -25,6 +25,7 @@ class Configuration:
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def config(self, ctx):
+        """ Configure server-specific settings """
         if not ctx.invoked_subcommand:
             _help = await self.bot.formatter.format_help_for(ctx, ctx.command)
 

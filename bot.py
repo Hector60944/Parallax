@@ -31,7 +31,7 @@ if __name__ == '__main__':
     with open('config.json') as f:
         config = json.load(f)
 
-    bot = AutoShardedBot(command_prefix=when_mentioned_or(*config.get('prefixes')))
+    bot = AutoShardedBot(command_prefix=when_mentioned_or(*config.get('prefixes')), help_attrs=dict(hidden=True))
     bot.startup = datetime.now()
     bot.version = config['version']
     bot.messages_seen = 0

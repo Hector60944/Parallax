@@ -27,6 +27,11 @@ class Misc:
         self.process = psutil.Process(os.getpid())
 
     @commands.command()
+    async def invite(self, ctx):
+        """ Displays Parallax's invite """
+        await ctx.send(f'Add me to your server with this URL: **<{self.bot.invite_url}>**')
+
+    @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def userinfo(self, ctx, user: str=''):
         """ Returns information about a user
@@ -65,6 +70,7 @@ class Misc:
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
     async def server(self, ctx):
+        """ Displays server information """
         bots = sum(1 for m in ctx.guild.members if m.bot)
         bot_percent = bots / len(ctx.guild.members) * 100
         embed = discord.Embed(color=0xbe2f2f,
@@ -83,6 +89,7 @@ class Misc:
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def stats(self, ctx):
+        """ Displays Parallax's statistics """
         uptime = f_time(datetime.now() - self.bot.startup)
         ram = self.process.memory_full_info().rss / 1024**2
         threads = psutil.Process().num_threads()
