@@ -14,7 +14,7 @@ class Events:
 
     async def on_member_join(self, member):
         config = await self.bot.db.get_config(member.guild.id)
-        log = config['messages']['joinLog']  # TODO: Make log do something
+        log = config['messages']['joinLog']
         join = config['messages']['joinMessage']
 
         category = 'bots' if member.bot else 'users'
@@ -43,8 +43,8 @@ class Events:
                 except (discord.Forbidden, discord.HTTPException):
                     pass
 
-        if join:
-            channel = self.bot.get_channel(int(join))
+        if log:
+            channel = self.bot.get_channel(int(log))
 
             if channel:
                 embed = discord.Embed(color=0xbe2f2f,
@@ -54,7 +54,7 @@ class Events:
 
     async def on_member_remove(self, member):
         config = await self.bot.db.get_config(member.guild.id)
-        log = config['messages']['leaveLog']  # TODO: Make log do something
+        log = config['messages']['leaveLog']
         leave = config['messages']['leaveMessage']
 
         if leave['message'] and leave['channel']:
@@ -71,8 +71,8 @@ class Events:
                 except (discord.Forbidden, discord.HTTPException):
                     pass
         
-        if leave:
-            channel = self.bot.get_channel(int(leave))
+        if log:
+            channel = self.bot.get_channel(int(log))
 
             if channel:
                 embed = discord.Embed(color=0xbe2f2f,
