@@ -31,7 +31,7 @@ class Helpers:
                                           title=f'**User {action}**',
                                           description=f'**Target:** {target} ({target.id})\n'
                                                       f'**Reason:** {reason}',
-                                          timestamp=datetime.now())
+                                          timestamp=datetime.utcnow())
                     embed.set_footer(text=f'Performed by {moderator}', icon_url=moderator.avatar_url_as(format='png'))
                     await channel.send(embed=embed)
 
