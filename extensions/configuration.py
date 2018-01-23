@@ -70,7 +70,7 @@ class Configuration:
         return await ctx.send(f'Invite Killer has been **{setting}**')
 
     @config.command()
-    async def muterole(self, ctx, role: discord.Role=None):
+    async def muterole(self, ctx, *, role: discord.Role=None):
         """ Sets the Muted role to the target role """
         config = await self.bot.db.get_config(ctx.guild.id)
         if not role:
@@ -100,7 +100,7 @@ class Configuration:
             await ctx.send(f'Log channel set to **{channel.name}**')
 
     @config.command()
-    async def autorole(self, ctx, category: str, method: str, role: discord.Role):
+    async def autorole(self, ctx, category: str, method: str, *, role: discord.Role):
         """ Setup autorole for members that join your server
 
         category: users | bots
