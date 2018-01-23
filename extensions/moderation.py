@@ -41,7 +41,7 @@ class Moderation:
         self.bot = bot
         self.helpers = Helpers(bot)
 
-    @commands.command()
+    @commands.command(aliases=['b'])
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     @commands.guild_only()
@@ -57,7 +57,7 @@ class Moderation:
         await ctx.message.add_reaction('🔨')
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason)
 
-    @commands.command()
+    @commands.command(aliases=['k'])
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
     @commands.guild_only()
@@ -136,7 +136,7 @@ class Moderation:
         await self.helpers.set_warns(member.id, ctx.guild.id, current_warns)
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Warned', member, ctx.author, reason)
 
-    @commands.command()
+    @commands.command(aliases=['m'])
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
@@ -166,7 +166,7 @@ class Moderation:
         await ctx.send('Muted')
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Muted', member, ctx.author, reason)
 
-    @commands.command()
+    @commands.command(aliases=['um'])
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()

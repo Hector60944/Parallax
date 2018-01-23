@@ -43,6 +43,15 @@ class Events:
                 except (discord.Forbidden, discord.HTTPException):
                     pass
 
+        if join:
+            channel = self.bot.get_channel(int(join))
+
+            if channel:
+                embed = discord.Embed(color=0xbe2f2f,
+                                      title=f'{str(member)} ({member.id})',
+                                      description='Member Joined')
+                await ctx.send(embed=embed)
+
     async def on_member_remove(self, member):
         config = await self.bot.db.get_config(member.guild.id)
         log = config['messages']['leaveLog']  # TODO: Make log do something
@@ -61,6 +70,15 @@ class Events:
                     await channel.send(m)
                 except (discord.Forbidden, discord.HTTPException):
                     pass
+        
+        if leave:
+            channel = self.bot.get_channel(int(leave))
+
+            if channel:
+                embed = discord.Embed(color=0xbe2f2f,
+                                      title=f'{str(member)} ({member.id})',
+                                      description='Member Left')
+                await ctx.send(embed=embed)
 
     async def on_command_error(self, ctx, error):
         try:
