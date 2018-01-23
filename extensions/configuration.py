@@ -34,7 +34,7 @@ class Configuration:
 
     @config.command()
     async def reset(self, ctx):
-        """ Resets the specified setting in the config, or the entire config if no setting specified """
+        """ Resets the entire config to defaults """
         await self.helpers.set_config(ctx.guild.id, self.helpers.default_config)
         await ctx.send(f'Successfully reset server settings.')
 
