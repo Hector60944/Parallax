@@ -10,12 +10,9 @@ class Helpers:
         self.bot = bot
 
     async def get_warns(self, user: int, guild_id: int):
-        warns = await self.bot.r.table('warns').get(str(user)).run(self.bot.connection)
+        warns = await self.bot.r.table('warns').get(str(user)).default({}).run(self.bot.connection)
 
-        if warns and str(guild_id) in warns:
-            return warns[str(guild_id)]
-
-        return 0
+        return warns.get(str(guild_id), 0)
 
     async def set_warns(self, user: int, guild_id: int, warns: int):
         await self.bot.r.table('warns') \
