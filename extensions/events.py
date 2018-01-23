@@ -50,7 +50,7 @@ class Events:
                 embed = discord.Embed(color=0xbe2f2f,
                                       title=f'{str(member)} ({member.id})',
                                       description='Member Joined')
-                await ctx.send(embed=embed)
+                await channel.send(embed=embed)
 
     async def on_member_remove(self, member):
         config = await self.bot.db.get_config(member.guild.id)
@@ -78,7 +78,7 @@ class Events:
                 embed = discord.Embed(color=0xbe2f2f,
                                       title=f'{str(member)} ({member.id})',
                                       description='Member Left')
-                await ctx.send(embed=embed)
+                await channel.send(embed=embed)
 
     async def on_command_error(self, ctx, error):
         try:
