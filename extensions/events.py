@@ -14,19 +14,53 @@ class Events:
 
     async def on_member_join(self, member):
         config = await self.bot.db.get_config(member.guild.id)
-        category = 'bots' if member.bot else 'users'
+        log = config['messages']['joinLog']  # TODO: Make log do something
+        join = config['messages']['joinMessage']
 
+        category = 'bots' if member.bot else 'users'
         assigned = config['autorole'][category]
 
-        if assigned:
-            if not member.guild.me.guild_permissions.manage_roles:
-                return
+        if assigned and member.guild.me.guild_permissions.manage_roles:
 
             roles = [discord.utils.get(member.guild.roles, id=int(r)) for r in assigned if discord.utils.get(member.guild.roles, id=int(r))]
             try:
                 await member.add_roles(*roles, reason='[ Parallax AutoRole ]')
             except (discord.Forbidden, discord.HTTPException):
                 pass
+
+        if join['message'] and join['channel']:
+            channel = self.bot.get_channel(int(join['channel']))
+
+            if channel:
+                m = join['message'] \
+                    .replace('{user}', member.mention) \
+                    .replace('{user:tag}', str(member)) \
+                    .replace('{server}', member.guild.name) \
+                    .replace('{owner}', str(member.guild.owner))
+
+                try:
+                    await channel.send(m)
+                except (discord.Forbidden, discord.HTTPException):
+                    pass
+
+    async def on_member_remove(self, member):
+        config = await self.bot.db.get_config(member.guild.id)
+        log = config['messages']['leaveLog']  # TODO: Make log do something
+        leave = config['messages']['leaveMessage']
+
+        if leave['message'] and leave['channel']:
+            channel = self.bot.get_channel(int(leave['channel']))
+
+            if channel:
+                m = leave['message'] \
+                    .replace('{user}', member.mention) \
+                    .replace('{user:tag}', str(member)) \
+                    .replace('{server}', member.guild.name)
+
+                try:
+                    await channel.send(m)
+                except (discord.Forbidden, discord.HTTPException):
+                    pass
 
     async def on_command_error(self, ctx, error):
         try:

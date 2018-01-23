@@ -21,6 +21,18 @@ class Database:
                 'autorole': {
                     'bots': [],
                     'users': []
+                },
+                'messages': {
+                    'joinLog': None,
+                    'leaveLog': None,
+                    'joinMessage': {
+                        'message': '',
+                        'channel': None
+                    },
+                    'leaveMessage': {
+                        'message': '',
+                        'channel': None
+                    }
                 }
             }).run(self.bot.connection)
 

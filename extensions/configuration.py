@@ -21,6 +21,27 @@ class Configuration:
         self.bot = bot
         self.helpers = Helpers(bot)
 
+    @commands.command()
+    @commands.is_owner()
+    async def migrate(self, ctx):
+        migrate_data = {
+            'messages': {
+                'joinLog': None,
+                'leaveLog': None,
+                'joinMessage': {
+                    'message': '',
+                    'channel': None
+                },
+                'leaveMessage': {
+                    'message': '',
+                    'channel': None
+                }
+            }
+        }
+        m = await ctx.send('Migrating all server settings...')
+        await self.bot.r.table('settings').update(migrate_data).run(self.bot.connection)
+        await m.edit(content='Done.')
+
     @commands.group(aliases=['configure'])
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
@@ -31,12 +52,6 @@ class Configuration:
 
             for page in _help:
                 await ctx.send(page)
-
-    @config.command()
-    async def reset(self, ctx):
-        """ Resets the entire config to defaults """
-        await self.helpers.set_config(ctx.guild.id, self.helpers.default_config)
-        await ctx.send(f'Successfully reset server settings.')
 
     @config.command()
     async def warnings(self, ctx, warn_threshold: int):
@@ -92,12 +107,12 @@ class Configuration:
         config = await self.bot.db.get_config(ctx.guild.id)
         if not channel:
             config['logChannel'] = None
-            await self.helpers.set_config(ctx.guild.id, config)
             await ctx.send(f'Setting cleared.')
         else:
             config['logChannel'] = str(channel.id)
-            await self.helpers.set_config(ctx.guild.id, config)
             await ctx.send(f'Log channel set to **{channel.name}**')
+
+        await self.helpers.set_config(ctx.guild.id, config)
 
     @config.command()
     async def autorole(self, ctx, category: str, method: str, *, role: discord.Role):
@@ -122,7 +137,6 @@ class Configuration:
 
             current_roles.append(str(role.id))
             await self.helpers.set_config(ctx.guild.id, config)
-
             await ctx.send(f'**{role.name}** will now be automatically assigned to new {category.lower()}')
         else:
             if str(role.id) not in current_roles:
@@ -130,26 +144,137 @@ class Configuration:
 
             current_roles.pop(current_roles.index(str(role.id)))
             await self.helpers.set_config(ctx.guild.id, config)
-
             await ctx.send(f'**{role.name}** will no longer be automatically assigned')
+
+    @config.command()
+    async def joinlog(self, ctx, *, channel: discord.TextChannel=None):
+        """ Log when a user joins the server """
+        config = await self.bot.db.get_config(ctx.guild.id)
+        if not channel:
+            config['messages']['joinLog'] = None
+            await ctx.send(f'Setting cleared.')
+        else:
+            config['messages']['joinLog'] = str(channel.id)
+            await ctx.send(f'Join log channel set to **{channel.name}**')
+
+        await self.helpers.set_config(ctx.guild.id, config)
+
+    @config.command()
+    async def leavelog(self, ctx, *, channel: discord.TextChannel=None):
+        """ Log when a user leaves the server """
+        config = await self.bot.db.get_config(ctx.guild.id)
+        if not channel:
+            config['messages']['leaveLog'] = None
+            await ctx.send(f'Setting cleared.')
+        else:
+            config['messages']['leaveLog'] = str(channel.id)
+            await ctx.send(f'Leave log channel set to **{channel.name}**')
+
+        await self.helpers.set_config(ctx.guild.id, config)
+
+    @config.command()
+    async def welcomechannel(self, ctx, channel: discord.TextChannel=None):
+        """ Sets the welcome message channel """
+        config = await self.bot.db.get_config(ctx.guild.id)
+        join = config['messages']['joinMessage']
+
+        if not channel:
+            join['channel'] = None
+            await ctx.send('Welcome channel reset')
+        else:
+            join['channel'] = str(channel.id)
+            await ctx.send(f'Set welcome channel to **{channel.name}**')
+
+        await self.helpers.set_config(ctx.guild.id, config)
+
+    @config.command()
+    async def welcomemsg(self, ctx, *, message: str=''):
+        """ Sets the welcome message when a user joins the server
+
+        special formatting keywords:
+        {user}      - Mentions the user that joined
+        {user:tag}  - The user's name and discriminator
+        {server}    - The server's name
+        {owner}     - The server owner's name and discriminator
+        """
+        config = await self.bot.db.get_config(ctx.guild.id)
+        join = config['messages']['joinMessage']
+
+        if not message:
+            join['message'] = None
+            await ctx.send('Welcome message reset')
+        else:
+            join['message'] = message
+            await ctx.send(f'Updated welcome message')
+
+        await self.helpers.set_config(ctx.guild.id, config)
+
+    @config.command()
+    async def leavechannel(self, ctx, channel: discord.TextChannel=None):
+        """ Sets the leave message channel """
+        config = await self.bot.db.get_config(ctx.guild.id)
+        leave = config['messages']['leaveMessage']
+
+        if not channel:
+            leave['channel'] = None
+            await ctx.send('Leave channel reset')
+        else:
+            leave['channel'] = str(channel.id)
+            await ctx.send(f'Set leave channel to **{channel.name}**')
+
+        await self.helpers.set_config(ctx.guild.id, config)
+
+    @config.command()
+    async def leavemsg(self, ctx, *, message: str=''):
+        """ Sets the leave message when a user leaves the server
+
+        special formatting keywords:
+        {user}      - Mentions the user that joined
+        {user:tag}  - The user's name and discriminator
+        {server}    - The server's name
+        """
+        config = await self.bot.db.get_config(ctx.guild.id)
+        leave = config['messages']['leaveMessage']
+
+        if not message:
+            leave['message'] = None
+            await ctx.send('Leave message reset')
+        else:
+            leave['message'] = message
+            await ctx.send(f'Updated leave message')
+
+        await self.helpers.set_config(ctx.guild.id, config)
 
     @config.command(aliases=['overview'])
     async def show(self, ctx):
         """ Displays current server configuration """
         config = await self.bot.db.get_config(ctx.guild.id)
+        _event = config['messages']
 
         mute_role = discord.utils.get(ctx.guild.roles, id=int(config['mutedRole'])) if config['mutedRole'] else None
         log_channel = self.bot.get_channel(int(config['logChannel'])) if config['logChannel'] else None
+        welcome_channel = self.bot.get_channel(int(_event['joinMessage']['channel'])) if _event['joinMessage']['channel'] else None
+        leave_channel = self.bot.get_channel(int(_event['leaveMessage']['channel'])) if _event['leaveMessage']['channel'] else None
+        join_log = self.bot.get_channel(int(_event['joinLog'])) if _event['joinLog'] else None
+        leave_log = self.bot.get_channel(int(_event['leaveLog'])) if _event['leaveLog'] else None
+
+        # ugh, spaghetti code...
 
         t = f'''**Server Configuration | {ctx.guild.name}**
 ```prolog
-Anti-Invite  : {'on' if config['antiInvite'] else 'off'}
-Muted Role   : {mute_role.name if mute_role else 'unknown'}
-Log Channel  : {log_channel.name if log_channel else 'unknown'}
-Warning Limit: {config['warnThreshold']}
+Anti-Invite   : {'on' if config['antiInvite'] else 'off'}
+Muted Role    : {mute_role.name if mute_role else 'unknown'}
+Warning Limit : {config['warnThreshold']}
 Autorole
-  ╚ Bots     : {" ".join(config["autorole"]["bots"])}
-  ╚ Users    : {" ".join(config["autorole"]["users"])}
+  ╚ Bots      : {" ".join(config["autorole"]["bots"])}
+  ╚ Users     : {" ".join(config["autorole"]["users"])}
+Announce
+  ╚ Welcome   : {welcome_channel.name if welcome_channel else 'unknown'}
+  ╚ Leave     : {leave_channel.name if leave_channel else 'unknown'}
+Log Channels
+  ╚ Join      : {join_log.name if join_log else 'unknown'}
+  ╚ Leave     : {leave_log.name if leave_log else 'unknown'}
+  ╚ Moderation: {log_channel.name if log_channel else 'unknown'}
 ```
         '''
 
