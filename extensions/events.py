@@ -47,10 +47,12 @@ class Events:
             channel = self.bot.get_channel(int(log))
 
             if channel:
-                embed = discord.Embed(color=0xbe2f2f,
-                                      title=f'{str(member)} ({member.id})',
-                                      description='Member Joined')
-                await channel.send(embed=embed)
+                embed = discord.Embed(color=0xbe2f2f, description='Member Joined')
+                embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
+                try:
+                    await channel.send(embed=embed)
+                except (discord.Forbidden, discord.HTTPException):
+                    pass
 
     async def on_member_remove(self, member):
         config = await self.bot.db.get_config(member.guild.id)
@@ -75,10 +77,12 @@ class Events:
             channel = self.bot.get_channel(int(log))
 
             if channel:
-                embed = discord.Embed(color=0xbe2f2f,
-                                      title=f'{str(member)} ({member.id})',
-                                      description='Member Left')
-                await channel.send(embed=embed)
+                embed = discord.Embed(color=0xbe2f2f, description='Member Left')
+                embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
+                try:
+                    await channel.send(embed=embed)
+                except (discord.Forbidden, discord.HTTPException):
+                    pass
 
     async def on_command_error(self, ctx, error):
         try:
