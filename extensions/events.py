@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import discord
 from discord.ext.commands import errors
 
@@ -47,7 +49,7 @@ class Events:
             channel = self.bot.get_channel(int(log))
 
             if channel:
-                embed = discord.Embed(color=0xbe2f2f, description='Member Joined')
+                embed = discord.Embed(color=0xbe2f2f, description='Member Joined', timestamp=datetime.utcnow())
                 embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
                 try:
                     await channel.send(embed=embed)
@@ -77,7 +79,7 @@ class Events:
             channel = self.bot.get_channel(int(log))
 
             if channel:
-                embed = discord.Embed(color=0xbe2f2f, description='Member Left')
+                embed = discord.Embed(color=0xbe2f2f, description='Member Left', timestamp=datetime.utcnow())
                 embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
                 try:
                     await channel.send(embed=embed)
