@@ -196,6 +196,26 @@ class Moderation:
         await ctx.send('Unmuted')
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Unmuted', member, ctx.author, reason)
 
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(manage_roles=True)
+    @commands.guild_only()
+    async def lock(self, ctx):
+        """ Puts the channel into lockdown """
+        await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=False, reason=f'[ {ctx.author} ] Lockdown')
+
+        if ctx.me.guild_permissions.send_messages:
+            await ctx.send('Channel locked.')
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(manage_roles=True)
+    @commands.guild_only()
+    async def unlock(self, ctx):
+        """ Puts the channel into lockdown """
+        await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True, reason=f'[ {ctx.author} ] Removed lockdown')
+        await ctx.send('Channel unlocked.')
+
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
