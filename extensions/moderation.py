@@ -212,7 +212,7 @@ class Moderation:
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def unlock(self, ctx):
-        """ Puts the channel into lockdown """
+        """ Removes the channel lockdown """
         await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True, reason=f'[ {ctx.author} ] Removed lockdown')
         await ctx.send('Channel unlocked.')
 
