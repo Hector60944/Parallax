@@ -45,7 +45,7 @@ class Moderation:
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     @commands.guild_only()
-    async def ban(self, ctx, member: discord.Member, reason: commands.clean_content(fix_channel_mentions=True)='None specified', time: str=None):
+    async def ban(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Bans a user from the server """
         if not interaction.check_hierarchy(ctx.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
@@ -140,7 +140,7 @@ class Moderation:
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
-    async def mute(self, ctx, member: discord.Member, reason: commands.clean_content(fix_channel_mentions=True)='None specified', time: str=None):
+    async def mute(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Mutes the specified user """
         if not interaction.check_hierarchy(ctx.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
