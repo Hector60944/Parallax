@@ -27,12 +27,14 @@ class Modules:
         self.helpers = Helpers(bot)
 
     async def on_message(self, message):
+        if isinstance(message.channel, discord.DMChannel):
+            return
+
         if await self.helpers.anti_invite(message.guild.id):
             await self.anti_invite(message)
 
     async def anti_invite(self, ctx):
-        if isinstance(ctx.channel, discord.DMChannel) or \
-                not interaction.check_bot_has(ctx, manage_messages=True) or \
+        if not interaction.check_bot_has(ctx, manage_messages=True) or \
                 not interaction.check_hierarchy(ctx.guild.me, ctx.author) or interaction.check_user_has(ctx, manage_messages=True) or \
                 not invite_rx.search(ctx.content):
             return
