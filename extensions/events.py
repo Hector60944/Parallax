@@ -97,7 +97,7 @@ class Events:
 
             elif isinstance(error, errors.CommandInvokeError):
                 print(error)
-                await ctx.send('An error has occurred in this command and has been logged.')
+                await ctx.send(f'**Error:**\n```py\n{err}\n```')
 
             elif isinstance(error, errors.CommandOnCooldown):
                 await ctx.send('You can use this command in {0:.0f} seconds.'.format(error.retry_after))
