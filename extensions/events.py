@@ -74,7 +74,7 @@ class Events:
                     await channel.send(m)
                 except (discord.Forbidden, discord.HTTPException):
                     pass
-        
+
         if log:
             channel = self.bot.get_channel(int(log))
 

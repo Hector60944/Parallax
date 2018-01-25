@@ -2,12 +2,22 @@ from datetime import datetime
 
 import discord
 from discord.ext import commands
-from utils import interaction
+from utils import interaction, timeparser
 
 
 class Helpers:
     def __init__(self, bot):
         self.bot = bot
+
+    async def create_timed_ban(self, guild_id: int, user: int, due: int):
+        await self.bot.r.table('bans') \
+            .insert({'user_id': str(user), 'guild_id': str(guild_id), 'due': str(due)}) \
+            .run(self.bot.connection)
+
+    async def create_timed_mute(self, guild_id: int, user: int, due: int, role: int):
+        await self.bot.r.table('mutes') \
+            .insert({'user_id': str(user), 'guild_id': str(guild_id), 'due': str(due), 'role_id': str(role)}) \
+            .run(self.bot.connection)
 
     async def get_warns(self, user: int, guild_id: int):
         warns = await self.bot.r.table('warns').get(str(user)).default({}).run(self.bot.connection)
@@ -19,7 +29,7 @@ class Helpers:
             .insert({'id': str(user), str(guild_id): warns}, conflict='update') \
             .run(self.bot.connection)
 
-    async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str):
+    async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str, time: str=''):
         config = await self.bot.db.get_config(guild_id)
 
         if config['logChannel']:
@@ -33,6 +43,10 @@ class Helpers:
                                                       f'**Reason:** {reason}',
                                           timestamp=datetime.utcnow())
                     embed.set_footer(text=f'Performed by {moderator}', icon_url=moderator.avatar_url_as(format='png'))
+
+                    if time:
+                        embed.description += f'\n**Duration:** {time}'
+
                     await channel.send(embed=embed)
 
 
@@ -53,9 +67,16 @@ class Moderation:
         if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
             return await ctx.send("Role hierarchy prevents you from doing that.")
 
+        time, reason = timeparser.convert(reason)
+
         await member.ban(reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
         await ctx.message.add_reaction('🔨')
-        await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason)
+
+        if time:
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason, f'{time.amount} {time.unit}')
+            await self.helpers.create_timed_action(ctx.guild.id, member.id, time.absolute)
+        else:
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason)
 
     @commands.command(aliases=['k'])
     @commands.has_permissions(kick_members=True)
@@ -162,9 +183,16 @@ class Moderation:
         if role.position > ctx.me.top_role.position:
             return await ctx.send('The muted role\'s position is higher than my top role. Unable to assign the role')
 
+        time, reason = timeparser.convert(reason)
+
         await member.add_roles(role, reason=f'[ {ctx.author} ] {reason}')
-        await ctx.send('Muted')
-        await self.helpers.post_modlog_entry(ctx.guild.id, 'Muted', member, ctx.author, reason)
+        await ctx.message.add_reaction('🔇')
+
+        if time:
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Muted', member, ctx.author, reason, f'{time.amount} {time.unit}')
+            await self.helpers.create_timed_mute(ctx.guild.id, member.id, time.absolute, role.id)
+        else:
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Muted', member, ctx.author, reason)
 
     @commands.command(aliases=['um'])
     @commands.has_permissions(ban_members=True)
@@ -219,6 +247,16 @@ class Moderation:
         ow.send_messages = None
         await ctx.channel.set_permissions(target=ctx.guild.default_role, overwrite=ow, reason=f'[ {ctx.author} ] Removed lockdown')
         await ctx.send('Channel unlocked.')
+
+    @commands.command()
+    @commands.is_owner()
+    async def parse(self, ctx, *, text: str):
+        time, reason = timeparser.convert(text)
+
+        if time:
+            await ctx.send(f'**Found Time:** {time.amount} {time.unit}')
+
+        await ctx.send(reason)
 
 
 def setup(bot):
