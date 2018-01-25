@@ -60,7 +60,14 @@ class Moderation:
     @commands.bot_has_permissions(ban_members=True)
     @commands.guild_only()
     async def ban(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
-        """ Bans a user from the server """
+        """ Bans a user from the server
+
+        Timed bans: For the reason parameter, specify a time, unit and then your reason. E.g:
+        5s Looked at me wrong
+
+        Where 5s means 5 seconds. Supported units: seconds, minutes, hours, days, weeks.
+        When using a unit, specify the first letter (seconds -> s, minutes -> m etc...)
+        """
         if not interaction.check_hierarchy(ctx.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
 
@@ -162,7 +169,14 @@ class Moderation:
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def mute(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
-        """ Mutes the specified user """
+        """ Mutes the specified user
+
+        Timed mutes: For the reason parameter, specify a time, unit and then your reason. E.g:
+        5s Looked at me wrong
+
+        Where 5s means 5 seconds. Supported units: seconds, minutes, hours, days, weeks.
+        When using a unit, specify the first letter (seconds -> s, minutes -> m etc...)
+        """
         if not interaction.check_hierarchy(ctx.me, member):
             return await ctx.send("Role hierarchy prevents me from doing that.")
 
