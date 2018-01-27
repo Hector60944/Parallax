@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 import discord
@@ -54,6 +55,34 @@ class Moderation:
     def __init__(self, bot):
         self.bot = bot
         self.helpers = Helpers(bot)
+
+    @commands.command(aliases=['ub'])
+    @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True)
+    @commands.guild_only()
+    async def unban(self, ctx, member: int, *, reason: str='None specified'):
+        """ Unbans a member from the server by their Discord ID
+        
+        To get a user's ID: https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID"""
+        bans = await ctx.guild.bans()
+        ban = discord.utils.get(bans, user__id=member)
+
+        if not ban:
+            return await ctx.send('No banned users found with that ID')
+
+        prompt = await ctx.send(f'The user **{str(ban.user)}** was banned for **{ban.reason}**.\n\nAre you sure you want to revoke this ban? (`y`/`n`)')
+
+        try:
+            m = await self.bot.wait_for('message', check=lambda m: m.content == 'y' or m.content == 'n', timeout=20)
+        except asyncio.TimeoutError:
+            await prompt.edit(content='Prompt cancelled; no response.')
+        else:
+            if m.content == 'n':
+                return await ctx.send(f'Ban revocation for **{str(ban.user)}** cancelled.')
+
+            await ctx.guild.unban(ban.user, reason=f'[ {ctx.author} ] {reason}')
+            await m.add_reaction('🛠')
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Unbanned', ban.user, ctx.author, reason)
 
     @commands.command(aliases=['b'])
     @commands.has_permissions(ban_members=True)
