@@ -272,24 +272,24 @@ class Moderation:
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def lock(self, ctx):
-        """ Puts the channel into lockdown """
+        """ Locks the current channel """
         ow = ctx.channel.overwrites_for(ctx.guild.default_role)
         ow.send_messages = False
         await ctx.channel.set_permissions(target=ctx.guild.default_role, overwrite=ow, reason=f'[ {ctx.author} ] Lockdown')
 
         if ctx.me.guild_permissions.send_messages:
-            await ctx.send('Channel locked.')
+            await ctx.message.add_reaction('🔒')
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def unlock(self, ctx):
-        """ Removes the channel lockdown """
+        """ Unlocks the current channel """
         ow = ctx.channel.overwrites_for(ctx.guild.default_role)
         ow.send_messages = None
         await ctx.channel.set_permissions(target=ctx.guild.default_role, overwrite=ow, reason=f'[ {ctx.author} ] Removed lockdown')
-        await ctx.send('Channel unlocked.')
+        await ctx.message.add_reaction('🔓')
 
     @commands.command()
     @commands.is_owner()
