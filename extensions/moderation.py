@@ -291,16 +291,6 @@ class Moderation:
         await ctx.channel.set_permissions(target=ctx.guild.default_role, overwrite=ow, reason=f'[ {ctx.author} ] Removed lockdown')
         await ctx.message.add_reaction('🔓')
 
-    @commands.command()
-    @commands.is_owner()
-    async def parse(self, ctx, *, text: str):
-        time, reason = timeparser.convert(text)
-
-        if time:
-            await ctx.send(f'**Found Time:** {time.amount} {time.unit}')
-
-        await ctx.send(reason)
-
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
