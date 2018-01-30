@@ -1,9 +1,13 @@
 import os
+import re
 from datetime import datetime
 
 import discord
 import psutil
 from discord.ext import commands
+
+
+mention_rx = re.compile(r'<@!?(\d{16,19})>')
 
 
 def f_time(time):
@@ -14,17 +18,33 @@ def f_time(time):
     return "%02d:%02d:%02d:%02d" % (d, h, m, s)
 
 
-def as_number(number):
-    try:
-        return int(number)
-    except ValueError:
-        return None
+def is_mention(content: str):
+    return mention_rx.match(content)
 
 
 class Misc:
     def __init__(self, bot):
         self.bot = bot
         self.process = psutil.Process(os.getpid())
+
+    async def resolve_user_id(self, user_id: int):
+        user = self.bot.get_user(user_id)
+        if not user:
+            user = await self.bot.get_user_info(user_id)
+        return user
+
+    async def get_user(self, content: str):
+        mention = is_mention(content)
+        if mention:
+            return await self.resolve_user_id(mention.group(1))
+
+        if content.isdigit():
+            return await self.resolve_user_id(int(content))
+
+        if len(content) > 5 and content[-5] == '#':
+            return discord.utils.find(lambda u: str(u) == content, self.bot.users)
+
+        return discord.utils.get(self.bot.users, name=content)
 
     @commands.command()
     async def invite(self, ctx):
@@ -33,36 +53,22 @@ class Misc:
 
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
-    async def userinfo(self, ctx, user: str=''):
+    async def userinfo(self, ctx, user: str):
         """ Returns information about a user
 
-        Accepted searching methods: user[#discrim] | id
+        Search methods: user[#discrim] | id | mention
         """
-        _id = as_number(user)
-        _user = ctx.message.mentions[0] if ctx.message.mentions else None  # failsafe in case I missed some logic
+        user = await self.get_user(user)
 
-        if not _user and user:
-            if _id:
-                _user = self.bot.get_user(_id)
-                if not _user:
-                    _user = await self.bot.get_user_info(_id)
-            else:
-                if len(user) > 5 and user[-5] == '#':
-                    _user = discord.utils.find(lambda u: str(u) == user, ctx.bot.users)
-                else:
-                    _user = discord.utils.get(self.bot.users, name=user)
-        else:
-            _user = ctx.author
-
-        if not _user:
+        if not user:
             return await ctx.send('No users found matching that query.')
 
-        member = ctx.guild.get_member(_user.id) or _user  # Try to resolve the user in the server
+        member = ctx.guild.get_member(user.id)
 
         embed = discord.Embed(color=0xbe2f2f,
-                              description=f'Playing: `{member.game.name if hasattr(member, "game") and member.game else "Unknown"}`')
-        embed.set_author(name=f'{member} ({member.id})', icon_url=member.avatar_url)
-        embed.add_field(name='Account Type', value='User' if not member.bot else 'Bot', inline=True)
+                              description=f'Playing: `{member.game.name if member.game else "Unknown"}`')
+        embed.set_author(name=f'{user} ({user.id})', icon_url=user.avatar_url)
+        embed.add_field(name='Account Type', value='User' if not user.bot else 'Bot', inline=True)
 
         await ctx.send(embed=embed)
 
