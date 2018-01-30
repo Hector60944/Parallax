@@ -291,11 +291,13 @@ class Moderation:
         await ctx.message.add_reaction('🔓')
 
     @commands.command(aliases=['vk', 'vckick'])
-    @commands.has_permissions(move_members=True)
     @commands.bot_has_permissions(move_members=True, manage_channels=True)
     @commands.guild_only()
     async def voicekick(self, ctx, *users: discord.Member):
         """ Kicks the target users from their voicechannels """
+        if not ctx.author.guild_permissions.move_members:
+            return await ctx.send('**You need the following permissions:**\n-Move Members')
+
         dest = await ctx.guild.create_voice_channel(name='voicekick', reason=f'[ {ctx.author} ] Voicekick')
         in_voice = list(filter(lambda m: m.voice is not None and m.voice.channel is not None and m.voice.channel.permissions_for(ctx.me).move_members,
                                users))
