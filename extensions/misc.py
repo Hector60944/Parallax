@@ -51,7 +51,7 @@ class Misc:
         """ Displays Parallax's invite """
         await ctx.send(f'Add me to your server with this URL: **<{self.bot.invite_url}>**')
 
-    @commands.command()
+    @commands.command(aliases=['ui', 'user'])
     @commands.bot_has_permissions(embed_links=True)
     async def userinfo(self, ctx, user: str):
         """ Returns information about a user
@@ -69,6 +69,10 @@ class Misc:
                               description=f'Playing: `{member.game.name if member.game else "Unknown"}`')
         embed.set_author(name=f'{user} ({user.id})', icon_url=user.avatar_url)
         embed.add_field(name='Account Type', value='User' if not user.bot else 'Bot', inline=True)
+        embed.add_field(name='Created on', value=f'{user.created_at.strftime("%d.%m.%Y")}\n({(datetime.utcnow() - user.created_at).days} days ago)', inline=True)
+
+        if member:
+            embed.add_field(name='Joined on', value=f'{member.joined_at.strftime("%d.%m.%Y")}\n({(datetime.utcnow() - member.joined_at).days} days ago)', inline=True)
 
         await ctx.send(embed=embed)
 
