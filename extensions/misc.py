@@ -56,12 +56,15 @@ class Misc:
 
     @commands.command(aliases=['ui', 'user'])
     @commands.bot_has_permissions(embed_links=True)
-    async def userinfo(self, ctx, user: str):
+    async def userinfo(self, ctx, user: str=''):
         """ Returns information about a user
 
         Search methods: user[#discrim] | id | mention
         """
-        user = await self.get_user(user)
+        if not user:
+            user = ctx.author
+        else:
+            user = await self.get_user(user)
 
         if not user:
             return await ctx.send('No users found matching that query.')
