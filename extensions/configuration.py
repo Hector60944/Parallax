@@ -284,6 +284,9 @@ Log Channels
             if str(role.id) in current_roles:
                 return await ctx.send('That role is already assignable')
 
+            if role.position > ctx.author.top_role.position:
+                return await ctx.send('You can\'t make higher roles assignable')
+
             current_roles.append(str(role.id))
             await self.helpers.set_config(ctx.guild.id, config)
             await ctx.send(f'**{role.name}** is now self-assignable')
