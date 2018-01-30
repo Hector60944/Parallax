@@ -307,7 +307,7 @@ class Moderation:
         for m in in_voice:
             await m.move_to(channel=dest, reason=f'[ {ctx.author} ] Voicekick')
 
-        await dest.delete(f'[ {ctx.author} ] Voicekick')
+        await dest.delete(reason=f'[ {ctx.author} ] Voicekick')
         await ctx.message.add_reaction('👢')
 
 
