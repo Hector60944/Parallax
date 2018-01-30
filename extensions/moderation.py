@@ -6,6 +6,13 @@ from discord.ext import commands
 from utils import interaction, timeparser
 
 
+def pad(text, char, length):
+    if len(text) == length:
+        return text
+
+    return f'{text}{char * (length - len(text))}'
+
+
 class Helpers:
     def __init__(self, bot):
         self.bot = bot
@@ -21,9 +28,7 @@ class Helpers:
             .run(self.bot.connection)
 
     async def get_warns(self, user: int, guild_id: int):
-        warns = await self.bot.r.table('warns').get(str(user)).default({}).run(self.bot.connection)
-
-        return warns.get(str(guild_id), 0)
+        return (await self.bot.r.table('warns').get(str(user)).default({}).run(self.bot.connection)).get(str(guild_id), 0)
 
     async def set_warns(self, user: int, guild_id: int, warns: int):
         await self.bot.r.table('warns') \
@@ -309,6 +314,41 @@ class Moderation:
 
         await dest.delete(reason=f'[ {ctx.author} ] Voicekick')
         await ctx.message.add_reaction('👢')
+
+    @commands.command()
+    @commands.bot_has_permissions(manage_roles=True)
+    @commands.guild_only()
+    async def assign(self, ctx, role: discord.Role=None):
+        """ Assign yourself a (public) role
+
+        Use the same command to unassign a role
+        """
+        config = await self.bot.db.get_config(ctx.guild.id)
+
+        if not config['selfrole']:
+            return await ctx.send('There are no self-assignable roles')
+
+        if not role:
+            public_roles = ''
+            for role_id in config['selfrole']:
+                r = discord.utils.get(ctx.guild.roles, id=int(role_id))
+                if not r:
+                    continue
+                r_name = r.name[:11] + '...' if len(r.name) > 11 else r.name
+                public_roles += f'{pad(r_name, " ", 15)}({r.id})\n'
+            await ctx.send(f'```\n{public_roles.strip()}\n```')
+        else:
+            if str(role.id) not in config['selfrole']:
+                return await ctx.send('That role isn\'t self-assignable')
+
+            if role.position > ctx.me.top_role.position:
+                return await ctx.send('Unable to assign; the target role\'s position is higher than my top role')
+
+            if discord.utils.get(ctx.author.roles, id=role.id):
+                await ctx.author.remove_roles(role, reason=f'Selfrole')
+            else:
+                await ctx.author.add_roles(role, reason=f'Selfrole')
+            await ctx.message.add_reaction('👌')
 
 
 def setup(bot):

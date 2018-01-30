@@ -25,18 +25,7 @@ class Configuration:
     @commands.is_owner()
     async def migrate(self, ctx):
         migrate_data = {
-            'messages': {
-                'joinLog': None,
-                'leaveLog': None,
-                'joinMessage': {
-                    'message': '',
-                    'channel': None
-                },
-                'leaveMessage': {
-                    'message': '',
-                    'channel': None
-                }
-            }
+            'selfrole': []
         }
         m = await ctx.send('Migrating all server settings...')
         await self.bot.r.table('settings').update(migrate_data).run(self.bot.connection)
@@ -120,7 +109,7 @@ class Configuration:
 
         category: users | bots
         method  : add   | remove
-        role    : id or name of a role in your server.
+        role    : id or name of a role in your server
         """
         if method.lower() not in ['add', 'remove']:
             return await ctx.send('Method must be either `add` or `remove`')
@@ -260,7 +249,7 @@ class Configuration:
 
         # ugh, spaghetti code...
 
-        t = f'''**Server Configuration | {ctx.guild.name}**
+        await ctx.send(f'''**Server Configuration | {ctx.guild.name}**
 ```prolog
 Anti-Invite   : {'on' if config['antiInvite'] else 'off'}
 Muted Role    : {mute_role.name if mute_role else 'unknown'}
@@ -276,9 +265,35 @@ Log Channels
   ╚ Leave     : {leave_log.name if leave_log else 'unknown'}
   ╚ Moderation: {log_channel.name if log_channel else 'unknown'}
 ```
-        '''
+        ''')
 
-        await ctx.send(t)
+    @config.command()
+    async def selfrole(self, ctx, method: str, *, role: discord.Role):
+        """ Setup self-assignable roles
+
+        method  : add   | remove
+        role    : id or name of a role in your server
+        """
+        if method.lower() not in ['add', 'remove']:
+            return await ctx.send('Method must be either `add` or `remove`')
+
+        config = await self.bot.db.get_config(ctx.guild.id)
+        current_roles = config['selfrole']
+
+        if method.lower() == 'add':
+            if str(role.id) in current_roles:
+                return await ctx.send('That role is already assignable')
+
+            current_roles.append(str(role.id))
+            await self.helpers.set_config(ctx.guild.id, config)
+            await ctx.send(f'**{role.name}** is now self-assignable')
+        else:
+            if str(role.id) not in current_roles:
+                return await ctx.send('That role is not currently assignable')
+
+            current_roles.pop(current_roles.index(str(role.id)))
+            await self.helpers.set_config(ctx.guild.id, config)
+            await ctx.send(f'**{role.name}** is no longer self-assignable')
 
 
 def setup(bot):

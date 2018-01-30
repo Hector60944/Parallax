@@ -22,6 +22,7 @@ class Database:
                     'bots': [],
                     'users': []
                 },
+                'selfrole': [],
                 'messages': {
                     'joinLog': None,
                     'leaveLog': None,
