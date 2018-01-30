@@ -312,7 +312,7 @@ class Moderation:
     @commands.command()
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
-    async def assign(self, ctx, role: discord.Role=None):
+    async def assign(self, ctx, *, role: discord.Role=None):
         """ Assign yourself a (public) role
 
         Use the same command to unassign a role
