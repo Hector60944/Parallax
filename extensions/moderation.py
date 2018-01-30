@@ -62,7 +62,7 @@ class Moderation:
     @commands.guild_only()
     async def unban(self, ctx, member: int, *, reason: str='None specified'):
         """ Unbans a member from the server by their Discord ID
-        
+
         To get a user's ID: https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID"""
         bans = await ctx.guild.bans()
         ban = discord.utils.get(bans, user__id=member)
@@ -160,6 +160,7 @@ class Moderation:
 
         try:
             await ctx.channel.purge(limit=amount, check=pred)
+            await ctx.message.add_reaction('♻')
         except discord.HTTPException:
             await ctx.send("An unknown error occurred while cleaning the channel.")
         except discord.NotFound:
@@ -264,7 +265,7 @@ class Moderation:
             return await ctx.send('The muted role\'s position is higher than my top role. Unable to unassign the role')
 
         await member.remove_roles(role, reason=f'[ {ctx.author} ] {reason}')
-        await ctx.send('Unmuted')
+        await ctx.message.add_reaction('🔈')
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Unmuted', member, ctx.author, reason)
 
     @commands.command()
@@ -276,9 +277,7 @@ class Moderation:
         ow = ctx.channel.overwrites_for(ctx.guild.default_role)
         ow.send_messages = False
         await ctx.channel.set_permissions(target=ctx.guild.default_role, overwrite=ow, reason=f'[ {ctx.author} ] Lockdown')
-
-        if ctx.me.guild_permissions.send_messages:
-            await ctx.message.add_reaction('🔒')
+        await ctx.message.add_reaction('🔒')
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -290,6 +289,21 @@ class Moderation:
         ow.send_messages = None
         await ctx.channel.set_permissions(target=ctx.guild.default_role, overwrite=ow, reason=f'[ {ctx.author} ] Removed lockdown')
         await ctx.message.add_reaction('🔓')
+
+    @commands.command(aliases=['vk', 'vckick'])
+    @commands.has_permissions(move_members=True)
+    @commands.bot_has_permissions(move_members=True, manage_channels=True)
+    @commands.guild_only()
+    async def voicekick(self, ctx, *users: discord.Member):
+        """ Kicks the target users from their voicechannels """
+        dest = await ctx.guild.create_voice_channel(name='voicekick', reason=f'[ {ctx.author} ] Voicekick')
+        in_voice = list(filter(lambda m: m.voice is not None and m.voice.channel is not None and m.voice.channel.permissions_for(ctx.me).move_members,
+                               users))
+        for m in in_voice:
+            await m.move_to(dest, f'[ {ctx.author} ] Voicekick')
+
+        await dest.delete(f'[ {ctx.author} ] Voicekick')
+        await ctx.message.add_reaction('👢')
 
 
 def setup(bot):

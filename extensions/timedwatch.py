@@ -62,10 +62,10 @@ class Watcher:
                             permissions = channel.permissions_for(guild.me)
                             if permissions.send_messages and permissions.embed_links:
                                 embed = discord.Embed(color=0xbe2f2f,
-                                                    title=f'**User Unbanned**',
-                                                    description=f'**Target:** {str(user)} ({user.id})\n'
-                                                                f'**Reason:** [ Auto-Unban ] Expired',
-                                                    timestamp=datetime.utcnow())
+                                                      title=f'**User Unbanned**',
+                                                      description=f'**Target:** {str(user)} ({user.id})\n'
+                                                                  f'**Reason:** [ Auto-Unban ] Expired',
+                                                      timestamp=datetime.utcnow())
                                 embed.set_footer(text=f'Performed by {self.bot.user}', icon_url=self.bot.user.avatar_url_as(format='png'))
 
                                 await channel.send(embed=embed)
@@ -104,10 +104,10 @@ class Watcher:
                             permissions = channel.permissions_for(guild.me)
                             if permissions.send_messages and permissions.embed_links:
                                 embed = discord.Embed(color=0xbe2f2f,
-                                                    title=f'**User Unmuted**',
-                                                    description=f'**Target:** {str(user)} ({user.id})\n'
-                                                                f'**Reason:** [ Auto-Unmute ] Expired',
-                                                    timestamp=datetime.utcnow())
+                                                      title=f'**User Unmuted**',
+                                                      description=f'**Target:** {str(user)} ({user.id})\n'
+                                                                  f'**Reason:** [ Auto-Unmute ] Expired',
+                                                      timestamp=datetime.utcnow())
                                 embed.set_footer(text=f'Performed by {self.bot.user}', icon_url=self.bot.user.avatar_url_as(format='png'))
 
                                 await channel.send(embed=embed)
