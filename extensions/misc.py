@@ -30,7 +30,10 @@ class Misc:
     async def resolve_user_id(self, user_id: int):
         user = self.bot.get_user(user_id)
         if not user:
-            user = await self.bot.get_user_info(user_id)
+            try:
+                user = await self.bot.get_user_info(user_id)
+            except discord.NotFound:
+                return None
         return user
 
     async def get_user(self, content: str):
