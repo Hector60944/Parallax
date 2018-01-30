@@ -30,7 +30,7 @@ class Modules:
         self.helpers = Helpers(bot)
 
     async def on_message(self, message):
-        if isinstance(message.channel, discord.DMChannel):
+        if isinstance(message.channel, discord.DMChannel) or message.author.bot:
             return
 
         if await self.helpers.anti_invite(message.guild.id):
