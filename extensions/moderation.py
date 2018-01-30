@@ -212,9 +212,6 @@ class Moderation:
         Where 5s means 5 seconds. Supported units: seconds, minutes, hours, days, weeks.
         When using a unit, specify the first letter (seconds -> s, minutes -> m etc...)
         """
-        if not interaction.check_hierarchy(ctx.me, member):
-            return await ctx.send("Role hierarchy prevents me from doing that.")
-
         if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
             return await ctx.send("Role hierarchy prevents you from doing that.")
 
@@ -249,9 +246,6 @@ class Moderation:
     @commands.guild_only()
     async def unmute(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Unmutes the specified user """
-        if not interaction.check_hierarchy(ctx.me, member):
-            return await ctx.send("Role hierarchy prevents me from doing that.")
-
         if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
             return await ctx.send("Role hierarchy prevents you from doing that.")
 
