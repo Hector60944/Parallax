@@ -268,7 +268,7 @@ class Moderation:
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Unmuted', member, ctx.author, reason)
 
     @commands.command()
-    @commands.has_permissions(ban_members=True)
+    @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def lock(self, ctx):
@@ -279,7 +279,7 @@ class Moderation:
         await ctx.message.add_reaction('🔒')
 
     @commands.command()
-    @commands.has_permissions(ban_members=True)
+    @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def unlock(self, ctx):
