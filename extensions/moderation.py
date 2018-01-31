@@ -35,7 +35,7 @@ class Helpers:
             .insert({'id': str(user), str(guild_id): warns}, conflict='update') \
             .run(self.bot.connection)
 
-    async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str, time: str=''):
+    async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str, time: str='', color=0xbe2f2f):
         config = await self.bot.db.get_config(guild_id)
 
         if config['logChannel']:
@@ -43,7 +43,7 @@ class Helpers:
             if channel:
                 permissions = channel.permissions_for(channel.guild.me)
                 if permissions.send_messages and permissions.embed_links:
-                    embed = discord.Embed(color=0xbe2f2f,
+                    embed = discord.Embed(color=color,
                                           title=f'**User {action}**',
                                           description=f'**Target:** {target} ({target.id})\n'
                                                       f'**Reason:** {reason}',
@@ -87,7 +87,7 @@ class Moderation:
 
             await ctx.guild.unban(ban.user, reason=f'[ {ctx.author} ] {reason}')
             await m.add_reaction('🛠')
-            await self.helpers.post_modlog_entry(ctx.guild.id, 'Unbanned', ban.user, ctx.author, reason)
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Unbanned', ban.user, ctx.author, reason, 0x53dc39)
 
     @commands.command(aliases=['b'])
     @commands.has_permissions(ban_members=True)
@@ -265,7 +265,7 @@ class Moderation:
 
         await member.remove_roles(role, reason=f'[ {ctx.author} ] {reason}')
         await ctx.message.add_reaction('🔈')
-        await self.helpers.post_modlog_entry(ctx.guild.id, 'Unmuted', member, ctx.author, reason)
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Unmuted', member, ctx.author, reason, 0x53dc39)
 
     @commands.command()
     @commands.has_permissions(kick_members=True)

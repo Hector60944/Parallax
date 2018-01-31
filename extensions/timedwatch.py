@@ -61,7 +61,7 @@ class Watcher:
                         if channel:
                             permissions = channel.permissions_for(guild.me)
                             if permissions.send_messages and permissions.embed_links:
-                                embed = discord.Embed(color=0xbe2f2f,
+                                embed = discord.Embed(color=0x53dc39,
                                                       title=f'**User Unbanned**',
                                                       description=f'**Target:** {str(user)} ({user.id})\n'
                                                                   f'**Reason:** [ Auto-Unban ] Expired',
@@ -103,7 +103,7 @@ class Watcher:
                         if channel:
                             permissions = channel.permissions_for(guild.me)
                             if permissions.send_messages and permissions.embed_links:
-                                embed = discord.Embed(color=0xbe2f2f,
+                                embed = discord.Embed(color=0x53dc39,
                                                       title=f'**User Unmuted**',
                                                       description=f'**Target:** {str(user)} ({user.id})\n'
                                                                   f'**Reason:** [ Auto-Unmute ] Expired',
