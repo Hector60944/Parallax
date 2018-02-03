@@ -115,7 +115,7 @@ class Misc:
         threads = psutil.Process().num_threads()
 
         embed = discord.Embed(color=0xbe2f2f,
-                              title=f'Parallax ([{get_version()}](https://github.com/Devoxin/Parallax))',
+                              title=f'Parallax ({get_version()})',
                               description='**Developer:** Kromatic#0387')
         embed.add_field(name='Uptime', value=uptime, inline=True)
         embed.add_field(name='RAM Usage', value=f'{ram:.2f} MB', inline=True)
