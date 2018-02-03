@@ -1,13 +1,17 @@
 import os
 import re
+import subprocess
 from datetime import datetime
 
 import discord
 import psutil
 from discord.ext import commands
 
-
 mention_rx = re.compile(r'<@!?(\d{16,19})>')
+
+
+def get_version():
+    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()
 
 
 def f_time(time):
@@ -111,7 +115,7 @@ class Misc:
         threads = psutil.Process().num_threads()
 
         embed = discord.Embed(color=0xbe2f2f,
-                              title=f'Parallax | Version {self.bot.version}',
+                              title=f'Parallax ([{get_version()}](https://github.com/Devoxin/Parallax))',
                               description='**Developer:** Kromatic#0387')
         embed.add_field(name='Uptime', value=uptime, inline=True)
         embed.add_field(name='RAM Usage', value=f'{ram:.2f} MB', inline=True)

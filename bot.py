@@ -46,7 +46,6 @@ if __name__ == '__main__':
 
     bot = AutoShardedBot(command_prefix=when_mentioned_or(*config.get('prefixes')), help_attrs=dict(hidden=True))
     bot.startup = datetime.now()
-    bot.version = config['version']
     bot.messages_seen = 0
     bot.db = Database(bot)
     bot.connection = bot.loop.run_until_complete(r.connect(db='parallax'))
