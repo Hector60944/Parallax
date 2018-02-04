@@ -8,6 +8,12 @@ import psutil
 from discord.ext import commands
 
 mention_rx = re.compile(r'<@!?(\d{16,19})>')
+activites = {
+    0: 'Playing',
+    1: 'Streaming',
+    2: 'Listening to',
+    3: 'Watching'
+}
 
 
 def get_version():
@@ -74,9 +80,10 @@ class Misc:
             return await ctx.send('No users found matching that query.')
 
         member = ctx.guild.get_member(user.id)
+        activity = f'{activities[member.game.type]} `{member.game.name}`' if member and member.game else 'Playing: `Unknown`'
 
         embed = discord.Embed(color=0xbe2f2f,
-                              description=f'Playing: `{member.game.name if member and member.game else "Unknown"}`')
+                              description=activity)
         embed.set_author(name=f'{user} ({user.id})', icon_url=user.avatar_url)
         embed.add_field(name='Account Type', value='User' if not user.bot else 'Bot', inline=True)
         embed.add_field(name='Created on', value=f'{user.created_at.strftime("%d.%m.%Y")}\n({(datetime.utcnow() - user.created_at).days} days ago)', inline=True)
