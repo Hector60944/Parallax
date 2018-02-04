@@ -8,7 +8,7 @@ import psutil
 from discord.ext import commands
 
 mention_rx = re.compile(r'<@!?(\d{16,19})>')
-activites = {
+activities = {
     0: 'Playing',
     1: 'Streaming',
     2: 'Listening to',
