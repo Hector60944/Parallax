@@ -165,11 +165,15 @@ class Moderation:
 
         try:
             await ctx.channel.purge(limit=amount, check=pred)
-            await ctx.message.add_reaction('♻')
         except discord.HTTPException:
             await ctx.send("An unknown error occurred while cleaning the channel.")
         except discord.NotFound:
             pass
+        else:
+            try:
+                await ctx.message.add_reaction('♻')
+            except:
+                pass
 
     @commands.command(aliases=['w'])
     @commands.has_permissions(ban_members=True)
