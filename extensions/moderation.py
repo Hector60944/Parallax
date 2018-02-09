@@ -87,7 +87,7 @@ class Moderation:
 
             await ctx.guild.unban(ban.user, reason=f'[ {ctx.author} ] {reason}')
             await m.add_reaction('🛠')
-            await self.helpers.post_modlog_entry(ctx.guild.id, 'Unbanned', ban.user, ctx.author, reason, 0x53dc39)
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Unbanned', ban.user, ctx.author, reason, '', 0x53dc39)
 
     @commands.command(aliases=['b'])
     @commands.has_permissions(ban_members=True)
@@ -269,7 +269,7 @@ class Moderation:
 
         await member.remove_roles(role, reason=f'[ {ctx.author} ] {reason}')
         await ctx.message.add_reaction('🔈')
-        await self.helpers.post_modlog_entry(ctx.guild.id, 'Unmuted', member, ctx.author, reason, 0x53dc39)
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Unmuted', member, ctx.author, reason, '', 0x53dc39)
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
