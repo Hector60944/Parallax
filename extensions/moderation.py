@@ -305,7 +305,7 @@ class Moderation:
             return await ctx.send('**Missing required permissions:**\n-Move Members')
 
         dest = await ctx.guild.create_voice_channel(name='voicekick', reason=f'[ {ctx.author} ] Voicekick')
-        in_voice = [m for m in users if m.voice is not None and m.voice.channel is not None and m.voice.channel.permissions_for(ctx.me).move_members]
+        in_voice = [m for m in users if m.voice and m.voice.channel and m.voice.channel.permissions_for(ctx.me).move_members]
 
         for m in in_voice:
             await m.move_to(channel=dest, reason=f'[ {ctx.author} ] Voicekick')
