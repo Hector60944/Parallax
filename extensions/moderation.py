@@ -146,6 +146,7 @@ class Moderation:
         You can remove messages by users by specifying 'user' as the filter.
         You can remove messages by specific users by mentioning them after specifying 'user' as the filter.
         """
+        amount = max(min(amount, 1000), 0)
         pred = None
 
         if options:
@@ -159,9 +160,6 @@ class Moderation:
 
         if amount <= 0:
             return await ctx.send("Specify an amount above 0")
-
-        if amount > 1000:
-            amount = 1000
 
         try:
             await ctx.channel.purge(limit=amount, check=pred)
@@ -305,8 +303,8 @@ class Moderation:
             return await ctx.send('**Missing required permissions:**\n-Move Members')
 
         dest = await ctx.guild.create_voice_channel(name='voicekick', reason=f'[ {ctx.author} ] Voicekick')
-        in_voice = [m for m in users if m.voice and m.voice.channel and m.voice.channel.permissions_for(ctx.me).move_members]
-
+        in_voice = list(filter(lambda m: m.voice is not None and m.voice.channel is not None and m.voice.channel.permissions_for(ctx.me).move_members,
+                               users))
         for m in in_voice:
             await m.move_to(channel=dest, reason=f'[ {ctx.author} ] Voicekick')
 
