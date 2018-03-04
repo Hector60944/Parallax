@@ -170,7 +170,7 @@ class Moderation:
         else:
             try:
                 await ctx.message.add_reaction('♻')
-            except:
+            except (discord.HTTPException, discord.Forbidden):
                 pass
 
     @commands.command(aliases=['w'])

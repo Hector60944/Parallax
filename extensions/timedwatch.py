@@ -8,9 +8,8 @@ import discord
 class Watcher:
     def __init__(self, bot):
         self.bot = bot
-        self.r = self.bot.r
-
-        self.bot.loop.create_task(self.watch_db())
+        self.r = bot.r
+        bot.loop.create_task(self.watch_db())
 
     async def remove_entry(self, guild_id: int, user_id: int, table: str):
         await self.r.table(table) \
@@ -19,12 +18,7 @@ class Watcher:
             .run(self.bot.connection)
 
     async def resolve_user(self, u_id: int):
-        user = self.bot.get_user(u_id)
-
-        if not user:
-            user = await self.bot.get_user_info(u_id)
-
-        return user
+        return self.bot.get_user(u_id) or await self.bot.get_user_info(u_id)
 
     async def watch_db(self):
         await self.bot.wait_until_ready()
@@ -54,21 +48,8 @@ class Watcher:
                         await self.remove_entry(guild.id, user.id, 'bans')
                         db = await self.r.table('settings').get(str(guild.id)).run(self.bot.connection)
 
-                        if not db or not db['logChannel']:
-                            continue
-
-                        channel = self.bot.get_channel(int(db['logChannel']))
-                        if channel:
-                            permissions = channel.permissions_for(guild.me)
-                            if permissions.send_messages and permissions.embed_links:
-                                embed = discord.Embed(color=0x53dc39,
-                                                      title=f'**User Unbanned**',
-                                                      description=f'**Target:** {str(user)} ({user.id})\n'
-                                                                  f'**Reason:** [ Auto-Unban ] Expired',
-                                                      timestamp=datetime.utcnow())
-                                embed.set_footer(text=f'Performed by {self.bot.user}', icon_url=self.bot.user.avatar_url_as(format='png'))
-
-                                await channel.send(embed=embed)
+                        if db is not None and db['logChannel']:
+                            await self.post_modlog_entry(int(db['logChannel']), ('Unbanned', 'Unban'), user)
                 except Exception as e:
                     print(e)
 
@@ -96,21 +77,8 @@ class Watcher:
                     except (discord.HTTPException, discord.Forbidden):  # !?!?
                         pass
                     else:
-                        if not db['logChannel']:
-                            continue
-
-                        channel = self.bot.get_channel(int(db['logChannel']))
-                        if channel:
-                            permissions = channel.permissions_for(guild.me)
-                            if permissions.send_messages and permissions.embed_links:
-                                embed = discord.Embed(color=0x53dc39,
-                                                      title=f'**User Unmuted**',
-                                                      description=f'**Target:** {str(user)} ({user.id})\n'
-                                                                  f'**Reason:** [ Auto-Unmute ] Expired',
-                                                      timestamp=datetime.utcnow())
-                                embed.set_footer(text=f'Performed by {self.bot.user}', icon_url=self.bot.user.avatar_url_as(format='png'))
-
-                                await channel.send(embed=embed)
+                        if db['logChannel']:
+                            await self.post_modlog_entry(int(db['logChannel']), ('Unmuted', 'Unmute'), user)
                 except Exception as e:
                     print(e)
 
@@ -118,6 +86,20 @@ class Watcher:
             mutes.close()
 
             await asyncio.sleep(10)  # Run every 10 seconds :D
+
+    async def post_modlog_entry(self, channel_id, action, target: discord.User):
+        channel = self.bot.get_channel(channel_id)
+
+        if channel:
+            permissions = channel.permissions_for(channel.guild.me)
+            if permissions.send_messages and permissions.embed_links:
+                embed = discord.Embed(color=0x53dc39,
+                                      title=f'**User {action[0]}**',
+                                      description=f'**Target:** {target} ({target.id})\n'
+                                                  f'**Reason:** [ Auto-{action[1]}] Expired',
+                                      timestamp=datetime.utcnow())
+                embed.set_footer(text=f'Performed by {self.bot.user}', icon_url=self.bot.avatar_url_as(format='png'))
+                await channel.send(embed)
 
 
 def setup(bot):
