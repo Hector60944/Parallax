@@ -66,6 +66,7 @@ class Misc:
 
     @commands.command(aliases=['ui', 'user'])
     @commands.bot_has_permissions(embed_links=True)
+    @commands.guild_only()
     async def userinfo(self, ctx, user: str=''):
         """ Returns information about a user
 
