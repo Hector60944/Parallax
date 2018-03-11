@@ -51,7 +51,7 @@ class Watcher:
                         if db is not None and db['logChannel']:
                             await self.post_modlog_entry(int(db['logChannel']), ('Unbanned', 'Unban'), user)
                 except Exception as e:
-                    print(e)
+                    print('Got exception in unban:', e)
 
             for entry in mutes.items:
                 try:
@@ -80,7 +80,7 @@ class Watcher:
                         if db['logChannel']:
                             await self.post_modlog_entry(int(db['logChannel']), ('Unmuted', 'Unmute'), user)
                 except Exception as e:
-                    print(e)
+                    print('Got exception in unmute:', e)
 
             bans.close()
             mutes.close()
