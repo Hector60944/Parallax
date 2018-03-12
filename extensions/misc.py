@@ -95,6 +95,10 @@ class Misc:
         await ctx.send(embed=embed)
 
     @commands.command()
+    async def avatar(self, ctx):
+        await ctx.send(ctx.author.avatar_url)
+
+    @commands.command()
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
     async def server(self, ctx):
