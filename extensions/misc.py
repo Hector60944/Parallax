@@ -95,8 +95,9 @@ class Misc:
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def avatar(self, ctx):
-        await ctx.send(ctx.author.avatar_url)
+    async def avatar(self, ctx, user: discord.User=None):
+        avatar = (user or ctx.author).avatar_url
+        await ctx.send(avatar)
 
     @commands.command()
     @commands.guild_only()
