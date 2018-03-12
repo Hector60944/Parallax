@@ -1,4 +1,3 @@
-import os
 import re
 import subprocess
 from datetime import datetime
@@ -35,7 +34,7 @@ def is_mention(content: str):
 class Misc:
     def __init__(self, bot):
         self.bot = bot
-        self.process = psutil.Process(os.getpid())
+        self.process = psutil.Process()
 
     async def resolve_user_id(self, user_id: int):
         user = self.bot.get_user(user_id)
@@ -67,7 +66,7 @@ class Misc:
     @commands.command(aliases=['ui', 'user'])
     @commands.bot_has_permissions(embed_links=True)
     @commands.guild_only()
-    async def userinfo(self, ctx, user: str=''):
+    async def userinfo(self, ctx, user: str=None):
         """ Returns information about a user
 
         Search methods: user[#discrim] | id | mention
@@ -125,7 +124,7 @@ class Misc:
         """ Displays Parallax's statistics """
         uptime = f_time(datetime.now() - self.bot.startup)
         ram = self.process.memory_full_info().rss / 1024**2
-        threads = psutil.Process().num_threads()
+        threads = self.process.num_threads()
 
         embed = discord.Embed(color=0xbe2f2f,
                               title=f'Parallax ({get_version()})',
