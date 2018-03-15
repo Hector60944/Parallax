@@ -302,6 +302,9 @@ class Moderation:
         if not ctx.me.guild_permissions.move_members:
             return await ctx.send('**Missing required permissions:**\n-Move Members')
 
+        if not users:
+            return await ctx.send('You need to specify the users to kick from their voicechannels.')
+
         dest = await ctx.guild.create_voice_channel(name='voicekick', reason=f'[ {ctx.author} ] Voicekick')
         in_voice = [m for m in users if m.voice and m.voice.channel and m.voice.channel.permissions_for(ctx.me).move_members]
 

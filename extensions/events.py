@@ -30,7 +30,7 @@ class Events:
             except (discord.Forbidden, discord.HTTPException):
                 pass
 
-        if join['message'] and join['channel']:
+        if join['message'] and join['channel'] and not member.bot:
             channel = self.bot.get_channel(int(join['channel']))
 
             if channel:
@@ -61,7 +61,7 @@ class Events:
         log = config['messages']['leaveLog']
         leave = config['messages']['leaveMessage']
 
-        if leave['message'] and leave['channel']:
+        if leave['message'] and leave['channel'] and not member.bot:
             channel = self.bot.get_channel(int(leave['channel']))
 
             if channel:
