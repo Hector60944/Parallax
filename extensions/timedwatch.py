@@ -99,7 +99,7 @@ class Watcher:
                                                   f'**Reason:** [ Auto-{action[1]}] Expired',
                                       timestamp=datetime.utcnow())
                 embed.set_footer(text=f'Performed by {self.bot.user}', icon_url=self.bot.user.avatar_url_as(format='png'))
-                await channel.send(embed)
+                await channel.send(embed=embed)
 
 
 def setup(bot):
