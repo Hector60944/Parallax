@@ -252,18 +252,18 @@ class Configuration:
         await ctx.send(f'''**Server Configuration | {ctx.guild.name}**
 ```prolog
 Anti-Invite   : {'on' if config['antiInvite'] else 'off'}
-Muted Role    : {mute_role.name if mute_role else 'unknown'}
+Muted Role    : {mute_role.name if mute_role else ''}
 Warning Limit : {config['warnThreshold']}
 Autorole
   ╚ Bots      : {" ".join(config["autorole"]["bots"])}
   ╚ Users     : {" ".join(config["autorole"]["users"])}
 Announce
-  ╚ Welcome   : {welcome_channel.name if welcome_channel else 'unknown'}
-  ╚ Leave     : {leave_channel.name if leave_channel else 'unknown'}
+  ╚ Welcome   : {welcome_channel.name if welcome_channel else ''}
+  ╚ Leave     : {leave_channel.name if leave_channel else ''}
 Log Channels
-  ╚ Join      : {join_log.name if join_log else 'unknown'}
-  ╚ Leave     : {leave_log.name if leave_log else 'unknown'}
-  ╚ Moderation: {log_channel.name if log_channel else 'unknown'}
+  ╚ Join      : {join_log.name if join_log else ''}
+  ╚ Leave     : {leave_log.name if leave_log else ''}
+  ╚ Moderation: {log_channel.name if log_channel else ''}
 ```
         ''')
 
