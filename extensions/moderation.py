@@ -3,6 +3,8 @@ from datetime import datetime
 
 import discord
 from discord.ext import commands
+from discord.ext.commands import errors
+
 from utils import interaction, timeparser
 
 
@@ -303,7 +305,7 @@ class Moderation:
             return await ctx.send('**Missing required permissions:**\n-Move Members')
 
         if not users:
-            raise discord.InvalidArgument
+            raise errors.MissingRequiredArgument
 
         dest = await ctx.guild.create_voice_channel(name='voicekick', reason=f'[ {ctx.author} ] Voicekick')
         in_voice = [m for m in users if m.voice and m.voice.channel and m.voice.channel.permissions_for(ctx.me).move_members]
