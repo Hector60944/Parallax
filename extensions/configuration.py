@@ -15,6 +15,18 @@ class Helpers:
     async def delete_config(self, guild_id: int):
         await self.bot.r.table('settings').get(str(guild_id)).delete().run(self.bot.connection)
 
+    async def set_prefix(self, guild_id: int, prefix: str):
+        await self.bot.r.table('prefixes') \
+            .insert({'id': str(guild_id), 'prefix': prefix}, conflict='replace') \
+            .run(self.bot.connection)
+
+    async def get_prefix(self, guild_id: int):
+        return (await self.bot.r.table('prefixes')
+                .get(str(guild_id))
+                .default({})
+                .run(self.bot.connection)) \
+                .get('prefix', None)
+
 
 class Configuration:
     def __init__(self, bot):
@@ -41,6 +53,19 @@ class Configuration:
 
             for page in _help:
                 await ctx.send(page)
+
+    @config.command()
+    async def prefix(self, ctx, *, prefix: str=None):
+        """ Sets a custom prefix for this guild. Omit to reset """
+        if prefix is not None and len(prefix) > 30:
+            return await ctx.send('Prefix cannot exceed 30 characters')
+
+        await self.helpers.set_prefix(ctx.guild.id, prefix)
+
+        if not prefix:
+            await ctx.send('Prefix reset')
+        else:
+            await ctx.send(f'Prefix changed to **`{prefix}`**')
 
     @config.command()
     async def warnings(self, ctx, warn_threshold: int):
@@ -240,6 +265,7 @@ class Configuration:
         config = await self.bot.db.get_config(ctx.guild.id)
         _event = config['messages']
 
+        prefix = await self.helpers.get_prefix(ctx.guild.id) or self.bot.config.get('prefixes')[0]
         mute_role = discord.utils.get(ctx.guild.roles, id=int(config['mutedRole'])) if config['mutedRole'] else None
         log_channel = self.bot.get_channel(int(config['logChannel'])) if config['logChannel'] else None
         welcome_channel = self.bot.get_channel(int(_event['joinMessage']['channel'])) if _event['joinMessage']['channel'] else None
@@ -251,6 +277,7 @@ class Configuration:
 
         await ctx.send(f'''**Server Configuration | {ctx.guild.name}**
 ```prolog
+Prefix        : {prefix}
 Anti-Invite   : {'on' if config['antiInvite'] else 'off'}
 Muted Role    : {mute_role.name if mute_role else ''}
 Warning Limit : {config['warnThreshold']}

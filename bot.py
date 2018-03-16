@@ -3,39 +3,31 @@ import os
 from datetime import datetime
 
 import rethinkdb as r
-from discord.ext.commands import AutoShardedBot, when_mentioned_or
+from discord.ext.commands import AutoShardedBot
+
+from utils import database
 
 
-class Database:
-    def __init__(self, bot):
-        self.bot = bot
+async def get_prefix(bot, message):  # literal shit code send help
+    valid = []
 
-    async def get_config(self, guild_id: int):
-        return await self.bot.r.table('settings') \
-            .get(str(guild_id)) \
-            .default({
-                'warnThreshold': 0,
-                'antiInvite': False,
-                'mutedRole': None,
-                'logChannel': None,
-                'autorole': {
-                    'bots': [],
-                    'users': []
-                },
-                'selfrole': [],
-                'messages': {
-                    'joinLog': None,
-                    'leaveLog': None,
-                    'joinMessage': {
-                        'message': '',
-                        'channel': None
-                    },
-                    'leaveMessage': {
-                        'message': '',
-                        'channel': None
-                    }
-                }
-            }).run(self.bot.connection)
+    if hasattr(bot, 'user'):
+        valid.append(f'<@{bot.user.id}> ')
+        valid.append(f'<@!{bot.user.id}> ')
+
+    if message.guild is not None:
+        custom = (await bot.r.table('prefixes')
+                  .get(str(message.guild.id))
+                  .default({})
+                  .run(bot.connection)) \
+                  .get('prefix', None)
+
+        if custom:
+            valid.append(custom)
+        else:
+            valid.append(*bot.config.get('prefixes'))
+
+    return valid
 
 
 if __name__ == '__main__':
@@ -44,12 +36,13 @@ if __name__ == '__main__':
     with open('config.json') as f:
         config = json.load(f)
 
-    bot = AutoShardedBot(command_prefix=when_mentioned_or(*config.get('prefixes')), help_attrs=dict(hidden=True))
+    bot = AutoShardedBot(command_prefix=get_prefix, help_attrs=dict(hidden=True))
     bot.startup = datetime.now()
     bot.messages_seen = 0
-    bot.db = Database(bot)
+    bot.db = database.Database(bot)
     bot.connection = bot.loop.run_until_complete(r.connect(db='parallax'))
     bot.r = r
+    bot.config = config
 
     for f in os.listdir('extensions'):
         if f.endswith('.py'):
