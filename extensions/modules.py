@@ -2,13 +2,12 @@ import re
 from datetime import datetime
 
 import discord
-from discord.ext.commands import InviteConverter, BadArgument
+from discord.ext.commands import InviteConverter
 
 from utils import interaction
 
 
 invite_rx = re.compile("discord(?:app)?\.(?:gg|com\/invite)\/([a-z0-9]{1,16})", re.IGNORECASE)
-converter = InviteConverter()
 
 
 class Helpers:
@@ -27,13 +26,13 @@ class Helpers:
     async def set_invites(self, user: int, invites: int):
         await self.bot.r.table('invites').insert({'id': str(user), 'invites': invites}, conflict='replace').run(self.bot.connection)
 
-    async def is_valid_advert(self, ctx, invite: str):
+    async def is_valid_advert(self, invite: str, guild_id: int):
         try:
-            invite = await converter.convert(ctx, invite)
-        except BadArgument:
+            resolved = await self.bot.get_invite(invite)
+        except discord.NotFound as e:
             return True
         else:
-            return invite.guild.id != ctx.guild.id
+            return resolved.guild.id != guild_id
 
 
 class Modules:
@@ -56,7 +55,7 @@ class Modules:
                 not invite:
             return
 
-        if not await self.helpers.is_valid_advert(ctx, invite.group()):
+        if not await self.helpers.is_valid_advert(invite.group(), ctx.guild.id):
             return
 
         try:
