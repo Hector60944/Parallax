@@ -56,7 +56,7 @@ class Modules:
                 not invite:
             return
 
-        if not self.helpers.is_valid_advert(invite.group(), ctx.guild.id):
+        if not await self.helpers.is_valid_advert(invite.group(), ctx.guild.id):
             return
 
         try:
