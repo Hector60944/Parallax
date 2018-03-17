@@ -27,13 +27,13 @@ class Helpers:
     async def set_invites(self, user: int, invites: int):
         await self.bot.r.table('invites').insert({'id': str(user), 'invites': invites}, conflict='replace').run(self.bot.connection)
 
-    async def is_valid_advert(self, invite: str, guild_id: int):
+    async def is_valid_advert(self, ctx, invite: str):
         try:
-            invite = converter.convert(invite)
+            invite = converter.convert(ctx, invite)
         except BadArgument:
             return True
         else:
-            return invite.guild.id == guild_id
+            return invite.guild.id == ctx.guild.id
 
 
 class Modules:
@@ -56,7 +56,7 @@ class Modules:
                 not invite:
             return
 
-        if not await self.helpers.is_valid_advert(invite.group(), ctx.guild.id):
+        if not await self.helpers.is_valid_advert(ctx, invite.group()):
             return
 
         try:
