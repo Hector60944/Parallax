@@ -33,7 +33,7 @@ class Helpers:
         except BadArgument:
             return True
         else:
-            return invite.guild.id == ctx.guild.id
+            return invite.guild.id != ctx.guild.id
 
 
 class Modules:
