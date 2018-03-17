@@ -2,9 +2,13 @@ import re
 from datetime import datetime
 
 import discord
+from discord.ext.commands import InviteConverter, BadArgument
+
 from utils import interaction
 
+
 invite_rx = re.compile("discord(?:app)?\.(?:gg|com\/invite)\/([a-z0-9]{1,16})", re.IGNORECASE)
+converter = InviteConverter()
 
 
 class Helpers:
@@ -23,6 +27,14 @@ class Helpers:
     async def set_invites(self, user: int, invites: int):
         await self.bot.r.table('invites').insert({'id': str(user), 'invites': invites}, conflict='replace').run(self.bot.connection)
 
+    async def is_valid_advert(self, invite: str, guild_id: int):
+        try:
+            invite = converter.convert(content)
+        except BadArgument:
+            return True
+        else:
+            return invite.guild.id == guild_id
+
 
 class Modules:
     def __init__(self, bot):
@@ -37,9 +49,14 @@ class Modules:
             await self.anti_invite(message)
 
     async def anti_invite(self, ctx):
+        invite = invite_rx.search(ctx.content)
+
         if not interaction.check_bot_has(ctx, manage_messages=True) or \
                 not interaction.check_hierarchy(ctx.guild.me, ctx.author) or interaction.check_user_has(ctx, manage_messages=True) or \
-                not invite_rx.search(ctx.content):
+                not invite:
+            return
+
+        if not self.helpers.is_valid_advert(invite.group()):
             return
 
         try:
