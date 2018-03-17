@@ -2,7 +2,6 @@ import re
 from datetime import datetime
 
 import discord
-from discord.ext.commands import InviteConverter
 
 from utils import interaction
 
