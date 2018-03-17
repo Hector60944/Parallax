@@ -29,7 +29,7 @@ class Helpers:
 
     async def is_valid_advert(self, invite: str, guild_id: int):
         try:
-            invite = converter.convert(content)
+            invite = converter.convert(invite)
         except BadArgument:
             return True
         else:
