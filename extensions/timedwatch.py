@@ -9,7 +9,10 @@ class Watcher:
     def __init__(self, bot):
         self.bot = bot
         self.r = bot.r
-        bot.loop.create_task(self.watch_db())
+        try:
+            self.task = bot.loop.create_task(self.watch_db())
+        except asyncio.CancelledError:
+            pass
 
     async def remove_entry(self, guild_id: int, user_id: int, table: str):
         await self.r.table(table) \
@@ -96,7 +99,7 @@ class Watcher:
                 embed = discord.Embed(color=0x53dc39,
                                       title=f'**User {action[0]}**',
                                       description=f'**Target:** {target} ({target.id})\n'
-                                                  f'**Reason:** [ Auto-{action[1]}] Expired',
+                                                  f'**Reason:** [ Auto-{action[1]} ] Expired',
                                       timestamp=datetime.utcnow())
                 embed.set_footer(text=f'Performed by {self.bot.user}', icon_url=self.bot.user.avatar_url_as(format='png'))
                 await channel.send(embed=embed)
@@ -104,3 +107,6 @@ class Watcher:
 
 def setup(bot):
     bot.add_cog(Watcher(bot))
+
+def teardown(bot):
+    bot.get_cog('Watcher').task.cancel()
