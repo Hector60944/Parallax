@@ -69,7 +69,7 @@ class Moderation:
         m = await self.bot.r.table('snipes').get(str(ctx.channel.id)).run(self.bot.connection)
 
         if m:
-            em = discord.Embed(description=m['content'])
+            em = discord.Embed(color=0xbe2f2f, description=m['content'])
             em.set_author(name=m['author'])
             await ctx.send(embed=em)
         else:
