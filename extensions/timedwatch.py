@@ -108,5 +108,6 @@ class Watcher:
 def setup(bot):
     bot.add_cog(Watcher(bot))
 
+
 def teardown(bot):
     bot.get_cog('Watcher').task.cancel()

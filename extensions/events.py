@@ -14,6 +14,18 @@ class Events:
         self.bot.invite_url = discord.utils.oauth_url(app_info.id, discord.Permissions(8))
         print(f'Logged in as {self.bot.user.name}\nBot invite link: {self.bot.invite_url}')
 
+    async def on_message_delete(self, message):
+        if not message.guild:
+            return
+
+        store = {
+            'id': str(message.channel.id),
+            'content': message.content,
+            'author': f'{str(message.author)} ({message.author.id})'
+        }
+
+        await self.bot.r.table('snipes').insert(store, conflict='replace').run(self.bot.connection)
+
     async def on_member_join(self, member):
         config = await self.bot.db.get_config(member.guild.id)
         log = config['messages']['joinLog']
