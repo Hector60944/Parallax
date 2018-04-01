@@ -328,7 +328,7 @@ class Moderation:
         await dest.delete(reason=f'[ {ctx.author} ] Voicekick')
         await ctx.message.add_reaction('👢')
 
-    @commands.command()
+    @commands.command(aliases=['unassign'])
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def assign(self, ctx, *, role: discord.Role=None):
