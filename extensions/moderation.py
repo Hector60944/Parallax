@@ -71,6 +71,7 @@ class Moderation:
         if m:
             em = discord.Embed(color=0xbe2f2f, description=m['content'])
             em.set_author(name=m['author'])
+            em.set_footer(f'Sniped by {ctx.author}')
             await ctx.send(embed=em)
         else:
             await ctx.send('Nothing logged.')
@@ -116,11 +117,7 @@ class Moderation:
         Where 5s means 5 seconds. Supported units: seconds, minutes, hours, days, weeks.
         When using a unit, specify the first letter (seconds -> s, minutes -> m etc...)
         """
-        if not interaction.check_hierarchy(ctx.me, member):
-            return await ctx.send("Role hierarchy prevents me from doing that.")
-
-        if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
-            return await ctx.send("Role hierarchy prevents you from doing that.")
+        interaction.check_hierarchy(ctx, member)
 
         time, reason = timeparser.convert(reason)
 
@@ -139,11 +136,7 @@ class Moderation:
     @commands.guild_only()
     async def kick(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Kicks a user from the server """
-        if not interaction.check_hierarchy(ctx.me, member):
-            return await ctx.send("Role hierarchy prevents me from doing that.")
-
-        if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
-            return await ctx.send("Role hierarchy prevents you from doing that.")
+        interaction.check_hierarchy(ctx, member)
 
         await member.kick(reason=f'[ {ctx.author} ] {reason}')
         await ctx.message.add_reaction('👢')
@@ -173,12 +166,12 @@ class Moderation:
                     pred = lambda m: not m.author.bot  # noqa: E731
 
         if amount <= 0:
-            return await ctx.send("Specify an amount above 0")
+            return await ctx.send('Specify an amount above 0')
 
         try:
             await ctx.channel.purge(limit=amount, check=pred)
         except discord.HTTPException:
-            await ctx.send("An unknown error occurred while cleaning the channel.")
+            await ctx.send('An unknown error occurred while cleaning the channel.')
         except discord.NotFound:
             pass
         else:
@@ -192,11 +185,7 @@ class Moderation:
     @commands.guild_only()
     async def warn(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Issues a warning to the given user """
-        if not interaction.check_hierarchy(ctx.me, member):
-            return await ctx.send("Role hierarchy prevents me from doing that.")
-
-        if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
-            return await ctx.send("Role hierarchy prevents you from doing that.")
+        interaction.check_hierarchy(ctx, member)
 
         threshold = (await self.bot.db.get_config(ctx.guild.id))['warnThreshold']
         current_warns = await self.helpers.get_warns(member.id, ctx.guild.id) + 1
@@ -213,7 +202,16 @@ class Moderation:
             await ctx.send(f'Warned **{member}** for **{reason}** (Warnings: {current_warns})')
 
         await self.helpers.set_warns(member.id, ctx.guild.id, current_warns)
-        await self.helpers.post_modlog_entry(ctx.guild.id, 'Warned', member, ctx.author, reason)
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Warned', member, ctx.author, reason, '', 0xEFD344)
+
+    @commands.command(aliases=['cw'])
+    @commands.has_permissions(ban_members=True)
+    @commands.guild_only()
+    async def clearwarns(self, ctx, *, member: discord.Member):
+        """ Clears a user's warnings """
+        await self.helpers.set_warns(member.id, ctx.guild.id, 0)
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Warns Cleared', member, ctx.author, ' [ None ]', '', 0x53dc39)
+        await ctx.message.add_reaction('👌')
 
     @commands.command(aliases=['m'])
     @commands.has_permissions(ban_members=True)
@@ -228,8 +226,7 @@ class Moderation:
         Where 5s means 5 seconds. Supported units: seconds, minutes, hours, days, weeks.
         When using a unit, specify the first letter (seconds -> s, minutes -> m etc...)
         """
-        if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
-            return await ctx.send("Role hierarchy prevents you from doing that.")
+        interaction._check_hierarchy(ctx.author, member, False)
 
         config = await self.bot.db.get_config(ctx.guild.id)
         if not config['mutedRole']:
@@ -262,8 +259,7 @@ class Moderation:
     @commands.guild_only()
     async def unmute(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Unmutes the specified user """
-        if not interaction.check_hierarchy(ctx.author, member, owner_check=True):
-            return await ctx.send("Role hierarchy prevents you from doing that.")
+        interaction._check_hierarchy(ctx.author, member, False)
 
         config = await self.bot.db.get_config(ctx.guild.id)
         if not config['mutedRole']:
