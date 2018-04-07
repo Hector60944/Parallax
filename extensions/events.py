@@ -3,6 +3,8 @@ from datetime import datetime
 import discord
 from discord.ext.commands import errors
 
+from utils.interaction import HierarchicalError
+
 
 class Events:
     def __init__(self, bot):
@@ -15,13 +17,14 @@ class Events:
         print(f'Logged in as {self.bot.user.name}\nBot invite link: {self.bot.invite_url}')
 
     async def on_message_delete(self, message):
-        if not message.guild:
+        if not message.guild or not message.content:
             return
 
         store = {
             'id': str(message.channel.id),
             'content': message.content,
-            'author': f'{str(message.author)} ({message.author.id})'
+            'author': f'{str(message.author)} ({message.author.id})',
+            'timestamp': message.created_at
         }
 
         await self.bot.r.table('snipes').insert(store, conflict='replace').run(self.bot.connection)
@@ -121,7 +124,8 @@ class Events:
             elif isinstance(error, errors.BotMissingPermissions):
                 permissions = '\n'.join(f'- {p.title().replace("_", " ")}' for p in error.missing_perms)
                 await ctx.send(f'**Missing required permissions:**\n{permissions}')
-
+            elif isinstance(error, HierarchicalError):
+                await ctx.send(error.message)
             else:
                 pass
         except: # noqa: bare-except
