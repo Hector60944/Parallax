@@ -108,7 +108,7 @@ class Moderation:
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     @commands.guild_only()
-    async def ban(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
+    async def ban(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'): # TODO: Custom converter to support hackbans
         """ Bans a user from the server
 
         Timed bans: For the reason parameter, specify a time, unit and then your reason. E.g:
