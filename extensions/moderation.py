@@ -112,7 +112,7 @@ class Moderation:
         """ Bans a user from the server
 
         Timed bans: For the reason parameter, specify a time, unit and then your reason. E.g:
-        5s Looked at me wrong
+        5s Spamming
 
         Where 5s means 5 seconds. Supported units: seconds, minutes, hours, days, weeks.
         When using a unit, specify the first letter (seconds -> s, minutes -> m etc...)
@@ -221,7 +221,7 @@ class Moderation:
         """ Mutes the specified user
 
         Timed mutes: For the reason parameter, specify a time, unit and then your reason. E.g:
-        5s Looked at me wrong
+        5s Spamming
 
         Where 5s means 5 seconds. Supported units: seconds, minutes, hours, days, weeks.
         When using a unit, specify the first letter (seconds -> s, minutes -> m etc...)

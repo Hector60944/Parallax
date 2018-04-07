@@ -109,7 +109,8 @@ class Events:
 
                 for page in _help:
                     await ctx.send(page)
-
+            elif hasattr(error, 'original') and isinstance(error.original, HierarchicalError):
+                await ctx.send(error.original)
             elif isinstance(error, errors.CommandInvokeError):
                 print(error)
                 await ctx.send(f'**Error:**\n```py\n{str(error)}\n```')
@@ -124,12 +125,10 @@ class Events:
             elif isinstance(error, errors.BotMissingPermissions):
                 permissions = '\n'.join(f'- {p.title().replace("_", " ")}' for p in error.missing_perms)
                 await ctx.send(f'**Missing required permissions:**\n{permissions}')
-            elif isinstance(error, HierarchicalError):
-                await ctx.send(error.message)
             else:
                 pass
-        except: # noqa: bare-except
-            pass  # lol
+        except (discord.Forbidden, discord.HTTPException):
+            pass
 
 
 def setup(bot):

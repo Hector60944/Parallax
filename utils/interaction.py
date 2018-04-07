@@ -1,10 +1,14 @@
 class HierarchicalError(Exception):
     def __init__(self, message):
+        super().__init__(message)
         self.message = message
 
 
-def _check_hierarchy(member, member2, self_check):
+def _check_hierarchy(member, member2, self_check, suppress=False):
     if member.guild.owner_id == member2.id:
+        if suppress:
+            return
+
         if self_check:
             raise HierarchicalError('I cannot perform the requested action on the server owner.')
         else:
@@ -12,10 +16,12 @@ def _check_hierarchy(member, member2, self_check):
 
     if not self_check:
         if not member.guild.owner_id == member.id or member.top_role > member2.top_role:
-            raise HierarchicalError('You cannot perform that action on a member who is higher than you.')
-
-    if not member.top_role > member2.top_role:
-        raise HierarchicalError('The target member is has an equivalent or higher role than you.')
+            if not suppress:
+                raise HierarchicalError('The target member has an equivalent or higher role than you.')
+    else:
+        if not member.top_role > member2.top_role:
+            if not suppress:
+                raise HierarchicalError('The target member has an equivalent or higher role than me.')
 
 
 def check_hierarchy(ctx, target):
