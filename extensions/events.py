@@ -24,7 +24,7 @@ class Events:
             'id': str(message.channel.id),
             'content': message.content,
             'author': f'{str(message.author)} ({message.author.id})',
-            'timestamp': message.created_at
+            'timestamp': str(message.created_at)
         }
 
         await self.bot.r.table('snipes').insert(store, conflict='replace').run(self.bot.connection)
