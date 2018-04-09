@@ -15,10 +15,10 @@ def _check_hierarchy(member, member2, self_check, suppress=False):
             raise HierarchicalError('You cannot perform that action on the server owner.')
 
     if not self_check:
-        if not member.guild.owner_id == member.id and member.top_role > member2.top_role and not suppress:
+        if member.guild.owner_id != member.id and member.top_role <= member2.top_role and not suppress:
             raise HierarchicalError('The target member has an equivalent or higher role than you.')
     else:
-        if not member.top_role > member2.top_role and not suppress:
+        if member.top_role <= member2.top_role and not suppress:
             raise HierarchicalError('The target member has an equivalent or higher role than me.')
 
 
