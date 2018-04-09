@@ -77,7 +77,7 @@ class Moderation:
 
             em = discord.Embed(color=0xbe2f2f, description=m['content'], timestamp=time)
             em.set_author(name=m['author'])
-            em.set_footer(text=f'Sniped by {ctx.author}')
+            em.set_footer(text=f'Sniped by {ctx.author} | Message sent ')
             await ctx.send(embed=em)
         else:
             await ctx.send('Nothing logged.')
