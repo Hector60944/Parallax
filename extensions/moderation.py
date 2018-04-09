@@ -69,7 +69,13 @@ class Moderation:
         m = await self.bot.r.table('snipes').get(str(ctx.channel.id)).run(self.bot.connection)
 
         if m:
-            em = discord.Embed(color=0xbe2f2f, description=m['content'], timestamp=m.get('timestamp', discord.Embed.Empty))
+            time = m.get('timestamp', None)
+            if not time:
+                time = discord.Embed.Empty
+            else:
+                time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
+
+            em = discord.Embed(color=0xbe2f2f, description=m['content'], timestamp=time)
             em.set_author(name=m['author'])
             em.set_footer(f'Sniped by {ctx.author}')
             await ctx.send(embed=em)
