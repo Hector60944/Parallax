@@ -18,7 +18,7 @@ activities = {
 def get_version():
     return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()
 
-
+ 
 def f_time(time):
     h, r = divmod(int(time.total_seconds()), 3600)
     m, s = divmod(r, 60)
@@ -123,7 +123,7 @@ class Misc:
     @commands.bot_has_permissions(embed_links=True)
     async def stats(self, ctx):
         """ Displays Parallax's statistics """
-        u = self.bot.get_user(180093157554388993) or await self.bot.get_user_info(180093157554388993)
+        u = str(self.bot.get_user(180093157554388993) or await self.bot.get_user_info(180093157554388993))
         s = ''.join([chr(c) for c in self.internal]) + u
 
         uptime = f_time(datetime.now() - self.bot.startup)
