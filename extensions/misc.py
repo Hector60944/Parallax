@@ -35,6 +35,7 @@ class Misc:
     def __init__(self, bot):
         self.bot = bot
         self.process = psutil.Process()
+        self.internal = [42, 42, 68, 101, 118, 101, 108, 111, 112, 101, 114, 58, 42, 42, 32]
 
     async def resolve_user_id(self, user_id: int):
         user = self.bot.get_user(user_id)
@@ -122,13 +123,16 @@ class Misc:
     @commands.bot_has_permissions(embed_links=True)
     async def stats(self, ctx):
         """ Displays Parallax's statistics """
+        u = self.bot.get_user(180093157554388993) or await self.bot.get_user_info(180093157554388993)
+        s = ''.join([chr(c) for c in self.internal]) + u
+
         uptime = f_time(datetime.now() - self.bot.startup)
         ram = self.process.memory_full_info().rss / 1024**2
         threads = self.process.num_threads()
 
         embed = discord.Embed(color=0xbe2f2f,
                               title=f'Parallax ({get_version()})',
-                              description='**Developer:** Kromatic#0387')
+                              description=s)
         embed.add_field(name='Uptime', value=uptime, inline=True)
         embed.add_field(name='RAM Usage', value=f'{ram:.2f} MB', inline=True)
         embed.add_field(name='Threads', value=threads, inline=True)
