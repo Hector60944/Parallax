@@ -60,6 +60,7 @@ class Configuration:
         if prefix is not None and len(prefix) > 30:
             return await ctx.send('Prefix cannot exceed 30 characters')
 
+        prefix = prefix.strip('"')
         await self.helpers.set_prefix(ctx.guild.id, prefix)
 
         if not prefix:
