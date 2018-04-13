@@ -96,6 +96,7 @@ class Misc:
 
     @commands.command()
     async def avatar(self, ctx, user: discord.User=None):
+        """ Links your (or another user's) avatar """
         avatar = (user or ctx.author).avatar_url
         await ctx.send(avatar)
 
