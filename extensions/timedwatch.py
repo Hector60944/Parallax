@@ -40,7 +40,7 @@ class Watcher:
                     guild = self.bot.get_guild(int(entry['guild_id']))
                     user = await self.resolve_user(int(entry['user_id']))
 
-                    if not guild or not guild.me.guild_permissions.ban_members:
+                    if not guild or guild.unavailable or not guild.me.guild_permissions.ban_members:
                         continue
 
                     try:
@@ -64,7 +64,7 @@ class Watcher:
                     guild = self.bot.get_guild(int(entry['guild_id']))
                     user = await self.resolve_user(int(entry['user_id']))
 
-                    if not guild or not guild.me.guild_permissions.manage_roles:
+                    if not guild or guild.unavailable or not guild.me.guild_permissions.manage_roles:
                         continue
 
                     db = await self.r.table('settings').get(str(guild.id)).run(self.bot.connection)
