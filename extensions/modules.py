@@ -19,11 +19,11 @@ class Helpers:
     async def anti_invite(self, guild_id: int):
         return (await self.bot.r.table('settings').get(str(guild_id)).default({}).run(self.bot.connection)).get('antiInvite', False)
 
-    async def get_invites(self, user: int):
-        return (await self.bot.r.table('invites').get(str(user)).default({}).run(self.bot.connection)).get('invites', 0)
+    async def get_invites(self, user: int, guild_id: int):
+        return (await self.bot.r.table('invites').get(str(user)).default({}).run(self.bot.connection)).get(str(guild_id), 0)
 
-    async def set_invites(self, user: int, invites: int):
-        await self.bot.r.table('invites').insert({'id': str(user), 'invites': invites}, conflict='replace').run(self.bot.connection)
+    async def set_invites(self, user: int, guild_id: int, invites: int):
+        await self.bot.r.table('invites').insert({'id': str(user), str(guild_id): invites}, conflict='replace').run(self.bot.connection)
 
     async def is_valid_advert(self, invite: str, guild_id: int):
         try:
@@ -62,8 +62,8 @@ class Modules:
         except (discord.HTTPException, discord.NotFound):
             pass
 
-        attempts = await self.helpers.get_invites(ctx.author.id) + 1
-        await self.helpers.set_invites(ctx.author.id, attempts)
+        attempts = await self.helpers.get_invites(ctx.author.id, ctx.guild.id) + 1
+        await self.helpers.set_invites(ctx.author.id, ctx.guild.id, attempts)
 
         if attempts % 3 == 0:
             if interaction.check_bot_has(ctx, ban_members=True):
