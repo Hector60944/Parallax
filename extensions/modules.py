@@ -23,7 +23,7 @@ class Helpers:
         return (await self.bot.r.table('invites').get(str(user)).default({}).run(self.bot.connection)).get(str(guild_id), 0)
 
     async def set_invites(self, user: int, guild_id: int, invites: int):
-        await self.bot.r.table('invites').insert({'id': str(user), str(guild_id): invites}, conflict='replace').run(self.bot.connection)
+        await self.bot.r.table('invites').insert({'id': str(user), str(guild_id): invites}, conflict='update').run(self.bot.connection)
 
     async def is_valid_advert(self, invite: str, guild_id: int):
         try:
