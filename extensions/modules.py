@@ -50,7 +50,7 @@ class Modules:
         invite = invite_rx.search(ctx.content)
 
         if not interaction.check_bot_has(ctx, manage_messages=True) or \
-                not interaction._check_hierarchy(ctx.guild.me, ctx.author, False, True) or interaction.check_user_has(ctx, manage_messages=True) or \
+                not interaction._check_hierarchy(ctx.guild.me, ctx.author, True, True) or interaction.check_user_has(ctx, manage_messages=True) or \
                 not invite:
             return
 

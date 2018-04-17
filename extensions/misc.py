@@ -18,7 +18,7 @@ activities = {
 def get_version():
     return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()
 
- 
+
 def f_time(time):
     h, r = divmod(int(time.total_seconds()), 3600)
     m, s = divmod(r, 60)
