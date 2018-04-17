@@ -15,6 +15,11 @@ class Admin:
 
     @commands.command()
     @commands.is_owner()
+    async def reboot(self, ctx):
+        await self.bot.logout()
+
+    @commands.command()
+    @commands.is_owner()
     async def cleanup(self, ctx, amount: int):
         """ Cleans up messages sent by the bot """
         if amount <= 0 or amount > 100:
