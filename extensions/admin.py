@@ -67,6 +67,7 @@ class Admin:
 
         silent = code.startswith('--silent')
         code = code.replace('```py\n', '').replace('```', '').replace('`', '').replace('--silent', '')
+        print(code)
 
         _code = 'async def func(self):\n  try:\n{}\n  finally:\n    self._eval[\'env\'].update(locals())'\
             .format(textwrap.indent(code, '    '))
