@@ -11,7 +11,10 @@ from utils import pagination
 class Admin:
     def __init__(self, bot):
         self.bot = bot
-        self._eval = {}
+        self._eval = {
+            'env': {},
+            'count': 0
+        }
 
     @commands.command()
     @commands.is_owner()
@@ -53,11 +56,6 @@ class Admin:
     @commands.is_owner()
     async def eval(self, ctx, *, code: str):
         """ Evaluate Python code """
-        if not self._eval.get('env'):
-            self._eval['env'] = {}
-        if not self._eval.get('count'):
-            self._eval['count'] = 0
-
         self._eval['env'].update({
             'self': self.bot,
             'ctx': ctx,
@@ -67,7 +65,8 @@ class Admin:
             'author': ctx.message.author,
         })
 
-        code = code.replace('```py\n', '').replace('```', '').replace('`', '')
+        silent = code.startswith('--silent')
+        code = code.replace('```py\n', '').replace('```', '').replace('`', '').replace('--silent', '')
 
         _code = 'async def func(self):\n  try:\n{}\n  finally:\n    self._eval[\'env\'].update(locals())'\
             .format(textwrap.indent(code, '    '))
@@ -105,13 +104,11 @@ class Admin:
         ms = int(round((after - before) * 1000))
         message += '\n# {} ms\n```'.format(ms)
 
-        try:
-            if ctx.author.id == self.bot.user.id:
-                await ctx.message.edit(content=message)
-            else:
+        if not silent:
+            try:
                 await ctx.send(message)
-        except discord.HTTPException:
-            await ctx.send("Output was too big to be printed.")
+            except discord.HTTPException:
+                await ctx.send("Output was too big to be printed.")
 
     @commands.command()
     @commands.is_owner()
