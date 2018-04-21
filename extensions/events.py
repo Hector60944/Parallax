@@ -1,9 +1,12 @@
+import re
 from datetime import datetime
 
 import discord
 from discord.ext.commands import errors
 
 from utils.interaction import HierarchicalError
+
+invite_rx = re.compile("discord(?:app)?\.(?:gg|com\/invite)\/([a-z0-9]{1,16})", re.IGNORECASE)
 
 
 class Events:
@@ -20,9 +23,10 @@ class Events:
         if not message.guild or not message.content:
             return
 
+        cleaned = invite_rx.sub('[INVITE]', message.content)
         store = {
             'id': str(message.channel.id),
-            'content': message.content,
+            'content': cleaned,
             'author': f'{str(message.author)} ({message.author.id})',
             'timestamp': str(message.created_at)
         }
