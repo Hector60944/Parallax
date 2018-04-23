@@ -344,7 +344,7 @@ class Moderation:
                 if not r:
                     continue
                 r_name = r.name[:11] + '...' if len(r.name) > 11 else r.name
-                public_roles += f'{r_name:15)}({r.id})\n'
+                public_roles += f'{r_name:15}({r.id})\n'
             await ctx.send(f'```\n{public_roles.strip() or "No roles available"}\n```')
         else:
             if str(role.id) not in config['selfrole']:
