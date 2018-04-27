@@ -116,7 +116,7 @@ class Events:
             elif hasattr(error, 'original') and isinstance(error.original, HierarchicalError):
                 await ctx.send(error.original)
             elif isinstance(error, errors.CommandInvokeError):
-                print(error)
+                print(f'Command {ctx.command.name.upper()} encountered an error\n\t', error)
                 await ctx.send(f'**Error:**\n```py\n{str(error)}\n```')
 
             elif isinstance(error, errors.CommandOnCooldown):
