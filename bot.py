@@ -54,7 +54,7 @@ if __name__ == '__main__':
     @bot.event
     async def on_message(message):
         bot.messages_seen += 1
-        if not bot.is_ready() or message.author.bot or message.author.id == 95645231248048128:
+        if not bot.is_ready() or message.author.bot:
             return
 
         await bot.process_commands(message)
