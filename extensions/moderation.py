@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import errors
 
-from utils import interaction, timeparser
+from utils import interaction, timeparser, hastepaste
 
 
 class Helpers:
@@ -69,7 +69,13 @@ class Moderation:
             else:
                 time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
 
-            em = discord.Embed(color=0xbe2f2f, description=m['content'], timestamp=time)
+            if len(m['content']) > 2048:
+                url = await hastepaste.create(m['content'])
+                content = f'[Content too long, view on HastePaste]({url})'
+            else:
+                content = m['content']
+
+            em = discord.Embed(color=0xbe2f2f, description=content, timestamp=time)
             em.set_author(name=m['author'])
             em.set_footer(text=f'Sniped by {ctx.author} | Message sent ')
             await ctx.send(embed=em)
