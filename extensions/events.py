@@ -23,7 +23,7 @@ class Events:
         if not message.guild or not message.content:
             return
 
-        cleaned = invite_rx.sub('[INVITE]', message.content)
+        cleaned = invite_rx.sub('[INVITE]', message.content).replace('[', '\[')
         store = {
             'id': str(message.channel.id),
             'content': cleaned,
