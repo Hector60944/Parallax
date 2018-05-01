@@ -100,7 +100,7 @@ class Moderation:
         prompt = await ctx.send(f'The user **{str(ban.user)}** was banned for **{ban.reason}**.\n\nAre you sure you want to revoke this ban? (`y`/`n`)')
 
         try:
-            m = await self.bot.wait_for('message', check=lambda m: m.content == 'y' or m.content == 'n', timeout=20)
+            m = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.content in ['y', 'n'], timeout=20)
         except asyncio.TimeoutError:
             await prompt.edit(content='Prompt cancelled; no response.')
         else:
