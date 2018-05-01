@@ -60,7 +60,7 @@ class Moderation:
     @commands.guild_only()
     async def snipe(self, ctx):
         """ View the last deleted message in the channel """
-        pass
+        return
         m = await self.bot.r.table('snipes').get(str(ctx.channel.id)).run(self.bot.connection)
 
         if m:

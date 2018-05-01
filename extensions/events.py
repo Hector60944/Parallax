@@ -20,7 +20,7 @@ class Events:
         print(f'Logged in as {self.bot.user.name}\nBot invite link: {self.bot.invite_url}')
 
     async def on_message_delete(self, message):
-        pass
+        return
         if not message.guild or not message.content:
             return
 
