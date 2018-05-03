@@ -108,13 +108,18 @@ class Events:
     async def on_command_error(self, ctx, error):
         try:
             if isinstance(error, (errors.MissingRequiredArgument, errors.BadArgument)):
-                command = ctx.invoked_subcommand or ctx.command
-                _help = await ctx.bot.formatter.format_help_for(ctx, command)
+                if isinstance(error, errors.MissingRequiredArgument):
+                    msg = f'You need to specify `{error.param.name}`'
+                elif isinstance(error, errors.BadArgument):
+                    msg = error.args[0].replace('"', '`')
 
-                for page in _help:
-                    await ctx.send(page)
+                msg += f'\n\nUse `{ctx.prefix}help {ctx.command}` to view the syntax of the command'
+
+                await ctx.send(msg)
+
             elif hasattr(error, 'original') and isinstance(error.original, HierarchicalError):
                 await ctx.send(error.original)
+
             elif isinstance(error, errors.CommandInvokeError):
                 print(f'Command {ctx.command.name.upper()} encountered an error\n\t', error)
                 await ctx.send(f'**Error:**\n```py\n{str(error)}\n```')
@@ -129,6 +134,7 @@ class Events:
             elif isinstance(error, errors.BotMissingPermissions):
                 permissions = '\n'.join(f'- {p.title().replace("_", " ")}' for p in error.missing_perms)
                 await ctx.send(f'**Missing required permissions:**\n{permissions}')
+
             else:
                 pass
         except (discord.Forbidden, discord.HTTPException):
