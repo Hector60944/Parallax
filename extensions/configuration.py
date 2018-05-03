@@ -312,6 +312,7 @@ class Configuration:
 
         prefix = await self.helpers.get_prefix(ctx.guild.id) or self.bot.config.get('prefixes')[0]
         account_age = config['accountAge'] if config.get('accountAge') else 'Off' # TODO: parse this into human date
+        verification = discord.utils.get(ctx.guild.roles, id=int(config['verificationRole'])) if config['verificationRole'] else None
         mute_role = discord.utils.get(ctx.guild.roles, id=int(config['mutedRole'])) if config['mutedRole'] else None
         log_channel = self.helpers.get_channel(config['logChannel'])
         welcome_channel = self.helpers.get_channel(_event['joinMessage']['channel'])
@@ -326,6 +327,7 @@ Anti-Invite   : {'on' if config['antiInvite'] else 'off'}
 Muted Role    : {mute_role.name if mute_role else ''}
 Warning Limit : {config['warnThreshold']}
 Min Acc. Age  : {account_age}
+Verif. Role   : {verification.name if verification else 'None'}
 Autorole
   ╚ Bots      : {" ".join(config["autorole"]["bots"])}
   ╚ Users     : {" ".join(config["autorole"]["users"])}
