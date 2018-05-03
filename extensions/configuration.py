@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+from utils import timeparser
+
 
 class Helpers:
     def __init__(self, bot):
@@ -27,6 +29,12 @@ class Helpers:
                 .run(self.bot.connection)) \
                 .get('prefix', None)
 
+    def get_channel(self, channel_id: str):
+        if not channel_id:
+            return None
+
+        return self.bot.get_channel(int(channel_id))
+
 
 class Configuration:
     def __init__(self, bot):
@@ -37,7 +45,8 @@ class Configuration:
     @commands.is_owner()
     async def migrate(self, ctx):
         migrate_data = {
-            'selfrole': []
+            'accountAge': None,
+            'verificationRole': None
         }
         m = await ctx.send('Migrating all server settings...')
         await self.bot.r.table('settings').update(migrate_data).run(self.bot.connection)
@@ -79,6 +88,41 @@ class Configuration:
         await self.helpers.set_config(ctx.guild.id, config)
 
         return await ctx.send(f'Warn threshold set to **{warn_threshold}**')
+
+    @config.command(name='accountage', aliases=['account'])
+    async def account_age(self, ctx, *, minimum_age: str=None):
+        """ Sets the minimum account age needed to join the server """
+        config = await self.bot.db.get_config(ctx.guild.id)
+
+        if not minimum_age:
+            config.update({'accountAge': None})
+            await self.helpers.set_config(ctx.guild.id, config)
+            return await ctx.send('Alt account identifying disabled.')
+
+        time = timeparser.parse(minimum_age)
+
+        if not time:
+            return await ctx.send('Invalid time specified. Example format: `1d`, `1 d`, `1 day`')
+
+        config.update({'accountAge': str(time.relative)})
+        await self.helpers.set_config(ctx.guild.id, config)
+
+        await ctx.send(f'Minimum account age set to `{time.amount}{time.unit}`')
+
+    @config.command()
+    async def verificationrole(self, ctx, *, role: discord.Role=None):
+        """ Sets the role assigned to new accounts that need additional verification """
+        config = await self.bot.db.get_config(ctx.guild.id)
+
+        if not role:
+            config.update({'verificationRole': None})
+            await self.helpers.set_config(ctx.guild.id, config)
+            return await ctx.send('Verification role reset.')
+
+        config.update({'verificationRole': str(role.id)})
+        await self.helpers.set_config(ctx.guild.id, config)
+
+        await ctx.send(f'Verification role set to `{role.name}`')
 
     @config.command()
     async def invitekiller(self, ctx, option: str):
@@ -267,14 +311,13 @@ class Configuration:
         _event = config['messages']
 
         prefix = await self.helpers.get_prefix(ctx.guild.id) or self.bot.config.get('prefixes')[0]
+        account_age = config['accountAge'] if config.get('accountAge') else 'Off' # TODO: parse this into human date
         mute_role = discord.utils.get(ctx.guild.roles, id=int(config['mutedRole'])) if config['mutedRole'] else None
-        log_channel = self.bot.get_channel(int(config['logChannel'])) if config['logChannel'] else None
-        welcome_channel = self.bot.get_channel(int(_event['joinMessage']['channel'])) if _event['joinMessage']['channel'] else None
-        leave_channel = self.bot.get_channel(int(_event['leaveMessage']['channel'])) if _event['leaveMessage']['channel'] else None
-        join_log = self.bot.get_channel(int(_event['joinLog'])) if _event['joinLog'] else None
-        leave_log = self.bot.get_channel(int(_event['leaveLog'])) if _event['leaveLog'] else None
-
-        # ugh, spaghetti code...
+        log_channel = self.helpers.get_channel(config['logChannel'])
+        welcome_channel = self.helpers.get_channel(_event['joinMessage']['channel'])
+        leave_channel = self.helpers.get_channel(_event['leaveMessage']['channel'])
+        join_log = self.helpers.get_channel(_event['joinLog'])
+        leave_log = self.helpers.get_channel(_event['leaveLog'])
 
         await ctx.send(f'''**Server Configuration | {ctx.guild.name}**
 ```prolog
@@ -282,6 +325,7 @@ Prefix        : {prefix}
 Anti-Invite   : {'on' if config['antiInvite'] else 'off'}
 Muted Role    : {mute_role.name if mute_role else ''}
 Warning Limit : {config['warnThreshold']}
+Min Acc. Age  : {account_age}
 Autorole
   ╚ Bots      : {" ".join(config["autorole"]["bots"])}
   ╚ Users     : {" ".join(config["autorole"]["users"])}

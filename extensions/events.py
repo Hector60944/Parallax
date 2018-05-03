@@ -35,11 +35,37 @@ class Events:
 
     async def on_member_join(self, member):
         config = await self.bot.db.get_config(member.guild.id)
+        account_age = config['accountAge']
+        verification = config['verificationRole']
+
         log = config['messages']['joinLog']
         join = config['messages']['joinMessage']
 
         category = 'bots' if member.bot else 'users'
         assigned = config['autorole'][category]
+
+        if log:
+            channel = self.bot.get_channel(int(log))
+
+            if channel:
+                embed = discord.Embed(color=0x3f94e8, description='Member Joined', timestamp=datetime.utcnow())
+                embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
+                try:
+                    await channel.send(embed=embed)
+                except (discord.Forbidden, discord.HTTPException):
+                    pass
+
+        if account_age and verification and member.guild.me.guild_permissions.manage_roles:
+            now = datetime.utcnow()
+            
+            if (now - member.created_at).total_seconds() < int(account_age):
+                role = [discord.utils.get(member.guild.roles, id=int(verification))]
+
+                if role:
+                    try:
+                        await member.add_roles(*role, reason='[ Parallax Anti-Alt ] New account requires verification')
+                    except (discord.Forbidden, discord.HTTPException):
+                        pass
 
         if assigned and member.guild.me.guild_permissions.manage_roles:
 
@@ -64,21 +90,21 @@ class Events:
                 except (discord.Forbidden, discord.HTTPException):
                     pass
 
+    async def on_member_remove(self, member):
+        config = await self.bot.db.get_config(member.guild.id)
+        log = config['messages']['leaveLog']
+        leave = config['messages']['leaveMessage']
+
         if log:
             channel = self.bot.get_channel(int(log))
 
             if channel:
-                embed = discord.Embed(color=0x3f94e8, description='Member Joined', timestamp=datetime.utcnow())
+                embed = discord.Embed(color=0x3f94e8, description='Member Left', timestamp=datetime.utcnow())
                 embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
                 try:
                     await channel.send(embed=embed)
                 except (discord.Forbidden, discord.HTTPException):
                     pass
-
-    async def on_member_remove(self, member):
-        config = await self.bot.db.get_config(member.guild.id)
-        log = config['messages']['leaveLog']
-        leave = config['messages']['leaveMessage']
 
         if leave['message'] and leave['channel'] and not member.bot:
             channel = self.bot.get_channel(int(leave['channel']))
@@ -91,17 +117,6 @@ class Events:
 
                 try:
                     await channel.send(m)
-                except (discord.Forbidden, discord.HTTPException):
-                    pass
-
-        if log:
-            channel = self.bot.get_channel(int(log))
-
-            if channel:
-                embed = discord.Embed(color=0x3f94e8, description='Member Left', timestamp=datetime.utcnow())
-                embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
-                try:
-                    await channel.send(embed=embed)
                 except (discord.Forbidden, discord.HTTPException):
                     pass
 
@@ -121,7 +136,7 @@ class Events:
                 await ctx.send(error.original)
 
             elif isinstance(error, errors.CommandInvokeError):
-                print(f'Command {ctx.command.name.upper()} encountered an error\n\t', error)
+                print(f'Command {ctx.command.name.upper()} encountered an error:\n\t', error)
                 await ctx.send(f'**Error:**\n```py\n{str(error)}\n```')
 
             elif isinstance(error, errors.CommandOnCooldown):

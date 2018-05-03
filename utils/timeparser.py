@@ -9,7 +9,7 @@ TIMES = {
     'w': 604800
 }
 
-FORMAL_UNITS = {
+SHORT_UNITS = {
     's': 'second',
     'm': 'minute',
     'h': 'hour',
@@ -17,7 +17,8 @@ FORMAL_UNITS = {
     'w': 'week'
 }
 
-T_RX = re.compile('^[0-9]+[smhdw]', re.IGNORECASE)
+SHORT_TIME_RX = re.compile('^[0-9]+[smhdw]', re.IGNORECASE)
+LONG_TIME_RX = re.compile('^([0-9]+) *(s(?:ec(?:ond(?:s)?)?)?|m(?:in(?:ute(?:s)?)?)?|h(?:our(?:s)?)?|d(?:ay(?:s)?)?|w(?:eek(?:s)?)?)', re.IGNORECASE)
 
 
 class TimeFormat:
@@ -29,7 +30,7 @@ class TimeFormat:
 
 
 def convert(text: str):
-    match = T_RX.search(text)
+    match = SHORT_TIME_RX.search(text)
 
     if not match:
         return None, text
@@ -39,9 +40,24 @@ def convert(text: str):
 
     time = int(content[:-1])
     unit = content[-1].lower()
-    formal_unit = f'{FORMAL_UNITS[unit]}{"s" if time != 1 else ""}'
+    formal_unit = f'{SHORT_UNITS[unit]}{"s" if time != 1 else ""}'
 
     relative = TIMES[unit] * time
     absolute = int(round(date.time())) + relative
 
     return TimeFormat(absolute, relative, time, formal_unit), text[start:].strip()
+
+
+def parse(text: str):
+    match = LONG_TIME_RX.match(text)
+
+    if not match:
+        return None
+
+    time = int(match.group(1))
+    unit = match.group(2).lower()[0]
+
+    relative = TIMES[unit] * time
+    absolute = int(round(date.time())) + relative
+
+    return TimeFormat(absolute, relative, time, unit)

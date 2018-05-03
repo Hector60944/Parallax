@@ -6,6 +6,7 @@ class Database:
         return await self.bot.r.table('settings') \
             .get(str(guild_id)) \
             .default({
+                'accountAge': None
                 'warnThreshold': 0,
                 'antiInvite': False,
                 'mutedRole': None,
