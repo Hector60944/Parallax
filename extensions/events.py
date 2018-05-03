@@ -57,7 +57,7 @@ class Events:
 
         if account_age and verification and member.guild.me.guild_permissions.manage_roles:
             now = datetime.utcnow()
-            
+
             if (now - member.created_at).total_seconds() < int(account_age):
                 role = [discord.utils.get(member.guild.roles, id=int(verification))]
 
