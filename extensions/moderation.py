@@ -191,7 +191,7 @@ class Moderation:
     @commands.guild_only()
     async def warn(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Issues a warning to the given user """
-        interaction.check_hierarchy(ctx, member)
+        interaction._check_hierarchy(ctx.author, member, False)
 
         threshold = (await self.bot.db.get_config(ctx.guild.id))['warnThreshold']
         current_warns = await self.helpers.get_warns(member.id, ctx.guild.id) + 1
