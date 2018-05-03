@@ -216,7 +216,7 @@ class Moderation:
     async def clearwarns(self, ctx, *, member: discord.Member):
         """ Clears a user's warnings """
         await self.helpers.set_warns(member.id, ctx.guild.id, 0)
-        await self.helpers.post_modlog_entry(ctx.guild.id, 'Warns Cleared', member, ctx.author, ' [ None ]', '', 0x53dc39)
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Warns Cleared', member, ctx.author, 'None specified', '', 0x53dc39)
         await ctx.message.add_reaction('👌')
 
     @commands.command(aliases=['m'])
