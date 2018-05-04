@@ -62,25 +62,27 @@ class Moderation:
         """ View the last deleted message in the channel """
         m = await self.bot.r.table('snipes').get(str(ctx.channel.id)).run(self.bot.connection)
 
-        if m:
-            time = m.get('timestamp', None)
-            if not time:
-                time = discord.Embed.Empty
-            else:
-                time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
+        if not m:
+            return await ctx.send('No snipes available.')
 
-            if len(m['content']) > 2048:
-                url = await hastepaste.create(m['content'])
-                content = f'[Content too long, view on HastePaste]({url})'
-            else:
-                content = m['content']
+        await self.bot.r.table('snipes').get(str(ctx.channel.id)).delete().run(self.bot.connection)
 
-            em = discord.Embed(color=0xbe2f2f, description=content, timestamp=time)
-            em.set_author(name=m['author'])
-            em.set_footer(text=f'Sniped by {ctx.author} | Message sent ')
-            await ctx.send(embed=em)
+        time = m.get('timestamp', None)
+        if not time:
+            time = discord.Embed.Empty
         else:
-            await ctx.send('Nothing logged.')
+            time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
+
+        if len(m['content']) > 2048:
+            url = await hastepaste.create(m['content'])
+            content = f'[Snipe too long, view on HastePaste]({url})'
+        else:
+            content = m['content']
+
+        em = discord.Embed(color=0xbe2f2f, description=content, timestamp=time)
+        em.set_author(name=m['author'])
+        em.set_footer(text=f'Sniped by {ctx.author} | Message sent ')
+        await ctx.send(embed=em)
 
     @commands.command(aliases=['ub'])
     @commands.has_permissions(ban_members=True)
