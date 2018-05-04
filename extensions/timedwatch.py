@@ -67,7 +67,7 @@ class Watcher:
                     if not db or not member or not db['mutedRole']:
                         continue
 
-                    await self.self.bot.db.remove_timed_entry(guild.id, user.id, 'mutes')
+                    await self.bot.db.remove_timed_entry(guild.id, user.id, 'mutes')
 
                     try:
                         await member.remove_roles(discord.Object(id=int(entry['role_id'])), reason='[ Auto-Unmute ] Expired')
