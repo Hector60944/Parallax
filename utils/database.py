@@ -6,6 +6,7 @@ class Database:
         return await self.bot.r.table('settings') \
             .get(str(guild_id)) \
             .default({
+                'modOnly': False,
                 'accountAge': None,
                 'verificationRole': None,
                 'warnThreshold': 0,

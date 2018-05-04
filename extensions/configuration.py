@@ -45,8 +45,7 @@ class Configuration:
     @commands.is_owner()
     async def migrate(self, ctx):
         migrate_data = {
-            'accountAge': None,
-            'verificationRole': None
+            'modOnly': False
         }
         m = await ctx.send('Migrating all server settings...')
         await self.bot.r.table('settings').update(migrate_data).run(self.bot.connection)
@@ -76,6 +75,15 @@ class Configuration:
             await ctx.send('Prefix reset')
         else:
             await ctx.send(f'Prefix changed to **`{prefix}`**')
+
+    @config.command()
+    async def modonly(self, ctx, setting: bool):
+        """ Toggle whether Parallax will listen to commands from non-mods """
+        config = await self.bot.db.get_config(ctx.guild.id)
+        config.update({'modOnly': setting})
+        await self.helpers.set_config(ctx.guild.id, config)
+
+        return await ctx.send(f'Mod-Only **{"enabled" if setting else "disabled"}**')
 
     @config.command()
     async def warnings(self, ctx, warn_threshold: int):
@@ -125,23 +133,13 @@ class Configuration:
         await ctx.send(f'Verification role set to `{role.name}`')
 
     @config.command()
-    async def invitekiller(self, ctx, option: str):
-        """ Toggles whether discord invite links are suppressed
-
-        Valid options: on | off
-        """
-        if not option:
-            current = await self.bot.db.get_config(ctx.guild.id)
-            setting = 'enabled' if current['antiInvite'] else 'disabled'
-            return await ctx.send(f'Invite Killer is currently **{setting}**')
-
-        enabled = option.lower() == 'on'
+    async def antiinvite(self, ctx, setting: bool):
+        """ Toggles whether discord invite links are suppressed """
         config = await self.bot.db.get_config(ctx.guild.id)
-        config['antiInvite'] = enabled
+        config.update({'antiInvite', setting})
         await self.helpers.set_config(ctx.guild.id, config)
 
-        setting = 'enabled' if enabled else 'disabled'
-        return await ctx.send(f'Invite Killer has been **{setting}**')
+        return await ctx.send(f'Invite Killer **{"enabled" if setting else "disabled"}**')
 
     @config.command()
     async def muterole(self, ctx, *, role: discord.Role=None):
@@ -323,6 +321,7 @@ class Configuration:
         await ctx.send(f'''**Server Configuration | {ctx.guild.name}**
 ```prolog
 Prefix        : {prefix}
+Mod-Only      : {'on' if config['modOnly'] else 'off'}
 Anti-Invite   : {'on' if config['antiInvite'] else 'off'}
 Muted Role    : {mute_role.name if mute_role else ''}
 Warning Limit : {config['warnThreshold']}

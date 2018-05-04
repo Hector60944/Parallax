@@ -79,7 +79,10 @@ class Admin:
             output = await func(self)
 
             if output:
+                print('output!')
                 output = repr(output)
+            else:
+                output = str(output)
         except Exception as e:
             output = '{}: {}'.format(type(e).__name__, e)
         after = time.monotonic()

@@ -57,6 +57,11 @@ if __name__ == '__main__':
         if not bot.is_ready() or message.author.bot:
             return
 
+        if message.guild and not message.guild.unavailable:
+            config = await bot.db.get_config(message.guild.id)
+            if config.get('modOnly', False) and not message.author.guild_permissions.kick_members:
+                return
+
         await bot.process_commands(message)
 
     bot.run(config.get('token'))
