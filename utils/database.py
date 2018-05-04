@@ -31,3 +31,9 @@ class Database:
                     }
                 }
             }).run(self.bot.connection)
+
+    async def remove_timed_entry(self, guild_id: int, user_id: int, table: str):
+        await self.bot.r.table(table) \
+            .filter({'user_id': str(user_id), 'guild_id': str(guild_id)}) \
+            .delete() \
+            .run(self.bot.connection)

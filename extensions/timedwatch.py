@@ -14,12 +14,6 @@ class Watcher:
         except asyncio.CancelledError:
             pass
 
-    async def remove_entry(self, guild_id: int, user_id: int, table: str):
-        await self.r.table(table) \
-            .filter({'user_id': str(user_id), 'guild_id': str(guild_id)}) \
-            .delete() \
-            .run(self.bot.connection)
-
     async def resolve_user(self, u_id: int):
         return self.bot.get_user(u_id) or await self.bot.get_user_info(u_id)
 
@@ -48,7 +42,7 @@ class Watcher:
                     except (discord.HTTPException, discord.Forbidden):  # !?!?
                         pass
                     else:
-                        await self.remove_entry(guild.id, user.id, 'bans')
+                        await self.bot.db.remove_timed_entry(guild.id, user.id, 'bans')
                         db = await self.r.table('settings').get(str(guild.id)).run(self.bot.connection)
 
                         if db is not None and db['logChannel']:
@@ -73,7 +67,7 @@ class Watcher:
                     if not db or not member or not db['mutedRole']:
                         continue
 
-                    await self.remove_entry(guild.id, user.id, 'mutes')
+                    await self.self.bot.db.remove_timed_entry(guild.id, user.id, 'mutes')
 
                     try:
                         await member.remove_roles(discord.Object(id=int(entry['role_id'])), reason='[ Auto-Unmute ] Expired')

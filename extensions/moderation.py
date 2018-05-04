@@ -286,6 +286,7 @@ class Moderation:
         await member.remove_roles(role, reason=f'[ {ctx.author} ] {reason}')
         await ctx.message.add_reaction('🔈')
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Unmuted', member, ctx.author, reason, '', 0x53dc39)
+        await self.bot.db.remove_timed_entry(ctx.guild.id, member.id, 'mutes')
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
