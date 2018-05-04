@@ -25,7 +25,7 @@ class Watcher:
 
     async def watch_db(self):
         await self.bot.wait_until_ready()
-        print('Monitoring timed bans')
+        print('Watching for timed mutes and bans')
 
         while True:
             now = time.time()
