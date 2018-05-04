@@ -79,7 +79,6 @@ class Admin:
             output = await func(self)
 
             if output:
-                print('output!')
                 output = repr(output)
             else:
                 output = str(output)
