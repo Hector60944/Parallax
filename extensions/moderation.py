@@ -131,9 +131,10 @@ class Moderation:
 
         await member.ban(reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
         await ctx.message.add_reaction('🔨')
+        await self.bot.db.remove_timed_entry(ctx.guild.id, member.id, 'mutes')  # Delete any timed mutes this user has
 
         if time:
-            await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason, f'{time.amount} {time.unit}')
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason, str(time))
             await self.helpers.create_timed_ban(ctx.guild.id, member.id, time.absolute)
         else:
             await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason)
@@ -256,7 +257,7 @@ class Moderation:
         await ctx.message.add_reaction('🔇')
 
         if time:
-            await self.helpers.post_modlog_entry(ctx.guild.id, 'Muted', member, ctx.author, reason, f'{time.amount} {time.unit}')
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Muted', member, ctx.author, reason, str(time))
             await self.helpers.create_timed_mute(ctx.guild.id, member.id, time.absolute, role.id)
         else:
             await self.helpers.post_modlog_entry(ctx.guild.id, 'Muted', member, ctx.author, reason)

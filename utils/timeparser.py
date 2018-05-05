@@ -28,6 +28,9 @@ class TimeFormat:
         self.amount = amount
         self.unit = unit
 
+    def __str__(self):
+        return f'{self.amount} {self.unit}'
+
 
 def convert(text: str):
     match = SHORT_TIME_RX.search(text)
