@@ -106,7 +106,7 @@ class Moderation:
         if not ban:
             return await ctx.send('No banned users found with that ID')
 
-        prompt = await ctx.send(f'The user **{str(ban.user)}** was banned for **{ban.reason}**.\n\nAre you sure you want to revoke this ban? (`y`/`n`)')
+        prompt = await ctx.send(f'The user **{str(ban.user)}** was banned for **{ban.reason or "no reason specified"}**.\n\nAre you sure you want to revoke this ban? (`y`/`n`)')
 
         try:
             m = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.content in ['y', 'n'], timeout=20)
