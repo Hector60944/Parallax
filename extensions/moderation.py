@@ -126,13 +126,12 @@ class Moderation:
         Where 5s means 5 seconds. Supported units: seconds, minutes, hours, days, weeks.
         When using a unit, specify the first letter (seconds -> s, minutes -> m etc...)
         """
-        return await ctx.send(str(member))
         interaction.check_hierarchy(ctx, member)
 
         time, reason = timeparser.convert(reason)
 
         try:
-            await member.ban(reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
+            await ctx.guild.ban(discord.Object(id=member), reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
         except discord.NotFound:
             raise commands.BadArgument('member is not a valid user/id')
         else:
