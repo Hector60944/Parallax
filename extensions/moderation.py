@@ -13,6 +13,9 @@ class Helpers:
     def __init__(self, bot):
         self.bot = bot
 
+    async def resolve_user(self, u_id: int):
+        return self.bot.get_user(u_id) or await self.bot.get_user_info(u_id)
+
     async def create_timed_ban(self, guild_id: int, user: int, due: int):
         await self.bot.r.table('bans') \
             .insert({'user_id': str(user), 'guild_id': str(guild_id), 'due': str(due)}) \
@@ -89,10 +92,14 @@ class Moderation:
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     @commands.guild_only()
-    async def unban(self, ctx, member: int, *, reason: str='None specified'):
-        """ Unbans a member from the server by their Discord ID
+    async def unban(self, ctx, member: IDConverter, *, reason: str='None specified'):
+        """ Unbans a member from the server """
+        if not member:
+            raise commands.BadArgument('invalid user/id specified')
 
-        To get a user's ID: https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID"""
+        if not isinstance(member, int):
+            member = member.id
+
         bans = await ctx.guild.bans()
         ban = discord.utils.get(bans, user__id=member)
 
@@ -126,23 +133,30 @@ class Moderation:
         Where 5s means 5 seconds. Supported units: seconds, minutes, hours, days, weeks.
         When using a unit, specify the first letter (seconds -> s, minutes -> m etc...)
         """
-        interaction.check_hierarchy(ctx, member)
+        user = await self.helpers.resolve_user(member)
+
+        if not user:
+            raise commands.BadArgument('member is not a valid user/id')
+
+        member = ctx.guild.get_member(user.id)
+
+        if member:
+            interaction.check_hierarchy(ctx, member)
+        else:
+            member = user
 
         time, reason = timeparser.convert(reason)
 
-        try:
-            await ctx.guild.ban(discord.Object(id=member), reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
-        except discord.NotFound:
-            raise commands.BadArgument('member is not a valid user/id')
-        else:
-            await ctx.message.add_reaction('🔨')
-            await self.bot.db.remove_timed_entry(ctx.guild.id, member.id, 'mutes')  # Delete any timed mutes this user has
+        await ctx.guild.ban(member, reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
+        await ctx.message.add_reaction('🔨')
 
-            if time:
-                await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason, str(time))
-                await self.helpers.create_timed_ban(ctx.guild.id, member.id, time.absolute)
-            else:
-                await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason)
+        await self.bot.db.remove_timed_entry(ctx.guild.id, member.id, 'mutes')  # Delete any timed mutes this user has
+
+        if time:
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason, str(time))
+            await self.helpers.create_timed_ban(ctx.guild.id, member.id, time.absolute)
+        else:
+            await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason)
 
     @commands.command(aliases=['k'])
     @commands.has_permissions(kick_members=True)
