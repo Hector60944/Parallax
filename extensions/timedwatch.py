@@ -39,6 +39,8 @@ class Watcher:
 
                     try:
                         await guild.unban(discord.Object(id=user.id), reason='[ AutoMod ] Ban Expired')
+                    except discord.NotFound:  # User was unbanned before Parallax could unban
+                        await self.bot.db.remove_timed_entry(guild.id, user.id, 'bans')
                     except (discord.HTTPException, discord.Forbidden) as exception:  # !?!?
                         print('Failed to unban member {} in guild {}:\n\t'.format(user.id, guild.id), exception)
                     else:
