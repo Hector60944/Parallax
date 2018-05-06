@@ -14,7 +14,12 @@ class Helpers:
         self.bot = bot
 
     async def get_log_channel(self, guild_id: int):
-        return (await self.bot.r.table('settings').get(str(guild_id)).default({}).run(self.bot.connection)).get('logChannel', None)
+        channel = (await self.bot.r.table('settings').get(str(guild_id)).default({}).run(self.bot.connection)).get('logChannel', None)
+
+        if channel:
+            channel = self.bot.get_channel(int(channel))
+
+        return channel
 
     async def anti_invite(self, guild_id: int):
         return (await self.bot.r.table('settings').get(str(guild_id)).default({}).run(self.bot.connection)).get('antiInvite', False)
@@ -67,23 +72,23 @@ class Modules:
 
         if attempts % 3 == 0:
             if interaction.check_bot_has(ctx, ban_members=True):
-                await ctx.author.ban(reason='[ Parallax AutoBan ] Advertising', delete_message_days=7)
+                await ctx.author.ban(reason='[ AutoMod ] Advertising', delete_message_days=7)
                 await ctx.channel.send(f'Auto-Banned {ctx.author} for advertising')
+
                 channel = await self.helpers.get_log_channel(ctx.guild.id)
+
                 if not channel:
                     return
 
-                channel = self.bot.get_channel(int(channel))
-                if channel:
-                    permissions = channel.permissions_for(channel.guild.me)
-                    if permissions.send_messages and permissions.embed_links:
-                        embed = discord.Embed(color=0xbe2f2f,
-                                              title=f'**User Banned**',
-                                              description=f'**Target:** {str(ctx.author)} ({ctx.author.id})\n'
-                                                          f'**Reason:** Advertising',
-                                              timestamp=datetime.utcnow())
-                        embed.set_footer(text=f'Performed by {str(self.bot.user)}', icon_url=self.bot.user.avatar_url_as(format='png'))
-                        await channel.send(embed=embed)
+                permissions = channel.permissions_for(channel.guild.me)
+                if permissions.send_messages and permissions.embed_links:
+                    embed = discord.Embed(color=0xbe2f2f,
+                                          title=f'**User Banned**',
+                                          description=f'**Target:** {str(ctx.author)} ({ctx.author.id})\n'
+                                                      f'**Reason:** [ AutoMod ] Advertising',
+                                          timestamp=datetime.utcnow())
+                    embed.set_footer(text=f'Performed by {str(self.bot.user)}', icon_url=self.bot.user.avatar_url_as(format='png'))
+                    await channel.send(embed=embed)
         else:
             await ctx.channel.send(f'{ctx.author.mention} Do not advertise here ({attempts % 3}/3)')
 

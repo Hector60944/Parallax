@@ -38,17 +38,17 @@ class Watcher:
                         continue
 
                     try:
-                        await guild.unban(discord.Object(id=user.id), reason='[ Auto-Unban ] Expired')
-                    except (discord.HTTPException, discord.Forbidden):  # !?!?
-                        pass
+                        await guild.unban(discord.Object(id=user.id), reason='[ AutoMod ] Ban Expired')
+                    except (discord.HTTPException, discord.Forbidden) as exception:  # !?!?
+                        print('Failed to unban member {} in guild {}:\n\t'.format(user.id, guild.id), exception)
                     else:
                         await self.bot.db.remove_timed_entry(guild.id, user.id, 'bans')
                         db = await self.r.table('settings').get(str(guild.id)).run(self.bot.connection)
 
                         if db is not None and db['logChannel']:
-                            await self.post_modlog_entry(int(db['logChannel']), ('Unbanned', 'Unban'), user)
+                            await self.post_modlog_entry(int(db['logChannel']), ('Unbanned', 'Ban'), user)
                 except Exception as e:
-                    print('Got exception in unban\n\t', e)
+                    print('Exception in unban:\n\t', e)
 
             for entry in mutes.items:
                 try:
@@ -70,14 +70,14 @@ class Watcher:
                     await self.bot.db.remove_timed_entry(guild.id, user.id, 'mutes')
 
                     try:
-                        await member.remove_roles(discord.Object(id=int(entry['role_id'])), reason='[ Auto-Unmute ] Expired')
-                    except (discord.HTTPException, discord.Forbidden):  # !?!?
-                        pass
+                        await member.remove_roles(discord.Object(id=int(entry['role_id'])), reason='[ AutoMod ] Mute Expired')
+                    except (discord.HTTPException, discord.Forbidden) as exception:  # !?!?
+                        print('Failed to unmute member {} in guild {}:\n\t'.format(member.id, guild.id), exception)
                     else:
                         if db['logChannel']:
-                            await self.post_modlog_entry(int(db['logChannel']), ('Unmuted', 'Unmute'), user)
+                            await self.post_modlog_entry(int(db['logChannel']), ('Unmuted', 'Mute'), user)
                 except Exception as e:
-                    print('Got exception in unmute\n\t', e)
+                    print('Exception in unmute:\n\t', e)
 
             bans.close()
             mutes.close()
@@ -93,7 +93,7 @@ class Watcher:
                 embed = discord.Embed(color=0x53dc39,
                                       title=f'**User {action[0]}**',
                                       description=f'**Target:** {target} ({target.id})\n'
-                                                  f'**Reason:** [ Auto-{action[1]} ] Expired',
+                                                  f'**Reason:** [ AutoMod ] {action[1]} Expired',
                                       timestamp=datetime.utcnow())
                 embed.set_footer(text=f'Performed by {self.bot.user}', icon_url=self.bot.user.avatar_url_as(format='png'))
                 await channel.send(embed=embed)
