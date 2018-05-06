@@ -1,20 +1,17 @@
 import asyncio
 import textwrap
-import time
 from asyncio.subprocess import PIPE
 
 import discord
 from discord.ext import commands
-from utils import pagination
+
+from utils import hastepaste, pagination
 
 
 class Admin:
     def __init__(self, bot):
         self.bot = bot
-        self._eval = {
-            'env': {},
-            'count': 0
-        }
+        self.env = {}
 
     @commands.command()
     @commands.is_owner()
@@ -56,8 +53,13 @@ class Admin:
     @commands.is_owner()
     async def eval(self, ctx, *, code: str):
         """ Evaluate Python code """
-        self._eval['env'].update({
-            'self': self.bot,
+        if code == 'exit()':
+            self.env.clear()
+            return await ctx.send('Environment cleared')
+
+        self.env.update({
+            'self': self,
+            'bot': self.bot,
             'ctx': ctx,
             'message': ctx.message,
             'channel': ctx.message.channel,
@@ -65,52 +67,34 @@ class Admin:
             'author': ctx.message.author,
         })
 
-        silent = code.startswith('--silent')
-        code = code.replace('```py\n', '').replace('```', '').replace('`', '').replace('--silent', '').strip()
+        code = code.replace('```py\n', '').replace('```', '').replace('`', '').strip()
 
-        _code = 'async def func(self):\n  try:\n{}\n  finally:\n    self._eval[\'env\'].update(locals())'\
+        _code = 'async def func():\n  try:\n{}\n  finally:\n    self.env.update(locals())'\
             .format(textwrap.indent(code, '    '))
 
-        before = time.monotonic()
         try:
-            exec(_code, self._eval['env'])
+            exec(_code, self.env)
 
-            func = self._eval['env']['func']
-            output = await func(self)
+            func = self.env['func']
+            output = await func()
 
-            if output:
-                output = repr(output)
-            else:
-                output = str(output)
+            output = repr(output) if output else str(output)
         except Exception as e:
             output = '{}: {}'.format(type(e).__name__, e)
-        after = time.monotonic()
-        self._eval['count'] += 1
-        count = self._eval['count']
 
         code = code.split('\n')
-        if len(code) == 1:
-            _in = 'In [{}]: {}'.format(count, code[0])
-        else:
-            _first_line = code[0]
-            _rest = code[1:]
-            _rest = '\n'.join(_rest)
-            _countlen = len(str(count)) + 2
-            _rest = textwrap.indent(_rest, '...: ')
-            _rest = textwrap.indent(_rest, ' ' * _countlen)
-            _in = 'In [{}]: {}\n{}'.format(count, _first_line, _rest)
+        s = ''
+        for i, line in enumerate(code):
+            s += '>>> ' if i == 0 else '... '
+            s += line + '\n'
 
-        message = '```py\n{}'.format(_in)
-        if output:
-            message += '\nOut[{}]: {}'.format(count, output)
-        ms = int(round((after - before) * 1000))
-        message += '\n# {} ms\n```'.format(ms)
+        message = f'```py\n{s}\n{output}\n```'
 
-        if not silent:
-            try:
-                await ctx.send(message)
-            except discord.HTTPException:
-                await ctx.send("Output was too big to be printed.")
+        try:
+            await ctx.send(message)
+        except discord.HTTPException:
+            paste = await hastepaste.create(message)
+            await ctx.send(f'Output too big: <{paste}>')
 
     @commands.command()
     @commands.is_owner()

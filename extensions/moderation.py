@@ -5,7 +5,8 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import errors
 
-from utils import interaction, timeparser, hastepaste
+from utils import hastepaste, interaction, timeparser
+from utils.idconverter import IDConverter
 
 
 class Helpers:
@@ -116,7 +117,7 @@ class Moderation:
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     @commands.guild_only()
-    async def ban(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):  # TODO: Custom converter to support hackbans
+    async def ban(self, ctx, member: IDConverter, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Bans a user from the server
 
         Timed bans: For the reason parameter, specify a time, unit and then your reason. E.g:
@@ -125,19 +126,24 @@ class Moderation:
         Where 5s means 5 seconds. Supported units: seconds, minutes, hours, days, weeks.
         When using a unit, specify the first letter (seconds -> s, minutes -> m etc...)
         """
+        return await ctx.send(str(member))
         interaction.check_hierarchy(ctx, member)
 
         time, reason = timeparser.convert(reason)
 
-        await member.ban(reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
-        await ctx.message.add_reaction('🔨')
-        await self.bot.db.remove_timed_entry(ctx.guild.id, member.id, 'mutes')  # Delete any timed mutes this user has
-
-        if time:
-            await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason, str(time))
-            await self.helpers.create_timed_ban(ctx.guild.id, member.id, time.absolute)
+        try:
+            await member.ban(reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
+        except discord.NotFound:
+            raise commands.BadArgument('member is not a valid user/id')
         else:
-            await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason)
+            await ctx.message.add_reaction('🔨')
+            await self.bot.db.remove_timed_entry(ctx.guild.id, member.id, 'mutes')  # Delete any timed mutes this user has
+
+            if time:
+                await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason, str(time))
+                await self.helpers.create_timed_ban(ctx.guild.id, member.id, time.absolute)
+            else:
+                await self.helpers.post_modlog_entry(ctx.guild.id, 'Banned', member, ctx.author, reason)
 
     @commands.command(aliases=['k'])
     @commands.has_permissions(kick_members=True)
