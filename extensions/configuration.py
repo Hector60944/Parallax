@@ -136,7 +136,7 @@ class Configuration:
     async def antiinvite(self, ctx, setting: bool):
         """ Toggles whether discord invite links are suppressed """
         config = await self.bot.db.get_config(ctx.guild.id)
-        config.update({'antiInvite', setting})
+        config.update({'antiInvite': setting})
         await self.helpers.set_config(ctx.guild.id, config)
 
         return await ctx.send(f'Invite Killer **{"enabled" if setting else "disabled"}**')
