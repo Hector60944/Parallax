@@ -78,7 +78,7 @@ class Moderation:
 
     @dehoist.command()
     async def cancer(self, ctx):
-        """ Dehoist names starting with unicode characters """
+        """ Dehoists names starting with unicode characters """
         msg = await ctx.send('Please wait...')
         failed = 0
 
