@@ -68,6 +68,7 @@ class Moderation:
     @commands.guild_only()
     @commands.has_permissions(manage_nicknames=True)
     @commands.bot_has_permissions(manage_nicknames=True)
+    @commands.cooldown(rate=1, per=10.0, bucket=commands.BucketType.guild)
     async def dehoist(self, ctx):
         """ Renames users who hoist themselves to the top of the member list """
         if not ctx.invoked_subcommand:
@@ -131,6 +132,21 @@ class Moderation:
         failed = 0
 
         members = [m for m in ctx.guild.members if m.display_name.starts_with(prefix)][:100]
+        for m in members:
+            try:
+                await m.edit(nick='ЬооЬѕ')
+            except (discord.HTTPException, discord.Forbidden):
+                failed += 1
+
+        embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
+        await msg.edit(content=None, embed=embed)
+
+    @dehoist.command(name='all')
+    async def _all(self, ctx):
+        msg = await ctx.send('Please wait...')
+        failed = 0
+
+        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name) or no_numbers_regex.search(m.display_name) or no_symbols_regex.search(m.display_name)][:100]
         for m in members:
             try:
                 await m.edit(nick='ЬооЬѕ')
