@@ -1,12 +1,14 @@
 import asyncio
+import regex
 from datetime import datetime
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import errors
 
 from utils import hastepaste, interaction, timeparser
 from utils.idconverter import IDConverter
+
+no_cancer_regex = regex.compile(r'[^\p{L}\p{M}\s+]')
 
 
 class Helpers:
@@ -59,6 +61,32 @@ class Moderation:
     def __init__(self, bot):
         self.bot = bot
         self.helpers = Helpers(bot)
+
+    @commands.group()
+    @commands.guild_only()
+    @commands.has_permissions(manage_nicknames=True)
+    @commands.bot_has_permissions(manage_nicknames=True)
+    async def dehoist(self, ctx):
+        """ Renames users who hoist themselves to the top of the member list """
+        if not ctx.invoked_subcommand:
+            _help = await self.bot.formatter.format_help_for(ctx, ctx.command)
+
+            for page in _help:
+                await ctx.send(page)
+
+    async def cancer(self, ctx):
+        """ Removes unicode characters, preserves normal and accented characters """
+        failed = 0
+
+        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name)][:50]
+        for m in members:
+            try:
+                await m.edit(nick=no_cancer_regex.sub('', m.display_name))
+            except (discord.HTTPException, discord.Forbidden):
+                failed += 1
+
+        embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
+        return await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
@@ -342,7 +370,7 @@ class Moderation:
             return await ctx.send('**Missing required permissions:**\n-Move Members')
 
         if not users:
-            raise errors.BadArgument
+            raise commands.errors.BadArgument('users to voicekick must be specified')
 
         dest = await ctx.guild.create_voice_channel(name='voicekick', reason=f'[ {ctx.author} ] Voicekick')
         in_voice = [m for m in users if m.voice and m.voice.channel and m.voice.channel.permissions_for(ctx.me).move_members]
