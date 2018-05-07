@@ -131,7 +131,7 @@ class Moderation:
         msg = await ctx.send('Please wait...')
         failed = 0
 
-        members = [m for m in ctx.guild.members if m.display_name.starts_with(prefix)][:100]
+        members = [m for m in ctx.guild.members if m.display_name.startswith(prefix)][:100]
         for m in members:
             try:
                 await m.edit(nick='ЬооЬѕ')
