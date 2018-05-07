@@ -77,7 +77,7 @@ class Moderation:
     @dehoist.command()
     async def cancer(self, ctx):
         """ Removes unicode characters, preserves normal and accented characters """
-        m = await ctx.send('Please wait...')
+        msg = await ctx.send('Please wait...')
         failed = 0
 
         members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name)][:50]
@@ -88,7 +88,7 @@ class Moderation:
                 failed += 1
 
         embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
-        await m.edit(embed=embed)
+        await msg.edit(embed=embed)
 
     @commands.command()
     @commands.guild_only()
