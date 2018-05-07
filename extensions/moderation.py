@@ -8,7 +8,7 @@ from discord.ext import commands
 from utils import hastepaste, interaction, timeparser
 from utils.idconverter import IDConverter
 
-no_cancer_regex = regex.compile(r'[^\p{L}\p{M}\s+]')
+no_cancer_regex = regex.compile(r'[^\p{L}\p{M}\s+0-9]')
 
 
 class Helpers:
@@ -77,6 +77,7 @@ class Moderation:
     @dehoist.command()
     async def cancer(self, ctx):
         """ Removes unicode characters, preserves normal and accented characters """
+        m = await ctx.send('Please wait...')
         failed = 0
 
         members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name)][:50]
@@ -87,7 +88,7 @@ class Moderation:
                 failed += 1
 
         embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
-        return await ctx.send(embed=embed)
+        await m.edit(embed=embed)
 
     @commands.command()
     @commands.guild_only()
