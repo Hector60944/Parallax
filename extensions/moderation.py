@@ -8,7 +8,9 @@ from discord.ext import commands
 from utils import hastepaste, interaction, timeparser
 from utils.idconverter import IDConverter
 
-no_cancer_regex = regex.compile(r'[^\p{L}\p{M}\s+0-9]')
+no_cancer_regex = regex.compile(r'^[^\p{L}\p{M}\s+0-9]')
+no_symbols_regex = regex.compile(r'^[^a-zA-Z0-9]')
+no_numbers_regex = regex.compile(r'^[0-9]')
 
 
 class Helpers:
@@ -76,19 +78,67 @@ class Moderation:
 
     @dehoist.command()
     async def cancer(self, ctx):
-        """ Removes unicode characters, preserves normal and accented characters """
+        """ Dehoist names starting with unicode characters """
         msg = await ctx.send('Please wait...')
         failed = 0
 
-        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name)][:50]
+        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name)][:100]
         for m in members:
             try:
-                await m.edit(nick=no_cancer_regex.sub('', m.display_name))
+                await m.edit(nick='ЬооЬѕ')
             except (discord.HTTPException, discord.Forbidden):
                 failed += 1
 
         embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
-        await msg.edit(embed=embed)
+        await msg.edit(content=None, embed=embed)
+
+    @dehoist.command()
+    async def symbols(self, ctx):
+        """ Dehoists names starting with symbols """
+        msg = await ctx.send('Please wait...')
+        failed = 0
+
+        members = [m for m in ctx.guild.members if no_symbols_regex.search(m.display_name)][:100]
+        for m in members:
+            try:
+                await m.edit(nick='ЬооЬѕ')
+            except (discord.HTTPException, discord.Forbidden):
+                failed += 1
+
+        embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
+        await msg.edit(content=None, embed=embed)
+
+    @dehoist.command()
+    async def numbers(self, ctx):
+        """ Dehoists names starting with numbers """
+        msg = await ctx.send('Please wait...')
+        failed = 0
+
+        members = [m for m in ctx.guild.members if no_numbers_regex.search(m.display_name)][:100]
+        for m in members:
+            try:
+                await m.edit(nick='ЬооЬѕ')
+            except (discord.HTTPException, discord.Forbidden):
+                failed += 1
+
+        embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
+        await msg.edit(content=None, embed=embed)
+
+    @dehoist.command()
+    async def custom(self, ctx, *, prefix: str):
+        """ Dehoists names starting with the given prefix """
+        msg = await ctx.send('Please wait...')
+        failed = 0
+
+        members = [m for m in ctx.guild.members if m.display_name.starts_with(prefix)][:100]
+        for m in members:
+            try:
+                await m.edit(nick='ЬооЬѕ')
+            except (discord.HTTPException, discord.Forbidden):
+                failed += 1
+
+        embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
+        await msg.edit(content=None, embed=embed)
 
     @commands.command()
     @commands.guild_only()
