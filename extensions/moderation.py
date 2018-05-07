@@ -68,7 +68,7 @@ class Moderation:
     @commands.guild_only()
     @commands.has_permissions(manage_nicknames=True)
     @commands.bot_has_permissions(manage_nicknames=True)
-    @commands.cooldown(rate=1, per=10.0, bucket=commands.BucketType.guild)
+    @commands.cooldown(rate=1, per=10.0, type=commands.BucketType.guild)
     async def dehoist(self, ctx):
         """ Renames users who hoist themselves to the top of the member list """
         if not ctx.invoked_subcommand:
