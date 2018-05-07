@@ -53,10 +53,13 @@ class Modules:
 
     async def anti_invite(self, ctx):
         invite = invite_rx.search(ctx.content)
+        if isinstance(ctx.author, discord.User):
+            print(f'Encountered a user on anti_invite:\n\tAuthor Type: {type(ctx.author)}\n\tChannel Type: {type(ctx.channel)}\n\tUser: {str(ctx.author)}\n\tIs Bot: {ctx.author.bot}')
+            return
 
-        if not interaction.check_bot_has(ctx, manage_messages=True) or \
-                not interaction._check_hierarchy(ctx.guild.me, ctx.author, True, True) or interaction.check_user_has(ctx, manage_messages=True) or \
-                not invite:
+        if not invite or \
+                not interaction.check_bot_has(ctx, manage_messages=True) or \
+                not interaction._check_hierarchy(ctx.guild.me, ctx.author, True, True) or interaction.check_user_has(ctx, kick_members=True):
             return
 
         if not await self.helpers.is_valid_advert(invite.group(), ctx.guild.id):
