@@ -74,6 +74,7 @@ class Moderation:
             for page in _help:
                 await ctx.send(page)
 
+    @dehoist.command()
     async def cancer(self, ctx):
         """ Removes unicode characters, preserves normal and accented characters """
         failed = 0
