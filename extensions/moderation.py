@@ -143,6 +143,7 @@ class Moderation:
 
     @dehoist.command(name='all')
     async def _all(self, ctx):
+        """ Dehoists names using a combination of all available presets """
         msg = await ctx.send('Please wait...')
         failed = 0
 
