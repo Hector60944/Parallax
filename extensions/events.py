@@ -39,7 +39,7 @@ class Events:
         if channel:
             embed = discord.Embed(color=0xbe2f2f, description=message.content)
             embed.set_author(name=str(message.author), icon_url=message.author.avatar_url_as(format='png'))
-            embed.set_footer(text=f'Channel: {message.channel.name} | Message ID: {message.id}')
+            embed.set_footer(text=f'#{message.channel.name} | Message ID: {message.id}')
             try:
                 await channel.send(embed=embed)
             except (discord.HTTPException, discord.Forbidden):
