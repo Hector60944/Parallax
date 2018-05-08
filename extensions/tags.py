@@ -32,7 +32,7 @@ class Tags:
     @commands.group(aliases=['tags'], invoke_without_command=True)
     async def tag(self, ctx, *, tag_name: str=None):
         """ Create tags unique to you
-        
+
         Specify tag_name to view a tag
         """
         if not ctx.invoked_subcommand and not tag_name:
