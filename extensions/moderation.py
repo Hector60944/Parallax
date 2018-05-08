@@ -273,9 +273,9 @@ class Moderation:
     async def clean(self, ctx, amount: int, options: str=None, *users: discord.Member):
         """ Deletes messages in a channel
 
-        You can remove messages sent by bots by specifying 'bot' as the filter.
-        You can remove messages by users by specifying 'user' as the filter.
-        You can remove messages by specific users by mentioning them after specifying 'user' as the filter.
+        Valid options/filters:
+            bot   - Removes messages sent by bots
+            user  - Removes messages sent by users. Target specific users' messages by mentioning them
         """
         amount = max(min(amount, 1000), 0)
         pred = None
