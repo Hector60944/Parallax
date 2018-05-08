@@ -37,8 +37,9 @@ class Events:
         channel = get_channel(self.bot, config['messages']['deleteLog'])
 
         if channel:
-            embed = discord.Embed(color=0xbe2f2f, description=f'Message ID: {message.id}\n\n{message.content}')
+            embed = discord.Embed(color=0xbe2f2f, description=message.content)
             embed.set_author(name=str(message.author), icon_url=message.author.avatar_url_as(format='png'))
+            embed.set_footer(text=f'Message ID: {message.id}')
             try:
                 await channel.send(embed=embed)
             except (discord.HTTPException, discord.Forbidden):
