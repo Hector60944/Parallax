@@ -21,6 +21,7 @@ class Database:
                 'messages': {
                     'joinLog': None,
                     'leaveLog': None,
+                    'deleteLog': None,
                     'joinMessage': {
                         'message': '',
                         'channel': None

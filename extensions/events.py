@@ -4,7 +4,7 @@ from datetime import datetime
 import discord
 from discord.ext.commands import errors
 
-from utils.interaction import HierarchicalError
+from utils.interaction import HierarchicalError, get_channel
 
 invite_rx = re.compile(r'discord(?:app\.com\/invite|\.gg)\/([a-z0-9]{1,16})', re.IGNORECASE)
 
@@ -33,27 +33,35 @@ class Events:
 
         await self.bot.r.table('snipes').insert(store, conflict='replace').run(self.bot.connection)
 
+        config = await self.bot.db.get_config(message.guild.id)
+        channel = get_channel(config['messages']['deleteLog'])
+
+        if channel:
+            embed = discord.Embed(color=0xbe2f2f, description=f'Message ID: {message.id}\n\n{message.content}')
+            embed.set_author(name=str(message.author), icon_url=message.author.avatar_url_as(format='png'))
+            try:
+                await channel.send(embed=embed)
+            except (discord.HTTPException, discord.Forbidden):
+                pass
+
     async def on_member_join(self, member):
         config = await self.bot.db.get_config(member.guild.id)
         account_age = config['accountAge']
         verification = config['verificationRole']
 
-        log = config['messages']['joinLog']
+        log = get_channel(config['messages']['joinLog'])
         join = config['messages']['joinMessage']
 
         category = 'bots' if member.bot else 'users'
         assigned = config['autorole'][category]
 
         if log:
-            channel = self.bot.get_channel(int(log))
-
-            if channel:
-                embed = discord.Embed(color=0x3f94e8, description='Member Joined', timestamp=datetime.utcnow())
-                embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
-                try:
-                    await channel.send(embed=embed)
-                except (discord.Forbidden, discord.HTTPException):
-                    pass
+            embed = discord.Embed(color=0x3f94e8, description='Member Joined', timestamp=datetime.utcnow())
+            embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
+            try:
+                await log.send(embed=embed)
+            except (discord.Forbidden, discord.HTTPException):
+                pass
 
         if account_age and verification and member.guild.me.guild_permissions.manage_roles:
             now = datetime.utcnow()
@@ -92,19 +100,16 @@ class Events:
 
     async def on_member_remove(self, member):
         config = await self.bot.db.get_config(member.guild.id)
-        log = config['messages']['leaveLog']
+        log = get_channel(config['messages']['leaveLog'])
         leave = config['messages']['leaveMessage']
 
         if log:
-            channel = self.bot.get_channel(int(log))
-
-            if channel:
-                embed = discord.Embed(color=0x3f94e8, description='Member Left', timestamp=datetime.utcnow())
-                embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
-                try:
-                    await channel.send(embed=embed)
-                except (discord.Forbidden, discord.HTTPException):
-                    pass
+            embed = discord.Embed(color=0x3f94e8, description='Member Left', timestamp=datetime.utcnow())
+            embed.set_author(name=f'{str(member)} ({member.id})', icon_url=member.avatar_url)
+            try:
+                await log.send(embed=embed)
+            except (discord.Forbidden, discord.HTTPException):
+                pass
 
         if leave['message'] and leave['channel'] and not member.bot:
             channel = self.bot.get_channel(int(leave['channel']))

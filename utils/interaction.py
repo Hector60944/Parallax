@@ -43,3 +43,10 @@ def check_bot_has(ctx, **permissions):
 def check_user_has(ctx, **permissions):
     channel_permissions = ctx.channel.permissions_for(ctx.author)
     return all(getattr(channel_permissions, k, None) is v for k, v in permissions.items())
+
+
+def get_channel(bot, channel_id):
+    if not channel_id:
+        return None
+
+    return bot.get_channel(int(channel_id))

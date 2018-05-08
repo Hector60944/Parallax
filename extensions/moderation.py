@@ -40,23 +40,22 @@ class Helpers:
 
     async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str, time: str='', color=0xbe2f2f):
         config = await self.bot.db.get_config(guild_id)
+        log = interaction.get_channel(config['logChannel'])
 
-        if config['logChannel']:
-            channel = self.bot.get_channel(int(config['logChannel']))
-            if channel:
-                permissions = channel.permissions_for(channel.guild.me)
-                if permissions.send_messages and permissions.embed_links:
-                    embed = discord.Embed(color=color,
-                                          title=f'**User {action}**',
-                                          description=f'**Target:** {target} ({target.id})\n'
-                                                      f'**Reason:** {reason}',
-                                          timestamp=datetime.utcnow())
-                    embed.set_footer(text=f'Performed by {moderator}', icon_url=moderator.avatar_url_as(format='png'))
+        if log:
+            permissions = log.permissions_for(log.guild.me)
+            if permissions.send_messages and permissions.embed_links:
+                embed = discord.Embed(color=color,
+                                      title=f'**User {action}**',
+                                      description=f'**Target:** {target} ({target.id})\n'
+                                                  f'**Reason:** {reason}',
+                                      timestamp=datetime.utcnow())
+                embed.set_footer(text=f'Performed by {moderator}', icon_url=moderator.avatar_url_as(format='png'))
 
-                    if time:
-                        embed.description += f'\n**Duration:** {time}'
+                if time:
+                    embed.description += f'\n**Duration:** {time}'
 
-                    await channel.send(embed=embed)
+                await log.send(embed=embed)
 
 
 class Moderation:

@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 
 from utils import timeparser
+from utils.interaction import get_channel
 
 
 class Helpers:
@@ -29,12 +30,6 @@ class Helpers:
                 .run(self.bot.connection)) \
                 .get('prefix', None)
 
-    def get_channel(self, channel_id: str):
-        if not channel_id:
-            return None
-
-        return self.bot.get_channel(int(channel_id))
-
 
 class Configuration:
     def __init__(self, bot):
@@ -45,7 +40,9 @@ class Configuration:
     @commands.is_owner()
     async def migrate(self, ctx):
         migrate_data = {
-            'modOnly': False
+            'messages': {
+                'deleteLog': None
+            }
         }
         m = await ctx.send('Migrating all server settings...')
         await self.bot.r.table('settings').update(migrate_data).run(self.bot.connection)
@@ -230,6 +227,19 @@ class Configuration:
         await self.helpers.set_config(ctx.guild.id, config)
 
     @config.command()
+    async def deletelog(self, ctx, *, channel: discord.TextChannel=None):
+        """ Log when a message is deleted """
+        config = await self.bot.db.get_config(ctx.guild.id)
+        if not channel:
+            config['messages']['deleteLog'] = None
+            await ctx.send(f'Setting cleared.')
+        else:
+            config['messages']['deleteLog'] = str(channel.id)
+            await ctx.send(f'Delete log channel set to **{channel.name}**')
+
+        await self.helpers.set_config(ctx.guild.id, config)
+
+    @config.command()
     async def welcomechannel(self, ctx, channel: discord.TextChannel=None):
         """ Sets the welcome message channel """
         config = await self.bot.db.get_config(ctx.guild.id)
@@ -311,31 +321,33 @@ class Configuration:
         prefix = await self.helpers.get_prefix(ctx.guild.id) or self.bot.config.get('prefixes')[0]
         verification = discord.utils.get(ctx.guild.roles, id=int(config['verificationRole'])) if config['verificationRole'] else None
         mute_role = discord.utils.get(ctx.guild.roles, id=int(config['mutedRole'])) if config['mutedRole'] else None
-        log_channel = self.helpers.get_channel(config['logChannel'])
-        welcome_channel = self.helpers.get_channel(_event['joinMessage']['channel'])
-        leave_channel = self.helpers.get_channel(_event['leaveMessage']['channel'])
-        join_log = self.helpers.get_channel(_event['joinLog'])
-        leave_log = self.helpers.get_channel(_event['leaveLog'])
+        log_channel = get_channel(config['logChannel'])
+        welcome_channel = get_channel(_event['joinMessage']['channel'])
+        leave_channel = get_channel(_event['leaveMessage']['channel'])
+        join_log = get_channel(_event['joinLog'])
+        leave_log = get_channel(_event['leaveLog'])
+        delete_log = get_channel(_event['deleteLog'])
 
         await ctx.send(f'''**Server Configuration | {ctx.guild.name}**
 ```prolog
-Prefix        : {prefix}
-Mod-Only      : {'on' if config['modOnly'] else 'off'}
-Anti-Invite   : {'on' if config['antiInvite'] else 'off'}
-Muted Role    : {mute_role.name if mute_role else ''}
-Warning Limit : {config['warnThreshold']}
-Min Acc. Age  : {config['accountAge'] or 'off'}
-Verif. Role   : {verification.name if verification else 'None'}
+Prefix       : {prefix}
+Mod-Only     : {'on' if config['modOnly'] else 'off'}
+Anti-Invite  : {'on' if config['antiInvite'] else 'off'}
+Muted Role   : {mute_role.name if mute_role else ''}
+Warning Limit: {config['warnThreshold']}
+Min Acc. Age : {config['accountAge'] or 'off'}
+Verif. Role  : {verification.name if verification else 'None'}
 Autorole
-  ╚ Bots      : {" ".join(config["autorole"]["bots"])}
-  ╚ Users     : {" ".join(config["autorole"]["users"])}
+  Bots       : {" ".join(config["autorole"]["bots"])}
+  Users      : {" ".join(config["autorole"]["users"])}
 Announce
-  ╚ Welcome   : {welcome_channel.name if welcome_channel else ''}
-  ╚ Leave     : {leave_channel.name if leave_channel else ''}
+  Welcome    : {welcome_channel.name if welcome_channel else ''}
+  Leave      : {leave_channel.name if leave_channel else ''}
 Log Channels
-  ╚ Join      : {join_log.name if join_log else ''}
-  ╚ Leave     : {leave_log.name if leave_log else ''}
-  ╚ Moderation: {log_channel.name if log_channel else ''}
+  Join       : {join_log.name if join_log else ''}
+  Leave      : {leave_log.name if leave_log else ''}
+  Deletes    : {delete_log.name if delete_log else ''}
+  Moderation : {log_channel.name if log_channel else ''}
 ```
         ''')
 
