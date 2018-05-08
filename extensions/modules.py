@@ -15,7 +15,7 @@ class Helpers:
 
     async def get_log_channel(self, guild_id: int):
         channel = (await self.bot.r.table('settings').get(str(guild_id)).default({}).run(self.bot.connection)).get('logChannel', None)
-        return interaction.get_channel(channel)
+        return interaction.get_channel(self.bot, channel)
 
     async def anti_invite(self, guild_id: int):
         return (await self.bot.r.table('settings').get(str(guild_id)).default({}).run(self.bot.connection)).get('antiInvite', False)

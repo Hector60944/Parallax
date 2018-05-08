@@ -40,7 +40,7 @@ class Helpers:
 
     async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str, time: str='', color=0xbe2f2f):
         config = await self.bot.db.get_config(guild_id)
-        log = interaction.get_channel(config['logChannel'])
+        log = interaction.get_channel(self.bot, config['logChannel'])
 
         if log:
             permissions = log.permissions_for(log.guild.me)

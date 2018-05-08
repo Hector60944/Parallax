@@ -321,12 +321,12 @@ class Configuration:
         prefix = await self.helpers.get_prefix(ctx.guild.id) or self.bot.config.get('prefixes')[0]
         verification = discord.utils.get(ctx.guild.roles, id=int(config['verificationRole'])) if config['verificationRole'] else None
         mute_role = discord.utils.get(ctx.guild.roles, id=int(config['mutedRole'])) if config['mutedRole'] else None
-        log_channel = get_channel(config['logChannel'])
-        welcome_channel = get_channel(_event['joinMessage']['channel'])
-        leave_channel = get_channel(_event['leaveMessage']['channel'])
-        join_log = get_channel(_event['joinLog'])
-        leave_log = get_channel(_event['leaveLog'])
-        delete_log = get_channel(_event['deleteLog'])
+        log_channel = get_channel(self.bot, config['logChannel'])
+        welcome_channel = get_channel(self.bot, _event['joinMessage']['channel'])
+        leave_channel = get_channel(self.bot, _event['leaveMessage']['channel'])
+        join_log = get_channel(self.bot, _event['joinLog'])
+        leave_log = get_channel(self.bot, _event['leaveLog'])
+        delete_log = get_channel(self.bot, _event['deleteLog'])
 
         await ctx.send(f'''**Server Configuration | {ctx.guild.name}**
 ```prolog

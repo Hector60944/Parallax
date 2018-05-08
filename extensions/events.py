@@ -34,7 +34,7 @@ class Events:
         await self.bot.r.table('snipes').insert(store, conflict='replace').run(self.bot.connection)
 
         config = await self.bot.db.get_config(message.guild.id)
-        channel = get_channel(config['messages']['deleteLog'])
+        channel = get_channel(self.bot, config['messages']['deleteLog'])
 
         if channel:
             embed = discord.Embed(color=0xbe2f2f, description=f'Message ID: {message.id}\n\n{message.content}')
@@ -49,7 +49,7 @@ class Events:
         account_age = config['accountAge']
         verification = config['verificationRole']
 
-        log = get_channel(config['messages']['joinLog'])
+        log = get_channel(self.bot, config['messages']['joinLog'])
         join = config['messages']['joinMessage']
 
         category = 'bots' if member.bot else 'users'
@@ -100,7 +100,7 @@ class Events:
 
     async def on_member_remove(self, member):
         config = await self.bot.db.get_config(member.guild.id)
-        log = get_channel(config['messages']['leaveLog'])
+        log = get_channel(self.bot, config['messages']['leaveLog'])
         leave = config['messages']['leaveMessage']
 
         if log:
