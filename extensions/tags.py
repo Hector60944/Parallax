@@ -29,7 +29,7 @@ class Tags:
             .insert(tags, conflict='update') \
             .run(self.bot.connection)
 
-    @commands.group()
+    @commands.group(aliases=['tags'])
     async def tag(self, ctx):
         """ Create, view and edit tags. Specify tag name to view tag """
         if not ctx.invoked_subcommand:
