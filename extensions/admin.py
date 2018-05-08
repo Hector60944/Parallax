@@ -20,6 +20,24 @@ class Admin:
 
     @commands.command()
     @commands.is_owner()
+    async def reload(self, ctx, *modules: str):
+        """ Reload an extension """
+        failed = []
+        for module in modules:
+            try:
+                self.bot.unload_extension(f'extensions.{module}')
+                self.bot.load_extension(f'extensions.{module}')
+            except (ImportError, SyntaxError, ModuleNotFoundError) as exception:
+                failed.append((module, str(exception)))
+
+        if failed:
+            formatted = '\n'.join([f'{f[0]:15} - {f[1]}' for f in failed])
+            await ctx.send(f'**{len(failed)}** extensions failed to reload\n```\n{formatted}```')
+        else:
+            await ctx.send('All modules reloaded successfully.')
+
+    @commands.command()
+    @commands.is_owner()
     async def cleanup(self, ctx, amount: int):
         """ Cleans up messages sent by the bot """
         if amount <= 0 or amount > 100:
