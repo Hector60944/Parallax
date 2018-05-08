@@ -29,24 +29,24 @@ class Tags:
             .insert(tags, conflict='update') \
             .run(self.bot.connection)
 
-    @commands.group(aliases=['tags'])
-    async def tag(self, ctx):
-        """ Create tags unique to you """
-        if not ctx.invoked_subcommand:
+    @commands.group(aliases=['tags'], invoke_without_command=True)
+    async def tag(self, ctx, *, tag_name: str=None):
+        """ Create tags unique to you
+        
+        Specify tag_name to view a tag
+        """
+        if not ctx.invoked_subcommand and not tag_name:
             _help = await self.bot.formatter.format_help_for(ctx, ctx.command)
 
             for page in _help:
                 await ctx.send(page)
+        elif tag_name:
+            tag = await self.get_tag(ctx.author.id, tag_name)
 
-    @tag.command()
-    async def view(self, ctx, *, tag_name: str):
-        """ View an existing tag """
-        tag = await self.get_tag(ctx.author.id, tag_name)
-
-        if not tag:
-            return await ctx.send('No tags created by you found matching that name.')
-        else:
-            await ctx.send(tag)
+            if not tag:
+                return await ctx.send('No tags created by you found matching that name.')
+            else:
+                await ctx.send(tag)
 
     @tag.command()
     async def create(self, ctx, tag_name: str, *, tag_content: commands.clean_content(fix_channel_mentions=True)):
