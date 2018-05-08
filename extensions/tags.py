@@ -31,7 +31,7 @@ class Tags:
 
     @commands.group(aliases=['tags'])
     async def tag(self, ctx):
-        """ Create, view and edit tags. Specify tag name to view tag """
+        """ Create tags unique to you """
         if not ctx.invoked_subcommand:
             _help = await self.bot.formatter.format_help_for(ctx, ctx.command)
 
