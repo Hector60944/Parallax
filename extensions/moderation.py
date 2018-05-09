@@ -270,7 +270,7 @@ class Moderation:
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
     @commands.guild_only()
-    async def clean(self, ctx, amount: int, options: str=None, *users: discord.Member):
+    async def clean(self, ctx, amount: int=100, options: str=None, *users: discord.Member):
         """ Deletes messages in a channel
 
         Valid options/filters:
