@@ -274,8 +274,9 @@ class Moderation:
         """ Deletes messages in a channel
 
         Valid options/filters:
-            bot   - Removes messages sent by bots
-            user  - Removes messages sent by users. Target specific users' messages by mentioning them
+            bot    - Removes messages sent by bots
+            user   - Removes messages sent by users. Target specific users' messages by mentioning them
+            images - Removes messages that have image attachments
         """
         amount = max(min(amount, 1000), 0)
         pred = None
@@ -283,11 +284,13 @@ class Moderation:
         if options:
             if 'bot' in options:
                 pred = lambda m: m.author.bot  # noqa: E731
-            if 'user' in options:
+            elif 'user' in options:
                 if users:
                     pred = lambda m: any(m.author.id == u.id for u in users)  # noqa: E731
                 else:
                     pred = lambda m: not m.author.bot  # noqa: E731
+            elif 'images' in options:
+                pred = lambda m: len(m.attachments) > 0
 
         if amount <= 0:
             return await ctx.send('Specify an amount above 0')
