@@ -82,7 +82,7 @@ class Moderation:
         msg = await ctx.send('Please wait...')
         failed = 0
 
-        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name)][:100]
+        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name)][:200]
         for m in members:
             try:
                 await m.edit(nick='ЬооЬѕ')
@@ -98,7 +98,7 @@ class Moderation:
         msg = await ctx.send('Please wait...')
         failed = 0
 
-        members = [m for m in ctx.guild.members if no_symbols_regex.search(m.display_name)][:100]
+        members = [m for m in ctx.guild.members if no_symbols_regex.search(m.display_name)][:200]
         for m in members:
             try:
                 await m.edit(nick='ЬооЬѕ')
@@ -114,7 +114,7 @@ class Moderation:
         msg = await ctx.send('Please wait...')
         failed = 0
 
-        members = [m for m in ctx.guild.members if no_numbers_regex.search(m.display_name)][:100]
+        members = [m for m in ctx.guild.members if no_numbers_regex.search(m.display_name)][:200]
         for m in members:
             try:
                 await m.edit(nick='ЬооЬѕ')
@@ -130,7 +130,7 @@ class Moderation:
         msg = await ctx.send('Please wait...')
         failed = 0
 
-        members = [m for m in ctx.guild.members if m.display_name.startswith(prefix)][:100]
+        members = [m for m in ctx.guild.members if m.display_name.startswith(prefix)][:200]
         for m in members:
             try:
                 await m.edit(nick='ЬооЬѕ')
@@ -146,7 +146,7 @@ class Moderation:
         msg = await ctx.send('Please wait...')
         failed = 0
 
-        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name) or no_numbers_regex.search(m.display_name) or no_symbols_regex.search(m.display_name)][:100]
+        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name) or no_numbers_regex.search(m.display_name) or no_symbols_regex.search(m.display_name)][:200]
         for m in members:
             try:
                 await m.edit(nick='ЬооЬѕ')
