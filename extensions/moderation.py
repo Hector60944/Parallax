@@ -266,40 +266,51 @@ class Moderation:
         await ctx.message.add_reaction('👢')
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Kicked', member, ctx.author, reason)
 
-    @commands.command(aliases=['d', 'purge', 'prune', 'clear', 'delete', 'remove'])
+    @commands.group(aliases=['d', 'purge', 'prune', 'clear', 'delete', 'remove'])
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
     @commands.guild_only()
-    async def clean(self, ctx, amount: int=100, options: str=None, *users: discord.Member):
-        """ Deletes messages in a channel
+    async def clean(self, ctx):
+        """ Deletes messages in a channel """
+        if not ctx.invoked_subcommand:
+            _help = await self.bot.formatter.format_help_for(ctx, ctx.command)
 
-        Valid options/filters:
-            bot         - Removes messages sent by bots
-            user        - Removes messages sent by users. Target specific users' messages by mentioning them
-            images      - Removes messages that have image attachments
-            attachments - Removes messages that have any attachments
-        """
-        amount = max(min(amount, 1000), 0)
-        pred = None
+            for page in _help:
+                await ctx.send(page)
 
-        if options:
-            if 'bot' in options:
-                pred = lambda m: m.author.bot  # noqa: E731
-            elif 'user' in options:
-                if users:
-                    pred = lambda m: any(m.author.id == u.id for u in users)  # noqa: E731
-                else:
-                    pred = lambda m: not m.author.bot  # noqa: E731
-            elif 'images' in options:
-                pred = lambda m: len(m.attachments) > 0 and any(a for a in m.attachments if a.url[-3:].lower() in ['jpg', 'gif', 'png', 'webp'])  # noqa: E731
-            elif 'attachments' in options:
-                pred = lambda m: len(m.attachments) > 0  # noqa: E731
+    @clean.command()
+    async def attachments(self, ctx, amount: int=100):
+        await self.remove(ctx, amount, lambda m: len(m.attachments) > 0)  # noqa: E731
 
+    @clean.command()
+    async def images(self, ctx, amount: int=100):
+        await self.remove(ctx, amount, lambda m: len(m.attachments) > 0 and any(a for a in m.attachments if a.url[-3:].lower() in ['jpg', 'gif', 'png', 'webp']))  # noqa: E731
+
+    @clean.command()
+    async def users(self, ctx, amount: int=100, *users: discord.Member):
+        if users:
+            await self.remove(ctx, amount, lambda m: any(m.author.id == u.id for u in users))  # noqa: E731
+        else:
+            await self.remove(ctx, amount, lambda m: not m.author.bot)  # noqa: E731
+
+    @clean.command()
+    async def bots(self, ctx, amount: int=100):
+        """ Removes all messages sent by bots """
+        await self.remove(ctx, amount, lambda m: m.author.bot)  # noqa: E731
+
+    @clean.command(name='all')
+    async def all_(self, ctx, amount: int=100):
+        """ Removes all messages """
+        await self.remove(ctx, amount, None)
+
+    async def remove(self, ctx, amount, predicate):
         if amount <= 0:
-            return await ctx.send('Specify an amount above 0')
+            return await ctx.send('Amount cannot be 0 or less.')
+
+        amount = max(min(amount, 1000), 1)
 
         try:
-            await ctx.channel.purge(limit=amount, check=pred)
+            await ctx.channel.purge(limit=amount, check=predicate)
         except discord.HTTPException:
             await ctx.send('An unknown error occurred while cleaning the channel.')
         except discord.NotFound:
