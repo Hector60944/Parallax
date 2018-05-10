@@ -280,14 +280,17 @@ class Moderation:
 
     @clean.command()
     async def attachments(self, ctx, amount: int=100):
+        """ Removes messages with any kind of attachments """
         await self.remove(ctx, amount, lambda m: len(m.attachments) > 0)  # noqa: E731
 
     @clean.command()
     async def images(self, ctx, amount: int=100):
+        """ Removes messages with image attachments """
         await self.remove(ctx, amount, lambda m: len(m.attachments) > 0 and any(a for a in m.attachments if a.url[-3:].lower() in ['jpg', 'gif', 'png', 'webp']))  # noqa: E731
 
     @clean.command()
     async def users(self, ctx, amount: int=100, *users: discord.Member):
+        """ Removes messages sent by users. Optionally specify users to remove their messages """
         if users:
             await self.remove(ctx, amount, lambda m: any(m.author.id == u.id for u in users))  # noqa: E731
         else:
