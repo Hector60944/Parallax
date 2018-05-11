@@ -29,7 +29,7 @@ class Tags:
             .insert(tags, conflict='update') \
             .run(self.bot.connection)
 
-    @commands.group(aliases=['tags'], invoke_without_command=True)
+    @commands.group(aliases=['t', 'tags'], invoke_without_command=True)
     async def tag(self, ctx, *, tag_name: str=None):
         """ Create tags unique to you
 
