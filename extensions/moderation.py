@@ -315,7 +315,7 @@ class Moderation:
         try:
             await ctx.channel.purge(limit=amount, check=predicate)
         except discord.HTTPException:
-            await ctx.send('An unknown error occurred while cleaning the channel.')
+            await ctx.send('An error occurred while cleaning the channel. Note that due to API limitations, messages older than 2 weeks *cannot* be deleted.')
         except discord.NotFound:
             pass
         else:
