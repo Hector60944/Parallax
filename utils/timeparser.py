@@ -50,8 +50,9 @@ def convert(text: str):
 
     relative = TIMES[unit] * time
     absolute = int(round(date.time())) + relative
+    human = datetime.fromtimestamp(absolute).strftime("%d-%m-%y %H:%M:%S")
 
-    return TimeFormat(absolute, relative, time, formal_unit), text[start:].strip()
+    return TimeFormat(absolute, relative, time, formal_unit, human), text[start:].strip()
 
 
 def parse(text: str):

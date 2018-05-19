@@ -14,6 +14,14 @@ class Watcher:
         except asyncio.CancelledError:
             pass
 
+    async def get_expired(self, table: str):
+        t = time.time()
+
+        return await self.r.table(table) \
+            .filter(self.r.row['due'].coerce_to('number') <= t) \
+            .coerce_to('array') \
+            .run(self.bot.connection)
+
     async def resolve_user(self, u_id: int):
         return self.bot.get_user(u_id) or await self.bot.get_user_info(u_id)
 
@@ -22,15 +30,11 @@ class Watcher:
         print('Watching for timed mutes and bans')
 
         while True:
-            now = time.time()
-            bans = await self.r.table('bans').run(self.bot.connection)
-            mutes = await self.r.table('mutes').run(self.bot.connection)
+            bans = await self.get_expired('bans')
+            mutes = await self.get_expired('mutes')
 
-            for entry in bans.items:
+            for entry in bans:
                 try:
-                    if int(entry['due']) > now:
-                        continue
-
                     guild = self.bot.get_guild(int(entry['guild_id']))
                     user = await self.resolve_user(int(entry['user_id']))
 
@@ -52,11 +56,8 @@ class Watcher:
                 except Exception as e:
                     print('Exception in unban:\n\t', e)
 
-            for entry in mutes.items:
+            for entry in mutes:
                 try:
-                    if int(entry['due']) > now:
-                        continue
-
                     guild = self.bot.get_guild(int(entry['guild_id']))
                     user = await self.resolve_user(int(entry['user_id']))
 
@@ -80,9 +81,6 @@ class Watcher:
                             await self.post_modlog_entry(int(db['logChannel']), ('Unmuted', 'Mute'), user)
                 except Exception as e:
                     print('Exception in unmute:\n\t', e)
-
-            bans.close()
-            mutes.close()
 
             await asyncio.sleep(10)  # Run every 10 seconds :D
 
