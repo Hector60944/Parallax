@@ -39,9 +39,9 @@ if __name__ == '__main__':
     bot = AutoShardedBot(command_prefix=get_prefix, help_attrs=dict(hidden=True))
     bot.startup = datetime.now()
     bot.messages_seen = 0
-    bot.db = database.Database(bot)
-    bot.connection = bot.loop.run_until_complete(r.connect(db='parallax'))
     bot.r = r
+    bot.connection = bot.loop.run_until_complete(r.connect(db='parallax'))
+    bot.db = database.Database(bot)
     bot.config = config
 
     for f in os.listdir('extensions'):

@@ -1,10 +1,13 @@
 import re
 import subprocess
 from datetime import datetime
+from time import time
 
 import discord
 import psutil
 from discord.ext import commands
+
+from utils import timeparser
 
 mention_rx = re.compile(r'<@!?(\d{16,19})>')
 activities = {
@@ -142,6 +145,19 @@ class Misc:
         embed.add_field(name='Messages Seen', value=self.bot.messages_seen, inline=True)
 
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def remindme(self, ctx, when: str, *, reminder: str):
+        parsed = timeparser.parse(when)
+
+        if not parsed or parsed.absolute <= time():
+            return await ctx.send('You must specify a valid time ahead of now.')
+
+        if parsed.relative > 15770000:  # 6 months
+            return await ctx.send('Time cannot exceed 6 months.')
+
+        await self.bot.db.add_reminder(ctx.author.id, parsed.absolute, reminder)
+        await ctx.send(f'Alright! I will remind you on **{parsed.humanized}**')
 
 
 def setup(bot):

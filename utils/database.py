@@ -1,6 +1,13 @@
+import asyncio
+from time import time
+
+import discord
+
+
 class Database:
     def __init__(self, bot):
         self.bot = bot
+        self.bot.loop.create_task(self._watch_reminders())
 
     async def get_config(self, guild_id: int):
         return await self.bot.r.table('settings') \
@@ -38,3 +45,42 @@ class Database:
             .filter({'user_id': str(user_id), 'guild_id': str(guild_id)}) \
             .delete() \
             .run(self.bot.connection)
+
+    async def add_reminder(self, author: int, due: int, content: str):
+        await self.bot.r.table('reminders') \
+            .insert({'author': str(author), 'due': due, 'content': content}) \
+            .run(self.bot.connection)
+
+    async def get_expired_reminders(self):
+        t = time()
+
+        return await self.bot.r.table('reminders') \
+            .filter(self.bot.r.row['due'] <= t) \
+            .coerce_to('array') \
+            .run(self.bot.connection)
+
+    async def delete_expired_reminders(self):
+        t = time()
+
+        await self.bot.r.table('reminders') \
+            .filter(self.bot.r.row['due'] <= t) \
+            .delete() \
+            .run(self.bot.connection)
+
+    async def _watch_reminders(self):
+        while True:
+            expired = await self.get_expired_reminders()
+            await self.delete_expired_reminders()
+
+            for reminder in expired:
+                u = self.bot.get_user(int(reminder['author']))
+
+                if not u:
+                    continue
+
+                try:
+                    await u.send(reminder['content'])
+                except (discord.HTTPException, discord.Forbidden):
+                    pass
+
+            await asyncio.sleep(10)

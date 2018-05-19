@@ -1,5 +1,7 @@
 import re
 import time as date  # Note: time.time() is UTC seconds from Jan 1 1970
+from datetime import datetime
+
 
 TIMES = {
     's': 1,
@@ -22,11 +24,12 @@ LONG_TIME_RX = re.compile('^([0-9]+) *(s(?:ec(?:ond(?:s)?)?)?|m(?:in(?:ute(?:s)?
 
 
 class TimeFormat:
-    def __init__(self, absolute: int, relative: int, amount: int, unit: str):
+    def __init__(self, absolute: int, relative: int, amount: int, unit: str, human: str):
         self.absolute = absolute
         self.relative = relative
         self.amount = amount
         self.unit = unit
+        self.humanized = human
 
     def __str__(self):
         return f'{self.amount} {self.unit}'
@@ -62,5 +65,6 @@ def parse(text: str):
 
     relative = TIMES[unit] * time
     absolute = int(round(date.time())) + relative
+    human = datetime.fromtimestamp(absolute).strftime("%d-%m-%y %H:%M:%S")
 
-    return TimeFormat(absolute, relative, time, unit)
+    return TimeFormat(absolute, relative, time, unit, human)
