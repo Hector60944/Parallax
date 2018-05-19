@@ -45,7 +45,6 @@ class Misc:
                 return None
         return user
 
-
     @commands.command()
     async def invite(self, ctx):
         """ Displays Parallax's invite """
