@@ -150,15 +150,15 @@ class Misc:
     async def remindme(self, ctx, when: str, *, reminder: str):
         """ Reminds you of the given message at the given time
 
-        when    : Anything from seconds up to weeks. Format as "1 second" or "1s". Capped at 6 months
+        when    : Anything from seconds up to weeks. Format as "1 second" or "1s"
         reminder: The content of the reminder"""
         parsed = timeparser.parse(when)
 
         if not parsed or parsed.absolute <= time():
             return await ctx.send('You must specify a valid time ahead of now.')
 
-        if parsed.relative > 15770000:  # 6 months
-            return await ctx.send('Time cannot exceed 6 months.')
+        if parsed.relative > 31540000:  # 1 year, this one's for you Adam
+            return await ctx.send('Time cannot exceed 1 year.')
 
         await self.bot.db.add_reminder(ctx.author.id, parsed.absolute, reminder)
         await ctx.send(f'Alright! I will remind you on **{parsed.humanized}**')
