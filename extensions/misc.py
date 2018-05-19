@@ -7,7 +7,7 @@ import discord
 import psutil
 from discord.ext import commands
 
-from utils import timeparser
+from utils import timeparser, idconverter
 
 mention_rx = re.compile(r'<@!?(\d{16,19})>')
 activities = {
@@ -30,10 +30,6 @@ def f_time(time):
     return "%02d:%02d:%02d:%02d" % (d, h, m, s)
 
 
-def is_mention(content: str):
-    return mention_rx.match(content)
-
-
 class Misc:
     def __init__(self, bot):
         self.bot = bot
@@ -49,18 +45,6 @@ class Misc:
                 return None
         return user
 
-    async def get_user(self, content: str):
-        mention = is_mention(content)
-        if mention:
-            return await self.resolve_user_id(mention.group(1))
-
-        if content.isdigit():
-            return await self.resolve_user_id(int(content))
-
-        if len(content) > 5 and content[-5] == '#':
-            return discord.utils.find(lambda u: str(u) == content, self.bot.users)
-
-        return discord.utils.get(self.bot.users, name=content)
 
     @commands.command()
     async def invite(self, ctx):
@@ -70,15 +54,13 @@ class Misc:
     @commands.command(aliases=['ui', 'user'])
     @commands.bot_has_permissions(embed_links=True)
     @commands.guild_only()
-    async def userinfo(self, ctx, user: str=None):
+    async def userinfo(self, ctx, user: idconverter.IDConverter):
         """ Returns information about a user
 
         Search methods: user[#discrim] | id | mention
         """
-        if not user:
-            user = ctx.author
-        else:
-            user = await self.get_user(user)
+        if isinstance(user, int):
+            user = await self.resolve_user_id(user)
 
         if not user:
             return await ctx.send('No users found matching that query.')
@@ -141,7 +123,7 @@ class Misc:
         embed.add_field(name='RAM Usage', value=f'{ram:.2f} MB', inline=True)
         embed.add_field(name='Threads', value=threads, inline=True)
         embed.add_field(name='Servers', value=len(self.bot.guilds), inline=True)
-        embed.add_field(name='Users', value=len(self.bot.users), inline=True)
+        embed.add_field(name='Latency', value=f'{round(self.bot.latency * 1000)} ms', inline=True)
         embed.add_field(name='Messages Seen', value=self.bot.messages_seen, inline=True)
 
         await ctx.send(embed=embed)
