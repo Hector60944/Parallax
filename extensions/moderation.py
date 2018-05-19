@@ -338,8 +338,11 @@ class Moderation:
             amount = current_warns % threshold
 
             if amount == 0:
-                await member.ban(reason=f'[ {ctx.author} ] Too many warnings', delete_message_days=7)
-                await ctx.send(f'Banned **{member.name}** for hitting the warning limit ({threshold}/{threshold})')
+                try:
+                    await member.ban(reason=f'[ {ctx.author} ] Too many warnings', delete_message_days=7)
+                    await ctx.send(f'Banned **{member.name}** for hitting the warning limit ({threshold}/{threshold})')
+                except discord.Forbidden:
+                    await ctx.send(f'Unable to ban **{member.name}** for hitting the warning limit')
             else:
                 await ctx.send(f'Warned **{member}** for **{reason}** (Warnings: {amount}/{threshold})')
         else:
