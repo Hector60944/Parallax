@@ -148,6 +148,10 @@ class Misc:
 
     @commands.command()
     async def remindme(self, ctx, when: str, *, reminder: str):
+        """ Reminds you of the given message at the given time
+
+        when    : Anything from seconds up to weeks. Format as "1 second" or "1s". Capped at 6 months
+        reminder: The content of the reminder"""
         parsed = timeparser.parse(when)
 
         if not parsed or parsed.absolute <= time():
