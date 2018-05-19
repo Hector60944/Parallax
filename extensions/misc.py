@@ -53,11 +53,14 @@ class Misc:
     @commands.command(aliases=['ui', 'user'])
     @commands.bot_has_permissions(embed_links=True)
     @commands.guild_only()
-    async def userinfo(self, ctx, user: idconverter.IDConverter):
+    async def userinfo(self, ctx, user: idconverter.IDConverter=None):
         """ Returns information about a user
 
         Search methods: user[#discrim] | id | mention
         """
+        if user is None:
+            user = ctx.author
+
         if isinstance(user, int):
             user = await self.resolve_user_id(user)
 
