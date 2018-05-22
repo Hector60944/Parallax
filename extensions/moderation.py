@@ -18,7 +18,10 @@ class Helpers:
         self.bot = bot
 
     async def resolve_user(self, u_id: int):
-        return self.bot.get_user(u_id) or await self.bot.get_user_info(u_id)
+        try:
+            return self.bot.get_user(u_id) or await self.bot.get_user_info(u_id)
+        except discord.NotFound:
+            return None
 
     async def create_timed_ban(self, guild_id: int, user: int, due: int):
         await self.bot.r.table('bans') \
