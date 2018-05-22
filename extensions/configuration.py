@@ -138,7 +138,7 @@ class Configuration:
         config.update({'antiInvite': setting})
         await self.helpers.set_config(ctx.guild.id, config)
 
-        return await ctx.send(f'Invite Killer **{"enabled" if setting else "disabled"}**')
+        return await ctx.send(f'Anti-Invite **{"enabled" if setting else "disabled"}**')
 
     @config.command()
     async def muterole(self, ctx, *, role: discord.Role=None):
