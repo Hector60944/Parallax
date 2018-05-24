@@ -47,6 +47,7 @@ class Misc:
 
     @commands.group()
     @commands.guild_only()
+    @commands.is_owner()
     async def find(self, ctx):
         """ Find users based on a given query and search category """
         if not ctx.invoked_subcommand:
