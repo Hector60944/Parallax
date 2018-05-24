@@ -57,10 +57,11 @@ class Misc:
 
     @find.command()
     async def username(self, ctx, *, query):
+        """ Finds users whose username contain the given query """
         users = [m for m in ctx.guild.members if query in m.name][:15]
         formatted = '```\n'
         for u in users:
-            formatted += f'{u.name:35} ({u.id})'
+            formatted += f'{u.name:35} ({u.id})\n'
         formatted += '```'
         await ctx.send(formatted)
 
