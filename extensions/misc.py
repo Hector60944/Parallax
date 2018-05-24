@@ -89,7 +89,7 @@ class Misc:
             return await ctx.send('No users found matching that query.')
 
         member = ctx.guild.get_member(user.id)
-        activity = f'{activities[member.activity.type]} `{member.activity.name}`' if getattr(member, 'activity', None) else 'Playing: `Unknown`'
+        activity = f'{activities[member.activity.type]} `{member.activity.name}`' if getattr(member, 'activity', None) else 'Playing `Unknown`'
 
         embed = discord.Embed(color=0xbe2f2f,
                               description=activity)
