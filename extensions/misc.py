@@ -46,6 +46,25 @@ class Misc:
         return user
 
     @commands.command()
+    @commands.guild_only()
+    async def find(self, ctx):
+        """ Find users based on a given query and search category """
+        if not ctx.invoked_subcommand:
+            _help = await self.bot.formatter.format_help_for(ctx, ctx.command)
+
+            for page in _help:
+                await ctx.send(page)
+
+    @find.group()
+    async def username(self, ctx, *, query):
+        users = [m for m in ctx.guild.members if query in m.name][:15]
+        formatted = '```\n'
+        for u in users:
+            formatted += f'{u.name:35} ({u.id})'
+        formatted += '```'
+        await ctx.send(formatted)
+
+    @commands.command()
     async def invite(self, ctx):
         """ Displays Parallax's invite """
         await ctx.send(f'Add me to your server with this URL: **<{self.bot.invite_url}>**')
