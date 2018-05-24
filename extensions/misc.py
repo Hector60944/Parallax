@@ -45,7 +45,7 @@ class Misc:
                 return None
         return user
 
-    @commands.command()
+    @commands.group()
     @commands.guild_only()
     async def find(self, ctx):
         """ Find users based on a given query and search category """
@@ -55,7 +55,7 @@ class Misc:
             for page in _help:
                 await ctx.send(page)
 
-    @find.group()
+    @find.command()
     async def username(self, ctx, *, query):
         users = [m for m in ctx.guild.members if query in m.name][:15]
         formatted = '```\n'
