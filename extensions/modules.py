@@ -5,8 +5,7 @@ import discord
 
 from utils import interaction
 
-
-invite_rx = re.compile(r'(?:https?:\/\/)?discord(?:app\.com\/invite|\.gg)\/([a-z0-9]{1,16})', re.IGNORECASE)
+invite_rx = re.compile(r'discord(?:app\.com\/invite|\.gg)\/([a-z0-9]{1,16})', re.IGNORECASE)
 
 
 class Helpers:
