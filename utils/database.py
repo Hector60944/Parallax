@@ -18,6 +18,7 @@ class Database:
                 'verificationRole': None,
                 'warnThreshold': 0,
                 'antiInvite': False,
+                'antiadsIgnore': [],
                 'mutedRole': None,
                 'logChannel': None,
                 'autorole': {

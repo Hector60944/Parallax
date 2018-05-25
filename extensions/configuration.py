@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from utils import timeparser
+from utils import timeparser, pagination
 from utils.interaction import get_channel
 
 
@@ -30,6 +30,16 @@ class Helpers:
                 .run(self.bot.connection)) \
                 .get('prefix', None)
 
+    def get_channel_names(self, channel_ids: list):
+        names = []
+
+        for c in channel_ids:
+            chan = self.bot.get_channel(int(c))
+            if chan:
+                names.append(chan.name)
+
+        return names
+
 
 class Configuration:
     def __init__(self, bot):
@@ -40,9 +50,7 @@ class Configuration:
     @commands.is_owner()
     async def migrate(self, ctx):
         migrate_data = {
-            'messages': {
-                'deleteLog': None
-            }
+            'antiadsIgnore': []
         }
         m = await ctx.send('Migrating all server settings...')
         await self.bot.r.table('settings').update(migrate_data).run(self.bot.connection)
@@ -139,6 +147,31 @@ class Configuration:
         await self.helpers.set_config(ctx.guild.id, config)
 
         return await ctx.send(f'Anti-Invite **{"enabled" if setting else "disabled"}**')
+
+    @config.command()
+    async def ignoreads(self, ctx, method: str, *, channel: discord.TextChannel):
+        """ Adds/Removes a channel to the anti-ads whitelist
+
+        method must be either add or remove"""
+        if method != 'add' and method != 'remove':
+            return await ctx.send('Invalid method! Method must be `add` or `remove`')
+
+        config = await self.bot.db.get_config(ctx.guild.id)
+
+        if method == 'add':
+            if str(channel.id) in config['antiadsIgnore']:
+                return await ctx.send(f'{channel.mention} is already whitelisted.')
+
+            config['antiadsIgnore'].append(str(channel.id))
+            await ctx.send(f'{channel.mention} is now whitelisted!')
+        elif method == 'remove':
+            if str(channel.id) not in config['antiadsIgnore']:
+                return await ctx.send(f'{channel.mention} is not whitelisted.')
+
+            config['antiadsIgnore'].pop(config['antiadsIgnore'].index(str(channel.id)))
+            await ctx.send(f'{channel.mention} is no longer whitelisted.')
+
+        await self.helpers.set_config(ctx.guild.id, config)
 
     @config.command()
     async def muterole(self, ctx, *, role: discord.Role=None):
@@ -329,16 +362,18 @@ class Configuration:
         join_log = get_channel(self.bot, _event['joinLog'])
         leave_log = get_channel(self.bot, _event['leaveLog'])
         delete_log = get_channel(self.bot, _event['deleteLog'])
+        ignored_channels = ' '.join(self.helpers.get_channel_names(config['antiadsIgnore']))
 
-        await ctx.send(f'''**Server Configuration | {ctx.guild.name}**
-```prolog
+        settings = f'''
 Prefix       : {prefix}
 Mod-Only     : {'on' if config['modOnly'] else 'off'}
-Anti-Invite  : {'on' if config['antiInvite'] else 'off'}
 Muted Role   : {mute_role.name if mute_role else ''}
 Warning Limit: {config['warnThreshold']}
 Min Acc. Age : {config['accountAge'] or 'off'}
 Verif. Role  : {verification.name if verification else 'None'}
+Anti-Invite
+  Status     : {'on' if config['antiInvite'] else 'off'}
+  Ignored    : {ignored_channels or 'None'}
 Autorole
   Bots       : {" ".join(config["autorole"]["bots"])}
   Users      : {" ".join(config["autorole"]["users"])}
@@ -350,8 +385,12 @@ Log Channels
   Leave      : {leave_log.name if leave_log else ''}
   Deletes    : {delete_log.name if delete_log else ''}
   Moderation : {log_channel.name if log_channel else ''}
-```
-        ''')
+        '''
+
+        pages = pagination.paginate(settings, 1950)
+
+        for page in pages:
+            await ctx.send(f'```prolog\n{page.strip()}```')
 
     @config.command()
     async def selfrole(self, ctx, method: str, *, role: discord.Role):

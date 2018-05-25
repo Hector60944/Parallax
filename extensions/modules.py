@@ -16,8 +16,9 @@ class Helpers:
         channel = (await self.bot.r.table('settings').get(str(guild_id)).default({}).run(self.bot.connection)).get('logChannel', None)
         return interaction.get_channel(self.bot, channel)
 
-    async def anti_invite(self, guild_id: int):
-        return (await self.bot.r.table('settings').get(str(guild_id)).default({}).run(self.bot.connection)).get('antiInvite', False)
+    async def anti_invite_enabled(self, guild_id: int, channel_id: int):
+        config = await self.bot.db.get_config(guild_id)
+        return config['antiInvite'] and str(channel_id) not in config['antiadsIgnore']
 
     async def get_invites(self, user: int, guild_id: int):
         return (await self.bot.r.table('invites').get(str(user)).default({}).run(self.bot.connection)).get(str(guild_id), 0)
@@ -40,10 +41,10 @@ class Modules:
         self.helpers = Helpers(bot)
 
     async def on_message(self, message):
-        if isinstance(message.channel, discord.DMChannel) or message.author.bot:
+        if isinstance(message.channel, discord.DMChannel) or message.author.bot or message.guild.unavailable:
             return
 
-        if await self.helpers.anti_invite(message.guild.id):
+        if await self.helpers.anti_invite_enabled(message.guild.id, message.channel.id):
             await self.anti_invite(message)
 
     async def anti_invite(self, ctx):
@@ -54,10 +55,8 @@ class Modules:
 
         if not invite or \
                 not interaction.check_bot_has(ctx, manage_messages=True) or \
-                not interaction._check_hierarchy(ctx.guild.me, ctx.author, True, True) or interaction.check_user_has(ctx, kick_members=True):
-            return
-
-        if not await self.helpers.is_valid_advert(invite.group(), ctx.guild.id):
+                not interaction._check_hierarchy(ctx.guild.me, ctx.author, True, True) or interaction.check_user_has(ctx, kick_members=True) or \
+                not await self.helpers.is_valid_advert(invite.group(), ctx.guild.id):
             return
 
         try:
