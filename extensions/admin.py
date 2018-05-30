@@ -96,7 +96,10 @@ class Admin:
             func = self.env['func']
             output = await func()
 
-            output = repr(output) if output else str(output)
+            if not isinstance(output, str):
+                output = repr(output) if output else str(output)
+
+            # The above preserves text-formatting if a string is returned
         except Exception as e:
             output = '{}: {}'.format(type(e).__name__, e)
 
