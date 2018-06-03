@@ -281,7 +281,6 @@ class Moderation:
     async def clean(self, ctx):
         """ Deletes messages in a channel """
         if not ctx.invoked_subcommand:
-            print("Clean command called!")
             _help = await self.bot.formatter.format_help_for(ctx, ctx.command)
 
             for page in _help:
