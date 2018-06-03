@@ -66,6 +66,12 @@ class Moderation:
         self.bot = bot
         self.helpers = Helpers(bot)
 
+    async def safe_react(self, message, emoji):
+        try:
+            await message.add_reaction(emoji)
+        except (discord.HTTPException, discord.Forbidden):
+            pass
+
     @commands.group()
     @commands.guild_only()
     @commands.has_permissions(manage_nicknames=True)
@@ -216,7 +222,7 @@ class Moderation:
                 return await ctx.send(f'Ban revocation for **{str(ban.user)}** cancelled.')
 
             await ctx.guild.unban(ban.user, reason=f'[ {ctx.author} ] {reason}')
-            await m.add_reaction('🛠')
+            await self.safe_react(m, '🛠')
             await self.helpers.post_modlog_entry(ctx.guild.id, 'Unbanned', ban.user, ctx.author, reason, '', 0x53dc39)
 
     @commands.command(aliases=['b'])
@@ -247,8 +253,7 @@ class Moderation:
         time, reason = timeparser.convert(reason)
 
         await ctx.guild.ban(member, reason=f'[ {ctx.author} ] {reason}', delete_message_days=7)
-        await ctx.message.add_reaction('🔨')
-
+        await self.safe_react(ctx.message, '🔨')
         await self.bot.db.remove_timed_entry(ctx.guild.id, member.id, 'mutes')  # Delete any timed mutes this user has
 
         if time:
@@ -266,7 +271,7 @@ class Moderation:
         interaction.check_hierarchy(ctx, member)
 
         await member.kick(reason=f'[ {ctx.author} ] {reason}')
-        await ctx.message.add_reaction('👢')
+        await self.safe_react(ctx.message, '👢')
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Kicked', member, ctx.author, reason)
 
     @commands.group(aliases=['d', 'purge', 'prune', 'clear', 'delete', 'remove'])
@@ -322,10 +327,7 @@ class Moderation:
         except discord.NotFound:
             pass
         else:
-            try:
-                await ctx.message.add_reaction('♻')
-            except (discord.HTTPException, discord.Forbidden):
-                pass
+            await self.safe_react(ctx.message, '♻')
 
     @commands.command(aliases=['w'])
     @commands.has_permissions(ban_members=True)
@@ -362,7 +364,7 @@ class Moderation:
         """ Clears a user's warnings """
         await self.helpers.set_warns(member.id, ctx.guild.id, 0)
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Warns Cleared', member, ctx.author, 'None specified', '', 0x53dc39)
-        await ctx.message.add_reaction('👌')
+        await self.safe_react(ctx.message, '👌')
 
     @commands.command(aliases=['m'])
     @commands.has_permissions(ban_members=True)
@@ -396,7 +398,7 @@ class Moderation:
         time, reason = timeparser.convert(reason)
 
         await member.add_roles(role, reason=f'[ {ctx.author} ] {reason}')
-        await ctx.message.add_reaction('🔇')
+        await self.safe_react(ctx.message, '🔇')
 
         if time:
             await self.helpers.post_modlog_entry(ctx.guild.id, 'Muted', member, ctx.author, reason, str(time))
@@ -427,7 +429,7 @@ class Moderation:
             return await ctx.send('The muted role\'s position is higher than my top role. Unable to unassign the role')
 
         await member.remove_roles(role, reason=f'[ {ctx.author} ] {reason}')
-        await ctx.message.add_reaction('🔈')
+        await self.safe_react(ctx.message, '🔈')
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Unmuted', member, ctx.author, reason, '', 0x53dc39)
         await self.bot.db.remove_timed_entry(ctx.guild.id, member.id, 'mutes')
 
@@ -440,7 +442,7 @@ class Moderation:
         ow = ctx.channel.overwrites_for(ctx.guild.default_role)
         ow.send_messages = False
         await ctx.channel.set_permissions(target=ctx.guild.default_role, overwrite=ow, reason=f'[ {ctx.author} ] Lockdown')
-        await ctx.message.add_reaction('🔒')
+        await self.safe_react(ctx.message, '🔒')
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
@@ -451,7 +453,7 @@ class Moderation:
         ow = ctx.channel.overwrites_for(ctx.guild.default_role)
         ow.send_messages = None
         await ctx.channel.set_permissions(target=ctx.guild.default_role, overwrite=ow, reason=f'[ {ctx.author} ] Removed lockdown')
-        await ctx.message.add_reaction('🔓')
+        await self.safe_react(ctx.message, '🔓')
 
     @commands.command(aliases=['vk', 'vckick'])
     @commands.bot_has_permissions(manage_channels=True)
@@ -474,7 +476,7 @@ class Moderation:
             await m.move_to(channel=dest, reason=f'[ {ctx.author} ] Voicekick')
 
         await dest.delete(reason=f'[ {ctx.author} ] Voicekick')
-        await ctx.message.add_reaction('👢')
+        await self.safe_react(ctx.message, '👢')
 
     @commands.command(aliases=['unassign'])
     @commands.bot_has_permissions(manage_roles=True)
@@ -509,7 +511,8 @@ class Moderation:
                 await ctx.author.remove_roles(role, reason=f'Selfrole')
             else:
                 await ctx.author.add_roles(role, reason=f'Selfrole')
-            await ctx.message.add_reaction('👌')
+
+            await self.safe_react(ctx.message, '👌')
 
 
 def setup(bot):
