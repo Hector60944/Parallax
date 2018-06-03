@@ -280,6 +280,7 @@ class Moderation:
     @commands.guild_only()
     async def clean(self, ctx):
         """ Deletes messages in a channel """
+        print("Clean command called!")
         if not ctx.invoked_subcommand:
             _help = await self.bot.formatter.format_help_for(ctx, ctx.command)
 
