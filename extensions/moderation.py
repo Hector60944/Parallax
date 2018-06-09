@@ -205,25 +205,26 @@ class Moderation:
         if not isinstance(member, int):
             member = member.id
 
-        bans = await ctx.guild.bans()
-        ban = discord.utils.get(bans, user__id=member)
-
-        if not ban:
-            return await ctx.send('No banned users found with that ID')
-
-        prompt = await ctx.send(f'The user **{str(ban.user)}** was banned for **{ban.reason or "no reason specified"}**.\n\nAre you sure you want to revoke this ban? (`y`/`n`)')
-
         try:
-            m = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.content in ['y', 'n'], timeout=20)
-        except asyncio.TimeoutError:
-            await prompt.edit(content='Prompt cancelled; no response.')
+            ban = await ctx.guild.get_ban(discord.Object(id=member))
+        except discord.NotFound:
+            return await ctx.send('No banned users found with that ID')
+        except discord.HTTPException:
+            return await ctx.send('An error occurred while fetching the ban information')
         else:
-            if m.content == 'n':
-                return await ctx.send(f'Ban revocation for **{str(ban.user)}** cancelled.')
+            prompt = await ctx.send(f'The user **{str(ban.user)}** was banned for **{ban.reason or "no reason specified"}**.\n\nAre you sure you want to revoke this ban? (`y`/`n`)')
 
-            await ctx.guild.unban(ban.user, reason=f'[ {ctx.author} ] {reason}')
-            await self.safe_react(m, '🛠')
-            await self.helpers.post_modlog_entry(ctx.guild.id, 'Unbanned', ban.user, ctx.author, reason, '', 0x53dc39)
+            try:
+                m = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.content.lower() in ['y', 'n'], timeout=20)
+            except asyncio.TimeoutError:
+                await prompt.edit(content='Prompt cancelled; no response.')
+            else:
+                if m.content == 'n':
+                    return await ctx.send(f'Ban revocation for **{str(ban.user)}** cancelled.')
+
+                await ctx.guild.unban(ban.user, reason=f'[ {ctx.author} ] {reason}')
+                await self.safe_react(m, '🛠')
+                await self.helpers.post_modlog_entry(ctx.guild.id, 'Unbanned', ban.user, ctx.author, reason, '', 0x53dc39)
 
     @commands.command(aliases=['b'])
     @commands.has_permissions(ban_members=True)
@@ -279,7 +280,12 @@ class Moderation:
     @commands.bot_has_permissions(manage_messages=True)
     @commands.guild_only()
     async def clean(self, ctx):
-        """ Deletes messages in a channel """
+        """ Deletes messages in a channel
+
+        e.g. -clean all 50
+
+        When pruning users, syntax must be formatted like so:
+        -clean users <amount> [users...]"""
         if not ctx.invoked_subcommand:
             _help = await self.bot.formatter.format_help_for(ctx, ctx.command)
 
@@ -298,7 +304,7 @@ class Moderation:
 
     @clean.command()
     async def users(self, ctx, amount: int=100, *users: discord.Member):
-        """ Removes messages sent by users. Optionally specify users to remove their messages """
+        """ Removes messages sent by users """
         if users:
             await self.remove(ctx, amount, lambda m: any(m.author.id == u.id for u in users))  # noqa: E731
         else:

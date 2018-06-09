@@ -10,5 +10,5 @@ _headers = {
 async def create(content: str):
     async with _session.post('https://hastepaste.com/api/create',
                              data=f'raw=false&text={content}', headers=_headers) as res:
-        if res.status == 200:
-            return await res.text()
+        data = await res.text() if res.status == 200 else None
+        return data

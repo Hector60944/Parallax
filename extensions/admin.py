@@ -109,10 +109,10 @@ class Admin:
             s += '>>> ' if i == 0 else '... '
             s += line + '\n'
 
-        message = f'```py\n{s}\n{output}\n```'
+        message = f'{s}\n{output}'
 
         try:
-            await ctx.send(message)
+            await ctx.send(f'```py\n{message}```')
         except discord.HTTPException:
             paste = await hastepaste.create(message)
             await ctx.send(f'Output too big: <{paste}>')
