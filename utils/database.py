@@ -17,6 +17,7 @@ class Database:
                 'accountAge': None,
                 'verificationRole': None,
                 'warnThreshold': 0,
+                'consecutiveMentions': 0,
                 'antiInvite': False,
                 'antiadsIgnore': [],
                 'mutedRole': None,
@@ -40,6 +41,17 @@ class Database:
                     }
                 }
             }).run(self.bot.connection)
+
+    async def get_mentions(self, user_id: int, guild_id: int):
+        return (await self.bot.r.table('mentions')
+                .get(str(user_id))
+                .default({})
+                .run(self.bot.connection)).get(str(guild_id), 0)
+
+    async def update_mentions(self, user_id: int, guild_id: int, count: int):
+        await self.bot.r.table('mentions') \
+            .insert({'id': str(user_id), str(guild_id): count}, conflict='update') \
+            .run(self.bot.connection)
 
     async def remove_timed_entry(self, guild_id: int, user_id: int, table: str):
         await self.bot.r.table(table) \

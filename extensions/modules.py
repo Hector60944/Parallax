@@ -20,6 +20,10 @@ class Helpers:
         config = await self.bot.db.get_config(guild_id)
         return config['antiInvite'] and str(channel_id) not in config['antiadsIgnore']
 
+    async def ams_enabled(self, guild_id: int):
+        config = await self.bot.db.get_config(guild_id)
+        return config['consecutiveMentions'] > 0
+
     async def get_invites(self, user: int, guild_id: int):
         return (await self.bot.r.table('invites').get(str(user)).default({}).run(self.bot.connection)).get(str(guild_id), 0)
 
@@ -47,6 +51,29 @@ class Modules:
         if await self.helpers.anti_invite_enabled(message.guild.id, message.channel.id):
             await self.anti_invite(message)
 
+        if await self.helpers.ams_enabled(message.guild.id):
+            await self.anti_mention_spam(message)
+
+    async def anti_mention_spam(self, ctx):
+        if not interaction.check_bot_has(ctx, ban_members=True) or \
+                not interaction._check_hierarchy(ctx.guild.me, ctx.author, True, True) or \
+                interaction.check_user_has(ctx, manage_messages=True):
+            return
+
+        if not ctx.mentions:
+            return await self.bot.db.update_mentions(ctx.author.id, ctx.guild.id, 0)
+
+        threshold = (await self.bot.db.get_config(ctx.guild.id))['consecutiveMentions']
+        consec_mentions = await self.bot.db.get_mentions(ctx.author.id, ctx.guild.id) + 1
+        await self.bot.db.update_mentions(ctx.author.id, ctx.guild.id, consec_mentions)
+
+        if consec_mentions % threshold == 0:
+            await ctx.author.ban(reason='[ AutoMod ] Mention spamming', delete_message_days=7)
+            await ctx.channel.send(f'Auto-Banned {ctx.author} for mention spamming')
+            await self.post_modlog_entry(ctx.guild.id, ctx.author, 'Mention spam')
+        elif consec_mentions % threshold > 1:
+            await ctx.channel.send(f'{ctx.author.mention} Stop spamming mentions ({consec_mentions % threshold}/{threshold})')
+
     async def anti_invite(self, ctx):
         invite = invite_rx.search(ctx.content)
         if isinstance(ctx.author, discord.User):
@@ -71,23 +98,26 @@ class Modules:
             if interaction.check_bot_has(ctx, ban_members=True):
                 await ctx.author.ban(reason='[ AutoMod ] Advertising', delete_message_days=7)
                 await ctx.channel.send(f'Auto-Banned {ctx.author} for advertising')
-
-                channel = await self.helpers.get_log_channel(ctx.guild.id)
-
-                if not channel:
-                    return
-
-                permissions = channel.permissions_for(channel.guild.me)
-                if permissions.send_messages and permissions.embed_links:
-                    embed = discord.Embed(color=0xbe2f2f,
-                                          title=f'**User Banned**',
-                                          description=f'**Target:** {str(ctx.author)} ({ctx.author.id})\n'
-                                                      f'**Reason:** [ AutoMod ] Advertising',
-                                          timestamp=datetime.utcnow())
-                    embed.set_footer(text=f'Performed by {str(self.bot.user)}', icon_url=self.bot.user.avatar_url_as(format='png'))
-                    await channel.send(embed=embed)
+                await self.post_modlog_entry(ctx.guild.id, ctx.author, 'Advertising')
         else:
             await ctx.channel.send(f'{ctx.author.mention} Do not advertise here ({attempts % 3}/3)')
+
+    async def post_modlog_entry(self, guild_id: int, target: discord.User, reason: str):
+        channel = await self.helpers.get_log_channel(guild_id)
+
+        if not channel:
+            return
+
+        permissions = channel.permissions_for(channel.guild.me)
+
+        if permissions.send_messages and permissions.embed_links:
+            embed = discord.Embed(color=0xbe2f2f,
+                                  title=f'**User Banned**',
+                                  description=f'**Target:** {str(target)} ({target.id})\n'
+                                              f'**Reason:** [ AutoMod ] {reason}',
+                                  timestamp=datetime.utcnow())
+            embed.set_footer(text=f'Performed by {str(self.bot.user)}', icon_url=self.bot.user.avatar_url_as(format='png'))
+            await channel.send(embed=embed)
 
 
 def setup(bot):

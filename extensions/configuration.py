@@ -50,7 +50,7 @@ class Configuration:
     @commands.is_owner()
     async def migrate(self, ctx):
         migrate_data = {
-            'antiadsIgnore': []
+            'consecutiveMentions': 0
         }
         m = await ctx.send('Migrating all server settings...')
         await self.bot.r.table('settings').update(migrate_data).run(self.bot.connection)
@@ -172,6 +172,21 @@ class Configuration:
             await ctx.send(f'{channel.mention} is no longer whitelisted.')
 
         await self.helpers.set_config(ctx.guild.id, config)
+
+    @config.command(name='ams')
+    async def ams_threshold(self, ctx, threshold: int):
+        """ Sets anti-mention spam threshold.
+
+        Each message that contains at least one mention will count towards the threshold.
+
+        Set threshold to 0 to disable this feature."""
+        if threshold < 0:
+            return await ctx.send('Threshold must be 0 or higher.')
+
+        config = await self.bot.db.get_config(ctx.guild.id)
+        config['consecutiveMentions'] = threshold
+        await self.helpers.set_config(ctx.guild.id, config)
+        await ctx.send(f'Set AMS threshold to **{threshold}**')
 
     @config.command()
     async def muterole(self, ctx, *, role: discord.Role=None):
@@ -369,6 +384,7 @@ Prefix       : {prefix}
 Mod-Only     : {'on' if config['modOnly'] else 'off'}
 Muted Role   : {mute_role.name if mute_role else ''}
 Warning Limit: {config['warnThreshold']}
+AMS Thres.   : {config['consecutiveMentions']}
 Min Acc. Age : {config['accountAge'] or 'off'}
 Verif. Role  : {verification.name if verification else 'None'}
 Anti-Invite
