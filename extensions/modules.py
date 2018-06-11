@@ -51,7 +51,7 @@ class Modules:
         if await self.helpers.anti_invite_enabled(message.guild.id, message.channel.id):
             await self.anti_invite(message)
 
-        if await self.helpers.ams_enabled(message.guild.id):
+        if not message.author.bot and await self.helpers.ams_enabled(message.guild.id):
             await self.anti_mention_spam(message)
 
     async def anti_mention_spam(self, ctx):
