@@ -223,6 +223,7 @@ class Moderation:
                     return await ctx.send(f'Ban revocation for **{str(ban.user)}** cancelled.')
 
                 await ctx.guild.unban(ban.user, reason=f'[ {ctx.author} ] {reason}')
+                # TODO: Revoke any timed bans in rethinkdb
                 await self.safe_react(m, '🛠')
                 await self.helpers.post_modlog_entry(ctx.guild.id, 'Unbanned', ban.user, ctx.author, reason, '', 0x53dc39)
 
