@@ -321,6 +321,11 @@ class Moderation:
         """ Removes all messages """
         await self.remove(ctx, amount, None)
 
+    @clean.command()
+    async def contains(self, ctx, word: str, amount: int=100):
+        """ Removes messages that contain the given word (case-sensitive) """
+        await self.remove(ctx, amount, lambda m: word in m.content)
+
     async def remove(self, ctx, amount, predicate):
         if amount <= 0:
             return await ctx.send('Amount cannot be 0 or less.')
