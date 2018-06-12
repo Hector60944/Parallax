@@ -504,13 +504,14 @@ class Moderation:
             return await ctx.send('There are no self-assignable roles')
 
         if not role:
+            roles = [discord.utils.get(ctx.guild.roles, id=int(role_id)) for role_id in config['selfrole']]
+            roles = sorted(filter(None, roles), lambda r: r.name)
             public_roles = ''
-            for role_id in config['selfrole']:
-                r = discord.utils.get(ctx.guild.roles, id=int(role_id))
-                if not r:
-                    continue
-                r_name = r.name[:21] + '...' if len(r.name) > 21 else r.name
-                public_roles += f'{r_name:25}({r.id})\n'
+
+            for role in roles:
+                r_name = role.name[:21] + '...' if len(role.name) > 21 else role.name
+                public_roles += f'{r_name:25}({role.id})\n'
+
             await ctx.send(f'```\n{public_roles.strip() or "No roles available"}\n```')
         else:
             if str(role.id) not in config['selfrole']:
