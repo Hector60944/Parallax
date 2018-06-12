@@ -505,7 +505,7 @@ class Moderation:
 
         if not role:
             roles = [discord.utils.get(ctx.guild.roles, id=int(role_id)) for role_id in config['selfrole']]
-            roles = sorted(filter(None, roles), 'name')
+            roles = sorted(filter(None, roles), key=lambda r: r.name)
             public_roles = ''
 
             for role in roles:
