@@ -85,7 +85,7 @@ class Configuration:
 
     @config.command()
     async def modonly(self, ctx, setting: bool):
-        """ Toggle whether Parallax will listen to commands from non-mods """
+        """ Toggles whether non-mods are ignored """
         config = await self.bot.db.get_config(ctx.guild.id)
         config.update({'modOnly': setting})
         await self.helpers.set_config(ctx.guild.id, config)
@@ -94,7 +94,7 @@ class Configuration:
 
     @config.command()
     async def warnings(self, ctx, warn_threshold: int):
-        """ Set the amount of warnings a user needs before they are banned
+        """ Sets the warning ban threshold
 
         Specify '0' to disable banning.
         """
@@ -126,7 +126,7 @@ class Configuration:
 
     @config.command()
     async def verificationrole(self, ctx, *, role: discord.Role=None):
-        """ Sets the role assigned to new accounts that need additional verification """
+        """ Sets the role assigned to new accounts """
         config = await self.bot.db.get_config(ctx.guild.id)
 
         if not role:
