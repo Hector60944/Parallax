@@ -304,6 +304,11 @@ class Moderation:
         await self.remove(ctx, amount, lambda m: len(m.attachments) > 0 and any(a for a in m.attachments if a.url[-3:].lower() in ['jpg', 'gif', 'png', 'webp']))  # noqa: E731
 
     @clean.command()
+    async def textonly(self, ctx, amount: int=100):
+        """ Removes messages with no attachments """
+        await self.remove(ctx, amount, lambda m: len(m.attachments) == 0)
+
+    @clean.command()
     async def users(self, ctx, amount: int=100, *users: discord.Member):
         """ Removes messages sent by users """
         if users:
