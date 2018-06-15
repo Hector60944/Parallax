@@ -21,6 +21,7 @@ class Database:
                 'antiInvite': False,
                 'antiadsIgnore': [],
                 'mutedRole': None,
+                'mutePersist': True,
                 'logChannel': None,
                 'autorole': {
                     'bots': [],
@@ -79,6 +80,25 @@ class Database:
             .filter(self.bot.r.row['due'] <= t) \
             .delete() \
             .run(self.bot.connection)
+
+    async def set_persist(self, member: int, guild: int):
+        await self.bot.r.table('mutepersist') \
+            .insert({'id': str(member), str(guild): True}, conflict='update') \
+            .run(self.bot.connection)
+
+    async def get_persist(self, member: int, guild: int):
+        should_mute = (await self.bot.r.table('mutepersist')
+                       .get(str(member))
+                       .default({})
+                       .run(self.bot.connection)).get(str(guild), False)
+
+        if should_mute:
+            await self.bot.r.table('mutepersist') \
+                .get(str(member)) \
+                .replace(self.bot.r.row.without(str(guild))) \
+                .run(self.bot.connection)
+
+        return should_mute
 
     async def _watch_reminders(self):
         while True:

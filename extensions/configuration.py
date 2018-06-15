@@ -50,7 +50,7 @@ class Configuration:
     @commands.is_owner()
     async def migrate(self, ctx):
         migrate_data = {
-            'consecutiveMentions': 0
+            'mutePersist': True
         }
         m = await ctx.send('Migrating all server settings...')
         await self.bot.r.table('settings').update(migrate_data).run(self.bot.connection)
@@ -146,7 +146,7 @@ class Configuration:
         config.update({'antiInvite': setting})
         await self.helpers.set_config(ctx.guild.id, config)
 
-        return await ctx.send(f'Anti-Invite **{"enabled" if setting else "disabled"}**')
+        await ctx.send(f'Anti-Invite **{"enabled" if setting else "disabled"}**')
 
     @config.command()
     async def ignoreads(self, ctx, method: str, *, channel: discord.TextChannel):
@@ -204,6 +204,17 @@ class Configuration:
                 config['mutedRole'] = str(role.id)
                 await self.helpers.set_config(ctx.guild.id, config)
                 await ctx.send(f'Muted role set to **{role.name}**')
+
+    @config.command()
+    async def mutepersist(self, ctx, setting: bool):
+        """ Toggles mute-role persistence
+
+        If a user leaves and rejoins while muted, Parallax can reapply the muted role (if set)"""
+        config = await self.bot.db.get_config(ctx.guild.id)
+        config.update({'mutePersist': setting})
+        await self.helpers.set_config(ctx.guild.id, config)
+
+        await ctx.send(f'Mute-Persistence **{"enabled" if setting else "disabled"}**')
 
     @config.command()
     async def logs(self, ctx, channel: discord.TextChannel=None):
@@ -382,7 +393,9 @@ class Configuration:
         settings = f'''
 Prefix       : {prefix}
 Mod-Only     : {'on' if config['modOnly'] else 'off'}
-Muted Role   : {mute_role.name if mute_role else ''}
+Muting
+  Role       : {mute_role.name if mute_role else ''}
+  Persist    : {'on' if config['mutePersist'] else 'off'}
 Warning Limit: {config['warnThreshold']}
 AMS Thres.   : {config['consecutiveMentions']}
 Min Acc. Age : {config['accountAge'] or 'off'}

@@ -47,6 +47,17 @@ class Events:
 
     async def on_member_join(self, member):
         config = await self.bot.db.get_config(member.guild.id)
+
+        if config['mutePersist'] and config['mutedRole']:
+            mute_persist = await self.bot.db.get_persist(member.id, member.guild.id)
+            mute_role = [discord.utils.get(member.guild.roles, id=int(config['mutedRole']))]
+
+            if mute_persist and mute_role is not None:
+                try:
+                    await member.add_roles(*mute_role, reason='[ Parallax Mute-Persist ] Account was previously muted')
+                except (discord.HTTPException, discord.Forbidden):
+                    pass
+
         account_age = config['accountAge']
         verification = config['verificationRole']
 
@@ -101,6 +112,13 @@ class Events:
 
     async def on_member_remove(self, member):
         config = await self.bot.db.get_config(member.guild.id)
+
+        if config['mutePersist'] and config['mutedRole']:
+            muted = discord.utils.get(member.roles, id=int(config['mutedRole'])) is not None
+
+            if muted:
+                await self.bot.db.set_persist(member.id, member.guild.id)
+
         log = get_channel(self.bot, config['messages']['leaveLog'])
         leave = config['messages']['leaveMessage']
 
