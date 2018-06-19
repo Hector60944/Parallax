@@ -1,4 +1,3 @@
-import re
 import subprocess
 from datetime import datetime
 from time import time
@@ -9,7 +8,6 @@ from discord.ext import commands
 
 from utils import timeparser, idconverter
 
-mention_rx = re.compile(r'<@!?(\d{16,19})>')
 activities = {
     0: 'Playing',
     1: 'Streaming',
@@ -69,7 +67,8 @@ class Misc:
     @commands.command()
     async def invite(self, ctx):
         """ Displays Parallax's invite """
-        await ctx.send(f'Add me to your server with this URL: **<{self.bot.invite_url}>**')
+        em = discord.Embed(colour=0xbe2f2f, title='Links', description=f'[Add Parallax]({self.bot.invite_url}) | [Get Support](https://discord.gg/xvtH2Yn)')
+        await ctx.send(embed=em)
 
     @commands.command(aliases=['ui', 'user'])
     @commands.bot_has_permissions(embed_links=True)
