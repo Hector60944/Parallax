@@ -23,7 +23,6 @@ class Tags:
     async def delete_tag(self, author: int, tag_name: str):
         await self.bot.r.table('tags') \
             .get(str(author)) \
-            .default({}) \
             .replace(self.bot.r.row.without(tag_name)) \
             .run(self.bot.connection)
 
