@@ -21,12 +21,10 @@ class Tags:
             .run(self.bot.connection)
 
     async def delete_tag(self, author: int, tag_name: str):
-        tags = await self.get_all_tags(author)
-        tags.pop(tag_name)
-        tags.update({'id': str(author)})
-
         await self.bot.r.table('tags') \
-            .insert(tags, conflict='update') \
+            .get(str(author)) \
+            .default({}) \
+            .replace(self.bot.r.row.without(tag_name)) \
             .run(self.bot.connection)
 
     @commands.group(aliases=['t', 'tags'], invoke_without_command=True)
