@@ -355,8 +355,11 @@ class Moderation:
 
         threshold = (await self.bot.db.get_config(ctx.guild.id))['warnThreshold']
         current_warns = await self.helpers.get_warns(member.id, ctx.guild.id) + 1
+        append_reason = '' if reason == 'None specified' else f'for **{reason}**'
 
-        if threshold != 0:
+        if threshold == 0:
+            await ctx.send(f'Warned **{member}** {append_reason} (Warnings: {current_warns})')
+        else:
             amount = current_warns % threshold
 
             if amount == 0:
@@ -367,9 +370,7 @@ class Moderation:
                 else:
                     await ctx.send(f'Banned **{member.name}** for hitting the warning limit ({threshold}/{threshold})')
             else:
-                await ctx.send(f'Warned **{member}** for **{reason}** (Warnings: {amount}/{threshold})')
-        else:
-            await ctx.send(f'Warned **{member}** for **{reason}** (Warnings: {current_warns})')
+                await ctx.send(f'Warned **{member}** {append_reason} (Warnings: {amount}/{threshold})')
 
         await self.helpers.set_warns(member.id, ctx.guild.id, current_warns)
         await self.helpers.post_modlog_entry(ctx.guild.id, 'Warned', member, ctx.author, reason, '', 0xEFD344)
