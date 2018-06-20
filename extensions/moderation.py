@@ -378,10 +378,10 @@ class Moderation:
     @commands.command(aliases=['cw'])
     @commands.has_permissions(ban_members=True)
     @commands.guild_only()
-    async def clearwarns(self, ctx, *, member: discord.Member):
+    async def clearwarns(self, ctx, member: discord.Member, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
         """ Clears a user's warnings """
         await self.helpers.set_warns(member.id, ctx.guild.id, 0)
-        await self.helpers.post_modlog_entry(ctx.guild.id, 'Warns Cleared', member, ctx.author, 'None specified', '', 0x53dc39)
+        await self.helpers.post_modlog_entry(ctx.guild.id, 'Warns Cleared', member, ctx.author, reason, '', 0x53dc39)
         await self.safe_react(ctx.message, '👌')
 
     @commands.command(aliases=['m'])
