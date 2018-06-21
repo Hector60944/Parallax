@@ -323,6 +323,7 @@ class Configuration:
         {user}      - Mentions the user that joined
         {user:tag}  - The user's name and discriminator
         {server}    - The server's name
+        {count}     - The amount of members in the server
         {owner}     - The server owner's name and discriminator
         """
         config = await self.bot.db.get_config(ctx.guild.id)
@@ -360,6 +361,7 @@ class Configuration:
         {user}      - Mentions the user that joined
         {user:tag}  - The user's name and discriminator
         {server}    - The server's name
+        {count}     - The amount of members in the server
         """
         config = await self.bot.db.get_config(ctx.guild.id)
         leave = config['messages']['leaveMessage']
