@@ -104,7 +104,7 @@ class Events:
                     .replace('{user:tag}', str(member)) \
                     .replace('{server}', member.guild.name) \
                     .replace('{owner}', str(member.guild.owner)) \
-                    .replace('{count}', len(member.guild.members))
+                    .replace('{count}', str(len(member.guild.members)))
 
                 try:
                     await channel.send(m)
@@ -139,7 +139,7 @@ class Events:
                     .replace('{user}', member.mention) \
                     .replace('{user:tag}', str(member)) \
                     .replace('{server}', member.guild.name) \
-                    .replace('{count}', len(member.guild.members))
+                    .replace('{count}', str(len(member.guild.members)))
 
                 try:
                     await channel.send(m)
