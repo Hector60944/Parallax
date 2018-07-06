@@ -40,11 +40,12 @@ class Profile:
 
         tz = pytz.timezone(profile['timezone']) if profile['timezone'] else None
 
-        await ctx.send(f'''**{user.name}\'s profile**\n```prolog
-Timezone    : {profile['timezone'] or 'Unknown'}
-Current Time: {datetime.now(tz).strftime('%H:%M:%S')}
-Note        : {profile['notes'].get(str(ctx.guild.id))}
-```''')
+        em = discord.Embed(colour=0xbe2f2f, title=f'{user.name}\'s profile', description=f'Note: {profile["notes"].get(str(ctx.guild.id))}')
+
+        em.add_field(name='Timezone', value=profile['timezone'] or 'Unknown', inline=True)
+        em.add_field(name='User\'s Time', value=datetime.now(tz).strftime('%H:%M:%S'), inline=True)
+        em.add_field(name='\u200b', value='\u200b', inline=True)
+        await ctx.send(embed=em)
 
     @profile.command(aliases=['tz'])
     async def timezone(self, ctx, *, tz: str):
