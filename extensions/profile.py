@@ -40,7 +40,7 @@ class Profile:
 
         tz = pytz.timezone(profile['timezone']) if profile['timezone'] else None
 
-        em = discord.Embed(colour=0xbe2f2f, title=f'{user.name}\'s profile', description=f'Note: {profile["notes"].get(str(ctx.guild.id))}')
+        em = discord.Embed(colour=0xbe2f2f, title=f'{user.name}\'s profile', description=profile["notes"].get(str(ctx.guild.id)))
 
         em.add_field(name='Timezone', value=profile['timezone'] or 'Unknown', inline=True)
         em.add_field(name='User\'s Time', value=datetime.now(tz).strftime('%H:%M:%S'), inline=True)
