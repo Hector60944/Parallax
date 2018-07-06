@@ -46,7 +46,7 @@ Current Time: {datetime.now(tz).strftime('%H:%M:%S')}
 Note        : {profile['notes'].get(str(ctx.guild.id))}
 ```''')
 
-    @profile.command()
+    @profile.command(aliases=['tz'])
     async def timezone(self, ctx, *, tz: str):
         """ Sets your profile timezone
 
