@@ -159,6 +159,8 @@ class Moderation:
         for m in members:
             try:
                 await m.edit(nick='boobs')
+            except discord.NotFound:
+                pass
             except (discord.HTTPException, discord.Forbidden):
                 failed += 1
 
