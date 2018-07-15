@@ -18,6 +18,7 @@ class Database:
                 'verificationRole': None,
                 'warnThreshold': 0,
                 'consecutiveMentions': 0,
+                'autoDehoist': False,
                 'antiInvite': False,
                 'antiadsIgnore': [],
                 'mutedRole': None,

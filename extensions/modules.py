@@ -6,6 +6,7 @@ import discord
 from utils import interaction
 
 invite_rx = re.compile(r'discord(?:app\.com\/invite|\.gg)\/([a-z0-9]{1,16})', re.IGNORECASE)
+dehoist_rx = re.compile(r'^[^a-z0-9]', re.IGNORECASE)
 
 
 class Helpers:
@@ -23,6 +24,10 @@ class Helpers:
     async def ams_enabled(self, guild_id: int):
         config = await self.bot.db.get_config(guild_id)
         return config['consecutiveMentions'] > 0
+
+    async def auto_dehoist_enabled(self, guild_id: int):
+        config = await self.bot.db.get_config(guild_id)
+        return config['autoDehoist']
 
     async def get_invites(self, user: int, guild_id: int):
         return (await self.bot.r.table('invites').get(str(user)).default({}).run(self.bot.connection)).get(str(guild_id), 0)
@@ -53,6 +58,19 @@ class Modules:
 
         if not message.author.bot and await self.helpers.ams_enabled(message.guild.id):
             await self.anti_mention_spam(message)
+
+    async def on_member_update(self, old, new):
+        if await self.helpers.auto_dehoist_enabled(new.guild.id):
+            await self.auto_dehoist(old, new)
+
+    async def auto_dehoist(self, old, new):
+        if not dehoist_rx.match(new.display_name):
+            return
+
+        try:
+            await new.edit(nick='boobs', reason='[ AutoMod ] Auto-Dehoist')
+        except (discord.Forbidden, discord.HTTPException, discord.NotFound):
+            pass
 
     async def anti_mention_spam(self, ctx):
         if not interaction.check_bot_has(ctx, ban_members=True) or \

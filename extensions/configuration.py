@@ -50,7 +50,7 @@ class Configuration:
     @commands.is_owner()
     async def migrate(self, ctx):
         migrate_data = {
-            'mutePersist': True
+            'autoDehoist': False
         }
         m = await ctx.send('Migrating all server settings...')
         await self.bot.r.table('settings').update(migrate_data).run(self.bot.connection)
@@ -187,6 +187,14 @@ class Configuration:
         config['consecutiveMentions'] = threshold
         await self.helpers.set_config(ctx.guild.id, config)
         await ctx.send(f'Set AMS threshold to **{threshold}**')
+
+    @config.command()
+    async def autodehoist(self, ctx, setting: bool):
+        """ Sets whether auto-dehoist is enabled or not """
+        config = await self.bot.db.get_config(ctx.guild.id)
+        config['autoDehoist'] = setting
+        await self.helpers.set_config(ctx.guild.id, config)
+        await ctx.send(f'Auto-Dehoist is now **{"enabled" if setting else "disabled"}**')
 
     @config.command()
     async def muterole(self, ctx, *, role: discord.Role=None):
@@ -400,6 +408,7 @@ Muting
   Persist    : {'on' if config['mutePersist'] else 'off'}
 Warning Limit: {config['warnThreshold']}
 AMS Thres.   : {config['consecutiveMentions']}
+Auto-Dehoist : {'on' if config['autoDehoist'] else 'off'}
 Min Acc. Age : {config['accountAge'] or 'off'}
 Verif. Role  : {verification.name if verification else 'None'}
 Anti-Invite
