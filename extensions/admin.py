@@ -21,20 +21,18 @@ class Admin:
     @commands.command()
     @commands.is_owner()
     async def reload(self, ctx, *modules: str):
-        """ Reload an extension """
-        failed = []
+        """ Reload extensions """
+        out = ''
         for module in modules:
             try:
                 self.bot.unload_extension(f'extensions.{module}')
                 self.bot.load_extension(f'extensions.{module}')
-            except (ImportError, SyntaxError, ModuleNotFoundError) as exception:
-                failed.append((module, str(exception)))
+            except Exception as exception:
+                out += f'{module:15}ERR: {str(exception)}\n'
+            else:
+                out += f'{module:15}OK\n'
 
-        if failed:
-            formatted = '\n'.join([f'{f[0]:15} - {f[1]}' for f in failed])
-            await ctx.send(f'**{len(failed)}** extensions failed to reload\n```\n{formatted}```')
-        else:
-            await ctx.send('All modules reloaded successfully.')
+        await ctx.send(f'```\n{out.strip()}```')
 
     @commands.command()
     @commands.is_owner()

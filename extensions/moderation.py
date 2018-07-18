@@ -415,6 +415,9 @@ class Moderation:
         if role.position > ctx.me.top_role.position:
             return await ctx.send('The muted role\'s position is higher than my top role. Unable to assign the role')
 
+        if role in member.roles:
+            return await ctx.send('That user is already muted.')
+
         time, reason = timeparser.convert(reason)
 
         await member.add_roles(role, reason=f'[ {ctx.author} ] {reason}')
@@ -447,6 +450,9 @@ class Moderation:
 
         if role.position > ctx.me.top_role.position:
             return await ctx.send('The muted role\'s position is higher than my top role. Unable to unassign the role')
+
+        if role not in member.roles:
+            return await ctx.send('That user is not currently muted.')
 
         await member.remove_roles(role, reason=f'[ {ctx.author} ] {reason}')
         await self.safe_react(ctx.message, '🔈')
