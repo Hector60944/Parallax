@@ -67,7 +67,7 @@ class Modules:
 
     async def auto_dehoist(self, old, new):
         if not await self.helpers.auto_dehoist_enabled(new.guild.id) or \
-                interaction.check_user_has(new, kick_members=True) or \
+                new.guild_permissions.kick_members or \
                 not dehoist_rx.match(new.display_name):
             return
 
