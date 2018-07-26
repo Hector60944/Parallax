@@ -56,8 +56,10 @@ class Modules:
         if await self.helpers.anti_invite_enabled(message.guild.id, message.channel.id):
             await self.anti_invite(message)
 
-        if not message.author.bot and await self.helpers.ams_enabled(message.guild.id):
+        if await self.helpers.ams_enabled(message.guild.id):
             await self.anti_mention_spam(message)
+
+        await self.slow_mode(message)
 
     async def on_member_update(self, old, new):
         if await self.helpers.auto_dehoist_enabled(new.guild.id):
@@ -71,6 +73,13 @@ class Modules:
             await new.edit(nick='boobs', reason='[ AutoMod ] Auto-Dehoist')
         except (discord.Forbidden, discord.HTTPException, discord.NotFound):
             pass
+
+    async def slow_mode(self, message):
+        if await self.bot.db.should_slow(message.author.id, message.channel.id):
+            try:
+                await message.delete()
+            except (discord.Forbidden, discord.HTTPException):
+                pass
 
     async def anti_mention_spam(self, ctx):
         if not interaction.check_bot_has(ctx, ban_members=True) or \
