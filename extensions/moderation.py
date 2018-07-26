@@ -179,7 +179,10 @@ class Moderation:
         if not time:
             time = discord.Embed.Empty
         else:
-            time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
+            try:
+                time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
+            except ValueError:
+                time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
 
         if len(m['content']) > 2048:
             url = await hastepaste.create(m['content'])
