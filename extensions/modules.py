@@ -66,7 +66,8 @@ class Modules:
             await self.auto_dehoist(old, new)
 
     async def auto_dehoist(self, old, new):
-        if not dehoist_rx.match(new.display_name):
+        if interaction.check_user_has(new, kick_members=True) or \
+                not dehoist_rx.match(new.display_name):
             return
 
         try:
@@ -75,11 +76,14 @@ class Modules:
             pass
 
     async def slow_mode(self, message):
-        if await self.bot.db.should_slow(message.author.id, message.channel.id):
-            try:
-                await message.delete()
-            except (discord.Forbidden, discord.HTTPException):
-                pass
+        if interaction.check_user_has(message, kick_members=True) or \
+                not await self.bot.db.should_slow(message.author.id, message.channel.id):
+            return
+
+        try:
+            await message.delete()
+        except (discord.Forbidden, discord.HTTPException):
+            pass
 
     async def anti_mention_spam(self, ctx):
         if not interaction.check_bot_has(ctx, ban_members=True) or \
