@@ -41,8 +41,7 @@ class Database:
                         'message': '',
                         'channel': None
                     }
-                },
-                'slowmode': []
+                }
             }).run(self.bot.connection)
 
     async def get_mentions(self, user_id: int, guild_id: int):
