@@ -72,6 +72,23 @@ class Moderation:
         except (discord.HTTPException, discord.Forbidden):
             pass
 
+    @commands.command()
+    @commands.has_permissions(manage_nicknames=True)
+    @commands.bot_has_permissions(manage_nicknames=True)
+    @commands.cooldown(rate=1, per=10.0, type=commands.BucketType.guild)
+    async def decancer(self, ctx):
+        msg = await ctx.send('Please wait...')
+        failed = 0
+
+        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name)][:200]
+        for m in members:
+            try:
+                await m.edit(nick='Hoister')
+            except (discord.HTTPException, discord.Forbidden):
+                failed += 1
+
+        await msg.edit(content=f'**__Decancer Results__**\n**{len(members) - failed}** succeeded\n**{failed}** failed')
+
     @commands.group()
     @commands.guild_only()
     @commands.has_permissions(manage_nicknames=True)
@@ -86,36 +103,19 @@ class Moderation:
                 await ctx.send(page)
 
     @dehoist.command()
-    async def cancer(self, ctx):
-        """ Dehoists names starting with unicode characters """
-        msg = await ctx.send('Please wait...')
-        failed = 0
-
-        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name)][:200]
-        for m in members:
-            try:
-                await m.edit(nick='boobs')
-            except (discord.HTTPException, discord.Forbidden):
-                failed += 1
-
-        embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
-        await msg.edit(content=None, embed=embed)
-
-    @dehoist.command()
     async def symbols(self, ctx):
         """ Dehoists names starting with symbols """
         msg = await ctx.send('Please wait...')
         failed = 0
 
-        members = [m for m in ctx.guild.members if no_symbols_regex.search(m.display_name)][:200]
+        members = [m for m in ctx.guild.members if no_symbols_regex.match(m.display_name)][:200]
         for m in members:
             try:
-                await m.edit(nick='boobs')
+                await m.edit(nick='Hoister')
             except (discord.HTTPException, discord.Forbidden):
                 failed += 1
 
-        embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
-        await msg.edit(content=None, embed=embed)
+        await msg.edit(content=f'**__Dehoist Results__**\n**{len(members) - failed}** succeeded\n**{failed}** failed')
 
     @dehoist.command()
     async def numbers(self, ctx):
@@ -123,15 +123,14 @@ class Moderation:
         msg = await ctx.send('Please wait...')
         failed = 0
 
-        members = [m for m in ctx.guild.members if no_numbers_regex.search(m.display_name)][:200]
+        members = [m for m in ctx.guild.members if no_numbers_regex.match(m.display_name)][:200]
         for m in members:
             try:
-                await m.edit(nick='boobs')
+                await m.edit(nick='Hoister')
             except (discord.HTTPException, discord.Forbidden):
                 failed += 1
 
-        embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
-        await msg.edit(content=None, embed=embed)
+        await msg.edit(content=f'**__Dehoist Results__**\n**{len(members) - failed}** succeeded\n**{failed}** failed')
 
     @dehoist.command()
     async def custom(self, ctx, *, prefix: str):
@@ -142,12 +141,11 @@ class Moderation:
         members = [m for m in ctx.guild.members if m.display_name.startswith(prefix)][:200]
         for m in members:
             try:
-                await m.edit(nick='boobs')
+                await m.edit(nick='Hoister')
             except (discord.HTTPException, discord.Forbidden):
                 failed += 1
 
-        embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
-        await msg.edit(content=None, embed=embed)
+        await msg.edit(content=f'**__Dehoist Results__**\n**{len(members) - failed}** succeeded\n**{failed}** failed')
 
     @dehoist.command(name='all')
     async def _all(self, ctx):
@@ -155,17 +153,16 @@ class Moderation:
         msg = await ctx.send('Please wait...')
         failed = 0
 
-        members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name) or no_numbers_regex.search(m.display_name) or no_symbols_regex.search(m.display_name)][:200]
+        members = [m for m in ctx.guild.members if no_numbers_regex.match(m.display_name) or no_symbols_regex.match(m.display_name)][:200]
         for m in members:
             try:
-                await m.edit(nick='boobs')
+                await m.edit(nick='Hoister')
             except discord.NotFound:
                 pass
             except (discord.HTTPException, discord.Forbidden):
                 failed += 1
 
-        embed = discord.Embed(colour=0xbe2f2f, title='Dehoist Results', description=f'{len(members) - failed} succeeded\n{failed} failed')
-        await msg.edit(content=None, embed=embed)
+        await msg.edit(content=f'**__Dehoist Results__**\n**{len(members) - failed}** succeeded\n**{failed}** failed')
 
     @commands.command()
     @commands.guild_only()
