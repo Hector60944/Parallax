@@ -53,7 +53,8 @@ class Modules:
         if isinstance(message.channel, discord.DMChannel) or message.author.bot or message.guild.unavailable:
             return
 
-        if await self.helpers.anti_invite_enabled(message.guild.id, message.channel.id):
+        if 'discord' in message.content.lower() and \
+                await self.helpers.anti_invite_enabled(message.guild.id, message.channel.id):
             await self.anti_invite(message)
 
         if await self.helpers.ams_enabled(message.guild.id):
