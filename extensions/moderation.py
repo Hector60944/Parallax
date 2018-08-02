@@ -83,7 +83,7 @@ class Moderation:
         members = [m for m in ctx.guild.members if no_cancer_regex.search(m.display_name)][:200]
         for m in members:
             try:
-                await m.edit(nick='Hoister')
+                await m.edit(nick='！ Dehoisted')
             except (discord.HTTPException, discord.Forbidden):
                 failed += 1
 
@@ -111,7 +111,7 @@ class Moderation:
         members = [m for m in ctx.guild.members if no_symbols_regex.match(m.display_name)][:200]
         for m in members:
             try:
-                await m.edit(nick='Hoister')
+                await m.edit(nick='！ Dehoisted')
             except (discord.HTTPException, discord.Forbidden):
                 failed += 1
 
@@ -126,7 +126,7 @@ class Moderation:
         members = [m for m in ctx.guild.members if no_numbers_regex.match(m.display_name)][:200]
         for m in members:
             try:
-                await m.edit(nick='Hoister')
+                await m.edit(nick='！ Dehoisted')
             except (discord.HTTPException, discord.Forbidden):
                 failed += 1
 
@@ -141,7 +141,7 @@ class Moderation:
         members = [m for m in ctx.guild.members if m.display_name.startswith(prefix)][:200]
         for m in members:
             try:
-                await m.edit(nick='Hoister')
+                await m.edit(nick='！ Dehoisted')
             except (discord.HTTPException, discord.Forbidden):
                 failed += 1
 
@@ -156,7 +156,7 @@ class Moderation:
         members = [m for m in ctx.guild.members if no_numbers_regex.match(m.display_name) or no_symbols_regex.match(m.display_name)][:200]
         for m in members:
             try:
-                await m.edit(nick='Hoister')
+                await m.edit(nick='！ Dehoisted')
             except discord.NotFound:
                 pass
             except (discord.HTTPException, discord.Forbidden):
