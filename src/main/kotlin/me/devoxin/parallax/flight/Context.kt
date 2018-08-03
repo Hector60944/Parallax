@@ -15,6 +15,7 @@ class Context(event: GuildMessageReceivedEvent, args: List<String>) {
     val message: Message = event.message
     val author: User = event.author
     val member: Member = event.member
+    val selfMember: Member = event.guild.selfMember
     val channel: TextChannel = event.channel
     val guild: Guild = event.guild
 
@@ -89,6 +90,17 @@ class Context(event: GuildMessageReceivedEvent, args: List<String>) {
         }
     }
 
+    fun resolveSnowflake(): String? {
+        val target = args.deplete(1)?.joinToString(" ") ?: return null
+        val match = snowflakeMatch.matcher(target)
+
+        return if (match.matches()) match.group() else null
+    }
+
+    fun resolveString(consumeRest: Boolean = false): String {
+        val amount = if (consumeRest) args.size else 1
+        return args.deplete(amount)?.joinToString(" ") ?: ""
+    }
 
 
     companion object {
