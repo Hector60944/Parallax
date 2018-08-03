@@ -60,7 +60,6 @@ class Context(event: GuildMessageReceivedEvent, args: List<String>) {
     fun resolveTextChannel(consumeRest: Boolean = false): TextChannel? {
         val amount = if (consumeRest) args.size else 1
         val target = args.deplete(amount)?.joinToString(" ") ?: return null
-        System.out.println(target)
 
         val hasSnowflake = snowflakeMatch.matcher(target)
 
@@ -77,7 +76,6 @@ class Context(event: GuildMessageReceivedEvent, args: List<String>) {
     fun resolveRole(consumeRest: Boolean = false): Role? {
         val amount = if (consumeRest) args.size else 1
         val target = args.deplete(amount)?.joinToString(" ") ?: return null
-        System.out.println(target)
 
         val hasSnowflake = snowflakeMatch.matcher(target)
 
