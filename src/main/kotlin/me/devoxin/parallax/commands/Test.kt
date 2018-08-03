@@ -8,12 +8,12 @@ class Test : CoroutineCommand {
     override suspend fun runAsync(ctx: Context) {
 
         val user = ctx.resolveUser()
+        val channel = ctx.resolveTextChannel()
+        val role = ctx.resolveRole()
 
-        if (user != null) {
-            ctx.send("${user.name}#${user.discriminator} <a:trashdoves:393764497967415296>")
-        } else {
-            ctx.send("nope")
-        }
+        ctx.send("User: ${user?.name ?: "who is this"}\n" +
+                "Channel: ${channel?.name ?: "stop hiding channels from me"}\n" +
+                "Role: ${role?.name ?: "???"}")
 
     }
 
