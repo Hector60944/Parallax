@@ -8,9 +8,9 @@ import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.util.regex.Pattern
 
-class Context(event: GuildMessageReceivedEvent, fucc: List<String>) {
+class Context(event: GuildMessageReceivedEvent, args: List<String>) {
 
-    val args = fucc.toMutableList()
+    val args = args.toMutableList()
     val jda: JDA = event.jda
     val message: Message = event.message
     val author: User = event.author
@@ -32,8 +32,8 @@ class Context(event: GuildMessageReceivedEvent, fucc: List<String>) {
     // Arg-Parsing stuff
 
     fun resolveMember(consumeRest: Boolean = false): Member? {
-        val end = if (consumeRest) args.size else 1
-        val target = args.deplete(end)?.joinToString(" ") ?: return null
+        val amount = if (consumeRest) args.size else 1
+        val target = args.deplete(amount)?.joinToString(" ") ?: return null
 
         val hasSnowflake = snowflakeMatch.matcher(target)
 
@@ -58,8 +58,8 @@ class Context(event: GuildMessageReceivedEvent, fucc: List<String>) {
 
 
     fun resolveTextChannel(consumeRest: Boolean = false): TextChannel? {
-        val end = if (consumeRest) args.size else 1
-        val target = args.deplete(end)?.joinToString(" ") ?: return null
+        val amount = if (consumeRest) args.size else 1
+        val target = args.deplete(amount)?.joinToString(" ") ?: return null
         System.out.println(target)
 
         val hasSnowflake = snowflakeMatch.matcher(target)
@@ -75,8 +75,8 @@ class Context(event: GuildMessageReceivedEvent, fucc: List<String>) {
     }
 
     fun resolveRole(consumeRest: Boolean = false): Role? {
-        val end = if (consumeRest) args.size else 1
-        val target = args.deplete(end)?.joinToString(" ") ?: return null
+        val amount = if (consumeRest) args.size else 1
+        val target = args.deplete(amount)?.joinToString(" ") ?: return null
         System.out.println(target)
 
         val hasSnowflake = snowflakeMatch.matcher(target)
