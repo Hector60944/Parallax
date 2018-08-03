@@ -2,6 +2,7 @@ package me.devoxin.parallax
 
 import kotlinx.coroutines.experimental.async
 import me.devoxin.parallax.commands.Ban
+import me.devoxin.parallax.commands.Prefix
 import me.devoxin.parallax.flight.Command
 import me.devoxin.parallax.flight.Context
 import net.dv8tion.jda.core.Permission
@@ -12,10 +13,11 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter
 
 class EventHandler(private val defaultPrefix: String) : ListenerAdapter() {
 
-    val commands: HashMap<String, Command> = HashMap()
+    private val commands: HashMap<String, Command> = HashMap()
 
     init {
         commands["ban"] = Ban()
+        commands["prefix"] = Prefix()
     }
 
     override fun onReady(event: ReadyEvent) {
@@ -28,7 +30,9 @@ class EventHandler(private val defaultPrefix: String) : ListenerAdapter() {
             return
         }
 
-        if (!event.message.contentDisplay.startsWith(defaultPrefix)) {
+        val prefix = Database.getPrefix(event.guild.id, defaultPrefix)
+
+        if (!event.message.contentDisplay.startsWith(prefix)) {
             return
         }
 
