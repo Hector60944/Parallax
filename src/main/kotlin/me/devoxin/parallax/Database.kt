@@ -11,6 +11,11 @@ class Database {
         val connection: Connection = r.connection().db("parallax").connect()
 
 
+        fun createDatabase() {
+
+        }
+
+
         fun getPrefix(guildId: String, default: String): String {
             return r.table("prefixes")
                     .get(guildId)

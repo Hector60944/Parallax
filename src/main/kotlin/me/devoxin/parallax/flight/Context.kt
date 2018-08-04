@@ -8,7 +8,9 @@ import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.util.regex.Pattern
 
-class Context(event: GuildMessageReceivedEvent, args: List<String>) {
+class Context(val trigger: String,
+              event: GuildMessageReceivedEvent,
+              args: List<String>) {
 
     val args = args.toMutableList()
     val jda: JDA = event.jda
@@ -20,7 +22,16 @@ class Context(event: GuildMessageReceivedEvent, args: List<String>) {
     val guild: Guild = event.guild
 
 
-    suspend fun send(content: String, codeblock: Boolean = false) {
+    fun send(content: String, codeblock: Boolean = false) {
+        val limit = if (codeblock) 1950 else 2000
+        val pages = split(content, limit)
+
+        for (page in pages) {
+            channel.sendMessage(page).queue()
+        }
+    }
+
+    suspend fun sendAsync(content: String, codeblock: Boolean = false) {
         val limit = if (codeblock) 1950 else 2000
         val pages = split(content, limit)
 
@@ -97,6 +108,8 @@ class Context(event: GuildMessageReceivedEvent, args: List<String>) {
         return if (match.matches()) match.group() else null
     }
 
+
+    // TODO: Clean param
     fun resolveString(consumeRest: Boolean = false): String {
         val amount = if (consumeRest) args.size else 1
         return args.deplete(amount)?.joinToString(" ") ?: ""

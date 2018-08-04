@@ -3,6 +3,7 @@ package me.devoxin.parallax
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.entities.Game
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.FileReader
 import java.util.*
@@ -12,7 +13,7 @@ class Parallax {
 
     companion object {
 
-        val logger = LoggerFactory.getLogger("parallax")
+        val logger: Logger = LoggerFactory.getLogger("parallax")
         lateinit var shardManager: ShardManager
 
         @JvmStatic
