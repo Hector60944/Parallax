@@ -30,6 +30,8 @@ class Parallax {
                     .setToken(token)
                     .addEventListeners(EventHandler(prefix))
                     .build()
+
+            Database.setup()
         }
 
         fun getConfig(): Properties {

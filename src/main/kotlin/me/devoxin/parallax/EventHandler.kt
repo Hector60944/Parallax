@@ -76,7 +76,12 @@ class EventHandler(private val defaultPrefix: String) : ListenerAdapter() {
         }
 
         async {
-            command.run(Context(cleanTrigger, event, args))
+            try {
+                command.run(Context(cleanTrigger, event, args))
+            } catch (e: Exception) {
+                Parallax.logger.error("Error occurred in the command handler", e)
+                event.channel.sendMessage("⚠ | An error occurred and has been logged").queue()
+            }
         }
     }
 
