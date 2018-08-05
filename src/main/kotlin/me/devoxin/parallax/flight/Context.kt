@@ -9,7 +9,6 @@ import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import java.awt.Color
 import java.time.Instant
 import java.util.regex.Pattern
 
@@ -61,7 +60,7 @@ class Context(
 
         channel.sendMessage(EmbedBuilder()
                 .setColor(severity.color)
-                .setTitle("User $action")
+                .setTitle("**User $action**")
                 .setDescription("**Target:** ${target.tag()} (${target.id})\n**Reason:** $reason")
                 .setFooter("Performed by ${author.tag()}", author.avatarUrl)
                 .setTimestamp(Instant.now())
@@ -150,7 +149,6 @@ class Context(
         MEDIUM(0xEFD344),
         HIGH(0xbe2f2f)
     }
-
 
 
 }
