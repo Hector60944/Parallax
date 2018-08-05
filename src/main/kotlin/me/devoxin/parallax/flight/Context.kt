@@ -1,16 +1,27 @@
 package me.devoxin.parallax.flight
 
+import me.devoxin.parallax.Database
 import me.devoxin.parallax.utils.await
 import me.devoxin.parallax.utils.deplete
 import me.devoxin.parallax.utils.split
+import me.devoxin.parallax.utils.tag
+import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import java.awt.Color
+import java.time.Instant
 import java.util.regex.Pattern
 
-class Context(val trigger: String,
-              event: GuildMessageReceivedEvent,
-              args: List<String>) {
+class Context(
+        val trigger: String,
+        event: GuildMessageReceivedEvent,
+        args: List<String>
+) {
+
+    companion object {
+        val snowflakeMatch: Pattern = Pattern.compile("[0-9]{17,20}")
+    }
 
     val args = args.toMutableList()
     val jda: JDA = event.jda
@@ -38,6 +49,24 @@ class Context(val trigger: String,
         for (page in pages) {
             channel.sendMessage(page).await()
         }
+    }
+
+    fun dispatchModLogEntry(severity: Severity, action: String, target: Member, reason: String) {
+        dispatchModLogEntry(severity, action, target.user, reason)
+    }
+
+    fun dispatchModLogEntry(severity: Severity, action: String, target: User, reason: String) {
+        val channelId = Database.getModlog(guild.id) ?: return
+        val channel = guild.getTextChannelById(channelId) ?: return
+
+        channel.sendMessage(EmbedBuilder()
+                .setColor(severity.color)
+                .setTitle("User $action")
+                .setDescription("**Target:** ${target.tag()} (${target.id})\n**Reason:** $reason")
+                .setFooter("Performed by ${author.tag()}", author.avatarUrl)
+                .setTimestamp(Instant.now())
+                .build()
+        ).queue()
     }
 
 
@@ -116,8 +145,12 @@ class Context(val trigger: String,
     }
 
 
-    companion object {
-        val snowflakeMatch: Pattern = Pattern.compile("[0-9]{17,20}")
+    enum class Severity(val color: Int) {
+        LOW(0x53dc39),
+        MEDIUM(0xEFD344),
+        HIGH(0xbe2f2f)
     }
+
+
 
 }

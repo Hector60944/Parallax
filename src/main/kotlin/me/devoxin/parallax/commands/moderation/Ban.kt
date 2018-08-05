@@ -1,6 +1,5 @@
 package me.devoxin.parallax.commands.moderation
 
-import me.devoxin.parallax.Database
 import me.devoxin.parallax.flight.Command
 import me.devoxin.parallax.flight.CommandCategory
 import me.devoxin.parallax.flight.CommandProperties
@@ -35,10 +34,7 @@ class Ban : Command {
         ctx.guild.controller.ban(user, 7, "[ ${ctx.author.tag()} ] $reason").await()
         ctx.message.addReaction("\uD83D\uDC4C").await()
 
-        val channelId = Database.getModlog(ctx.guild.id) ?: return
-        val channel = ctx.jda.getTextChannelById(channelId) ?: return
-
-        channel.sendMessage("some dude got bent lul rip").queue()
+        ctx.dispatchModLogEntry(Context.Severity.HIGH, "Banned", user, reason)
     }
 
 }
