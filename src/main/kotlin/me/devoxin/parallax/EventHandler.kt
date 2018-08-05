@@ -58,7 +58,9 @@ class EventHandler(private val defaultPrefix: String) : ListenerAdapter() {
 
         val commandString = content[0].toLowerCase()
         val args = content.drop(1)
-        val command = commands[commandString] ?: return
+        val command = commands[commandString]
+                ?: commands.values.firstOrNull { it.properties().triggers.contains(commandString) }
+                ?: return
 
         val userMissing = executePermissionCheck(event.member, command.properties().userPermissions)
         val botMissing = executePermissionCheck(event.guild.selfMember, command.properties().botPermissions)

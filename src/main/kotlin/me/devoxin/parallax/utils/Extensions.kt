@@ -1,6 +1,7 @@
 package me.devoxin.parallax.utils
 
 import kotlinx.coroutines.experimental.future.await
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.requests.RestAction
 
 
@@ -27,4 +28,8 @@ fun String.opt(default: String): String {
 
 suspend fun <T> RestAction<T>.await(): T {
     return submit().await()
+}
+
+fun User.tag(): String {
+    return "$name#$discriminator"
 }
