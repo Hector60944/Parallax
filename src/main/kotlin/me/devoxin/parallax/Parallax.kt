@@ -18,6 +18,7 @@ class Parallax {
 
         @JvmStatic
         fun main(args: Array<String>) {
+            Thread.currentThread().name = "Parallax-Main"
             val config = getConfig()
 
             val token = config.getProperty("token")

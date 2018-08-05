@@ -2,10 +2,10 @@
 <Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="[%d{HH:mm:ss}] [%t] [%-5level] %logger{36} - %msg%n"/>
+            <PatternLayout pattern="[%d{HH:mm:ss}] [%t] [%-5level] [%-15logger{1}] - %msg%n"/>
         </Console>
         <File name="File" fileName="parallax.log" immediateFlush="true" append="false">
-            <PatternLayout pattern="[%d{HH:mm:ss}] [%t] [%-5level] %logger{36} - %msg%n"/>
+            <PatternLayout pattern="[%d{HH:mm:ss}] [%t] [%-5level] [%-15logger{1}] - %msg%n"/>
         </File>
     </Appenders>
     <Loggers>

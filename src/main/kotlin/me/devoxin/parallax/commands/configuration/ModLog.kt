@@ -1,6 +1,5 @@
 package me.devoxin.parallax.commands.configuration
 
-import me.devoxin.parallax.Database
 import me.devoxin.parallax.flight.Command
 import me.devoxin.parallax.flight.CommandCategory
 import me.devoxin.parallax.flight.CommandProperties
@@ -9,21 +8,16 @@ import net.dv8tion.jda.core.Permission
 
 
 @CommandProperties(
-        description = "Sets the server prefix",
+        description = "Sets the channel used for moderation logs",
         userPermissions = [Permission.MANAGE_SERVER],
         category = CommandCategory.Configuration
 )
-class Prefix : Command {
+class ModLog : Command {
 
     override suspend fun run(ctx: Context) {
-        val newPrefix = ctx.resolveString()
+        val channel = ctx.resolveTextChannel(true)
 
-        if (newPrefix.isEmpty()) {
-            return ctx.send("Prefix may not be blank.")
-        }
 
-        Database.setPrefix(ctx.guild.id, newPrefix)
-        ctx.send("Updated server prefix.")
     }
 
 }
