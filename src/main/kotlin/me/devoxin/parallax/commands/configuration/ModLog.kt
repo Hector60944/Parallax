@@ -1,5 +1,6 @@
 package me.devoxin.parallax.commands.configuration
 
+import me.devoxin.parallax.Database
 import me.devoxin.parallax.flight.Command
 import me.devoxin.parallax.flight.CommandCategory
 import me.devoxin.parallax.flight.CommandProperties
@@ -17,7 +18,13 @@ class ModLog : Command {
     override suspend fun run(ctx: Context) {
         val channel = ctx.resolveTextChannel(true)
 
+        Database.setModlog(ctx.guild.id, channel?.id)
 
+        if (channel == null) {
+            ctx.send("Mod-log cleared.")
+        } else {
+            ctx.send("Mod-log set to ${channel.asMention}")
+        }
     }
 
 }
