@@ -20,21 +20,31 @@ import net.dv8tion.jda.core.Permission
 class Ban : Command {
 
     override suspend fun run(ctx: Context) {
-        val user = ctx.resolveMember() ?: return ctx.send("You need to specify a valid user/ID")
-        val reason = ctx.resolveString(true).opt("No reason specified")
+        val userId = ctx.args.resolveMemberId() ?: return ctx.send("You need to specify a valid user/ID")
+        val reason = ctx.args.resolveString(true).opt("No reason specified")
 
-        if (!ctx.member.canInteract(user)) {
-            return ctx.send("Role hierarchy prevents you from doing that.")
+        val member = ctx.guild.getMemberById(userId)
+
+        if (member != null) {
+            if (!ctx.member.canInteract(member)) {
+                return ctx.send("Role hierarchy prevents you from doing that.")
+            }
+
+            if (!ctx.selfMember.canInteract(member)) {
+                return ctx.send("Role hierarchy prevents me from doing that.")
+            }
         }
 
-        if (!ctx.selfMember.canInteract(user)) {
-            return ctx.send("Role hierarchy prevents me from doing that.")
-        }
-
-        ctx.guild.controller.ban(user, 7, "[ ${ctx.author.tag()} ] $reason").await()
-        ctx.message.addReaction("\uD83D\uDC4C").await()
-
-        ctx.dispatchModLogEntry(Context.Severity.HIGH, "Banned", user, reason)
+        ctx.guild.controller.ban(userId, 7, "[ ${ctx.author.tag()} ] $reason").queue({
+            ctx.message.addReaction("\uD83D\uDC4C").queue()
+            //ctx.dispatchModLogEntry(Context.Severity.HIGH, "Banned", user, reason)
+        }, {
+            if (it is IllegalArgumentException) {
+                ctx.send("Unable to ban: the user ID `$userId` is invalid.")
+            } else {
+                ctx.send(it.toString())
+            }
+        })
     }
 
 }

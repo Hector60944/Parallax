@@ -16,7 +16,7 @@ import net.dv8tion.jda.core.Permission
 class Prefix : Command {
 
     override suspend fun run(ctx: Context) {
-        val newPrefix = ctx.resolveString()
+        val newPrefix = ctx.args.resolveString()
 
         if (newPrefix.isEmpty()) {
             return ctx.send("Prefix may not be blank.")

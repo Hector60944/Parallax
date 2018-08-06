@@ -20,8 +20,8 @@ import net.dv8tion.jda.core.Permission
 class Kick : Command {
 
     override suspend fun run(ctx: Context) {
-        val user = ctx.resolveMember() ?: return ctx.send("You need to specify a valid user/ID")
-        val reason = ctx.resolveString(true).opt("No reason specified")
+        val user = ctx.args.resolveMember() ?: return ctx.send("You need to specify a valid user/ID")
+        val reason = ctx.args.resolveString(true).opt("No reason specified")
 
         if (!ctx.member.canInteract(user)) {
             return ctx.send("Role hierarchy prevents you from doing that.")

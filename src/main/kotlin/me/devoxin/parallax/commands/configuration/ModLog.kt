@@ -16,7 +16,7 @@ import net.dv8tion.jda.core.Permission
 class ModLog : Command {
 
     override suspend fun run(ctx: Context) {
-        val channel = ctx.resolveTextChannel(true)
+        val channel = ctx.args.resolveTextChannel(true)
 
         Database.setModlog(ctx.guild.id, channel?.id)
 
