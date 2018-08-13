@@ -7,39 +7,33 @@ import me.devoxin.parallax.flight.Context
 import me.devoxin.parallax.utils.opt
 import me.devoxin.parallax.utils.tag
 import net.dv8tion.jda.core.Permission
+import net.dv8tion.jda.core.exceptions.ErrorResponseException
 
 
 @CommandProperties(
-        description = "Bans a user from the server",
-        triggers = ["b"],
+        description = "Unbans a user from the server",
+        triggers = ["ub"],
         category = CommandCategory.Moderation,
         botPermissions = [Permission.BAN_MEMBERS],
         userPermissions = [Permission.BAN_MEMBERS]
 )
-class Ban : Command {
+class Unban : Command {
 
     override suspend fun run(ctx: Context) {
         val userId = ctx.args.resolveMemberId() ?: return ctx.send("You need to specify a valid user/ID")
         val reason = ctx.args.resolveString(true).opt("No reason specified")
 
-        val member = ctx.guild.getMemberById(userId)
-
-        if (member != null) {
-            if (!ctx.member.canInteract(member)) {
-                return ctx.send("Role hierarchy prevents you from doing that.")
+        ctx.guild.getBanById(userId).queue({
+            // Prompt for unban
+            //ctx.send("**${it.user.tag()}** was banned with reason: **${it.reason}**\n\nUnban? (y/n)")
+            ctx.embed {
+                setTitle("**${it.user.tag()}**")
+                setDescription(it.reason)
+                setFooter("Proceed with unban? (y/n)", null)
             }
-
-            if (!ctx.selfMember.canInteract(member)) {
-                return ctx.send("Role hierarchy prevents me from doing that.")
-            }
-        }
-
-        ctx.guild.controller.ban(userId, 7, "[ ${ctx.author.tag()} ] $reason").queue({
-            ctx.message.addReaction("\uD83D\uDC4C").queue()
-            //ctx.dispatchModLogEntry(Context.Severity.HIGH, "Banned", user, reason)
         }, {
-            if (it is IllegalArgumentException) {
-                ctx.send("Unable to ban: the user ID `$userId` is invalid.")
+            if (it is ErrorResponseException) {
+                return@queue ctx.send("No bans associated with that ID. Check the ID and try again.")
             } else {
                 ctx.send(it.toString())
             }

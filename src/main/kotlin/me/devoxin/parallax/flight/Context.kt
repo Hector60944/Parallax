@@ -35,6 +35,10 @@ class Context(
         }
     }
 
+    fun embed(builder: EmbedBuilder.() -> Unit) {
+        channel.sendMessage(EmbedBuilder().setColor(0xbe2f2f).apply(builder).build()).queue()
+    }
+
     suspend fun sendAsync(content: String, codeblock: Boolean = false) {
         val limit = if (codeblock) 1950 else 2000
         val pages = split(content, limit)
