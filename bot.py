@@ -22,10 +22,7 @@ async def get_prefix(bot, message):  # literal shit code send help
                   .run(bot.connection)) \
                   .get('prefix', None)
 
-        if custom:
-            valid.append(custom)
-        else:
-            valid.append(*bot.config.get('prefixes'))
+        valid.extend(custom or bot.config.get('prefixes'))
 
     return valid
 
