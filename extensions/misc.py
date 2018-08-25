@@ -150,7 +150,7 @@ class Misc:
 
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(aliases=['rm'])
     async def remindme(self, ctx, when: str, *, reminder: str):
         """ Reminds you of the given message at the given time
 
