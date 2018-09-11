@@ -9,7 +9,7 @@ from utils import database
 
 
 async def get_prefix(bot, message):  # literal shit code send help
-    valid = [*bot.config.get('prefixes')]
+    valid = []
 
     if hasattr(bot, 'user'):
         valid.append(f'<@{bot.user.id}> ')
@@ -22,8 +22,9 @@ async def get_prefix(bot, message):  # literal shit code send help
                   .run(bot.connection)) \
                   .get('prefix', None)
 
-        if custom:
-            valid.extend(custom)
+        valid.extend(custom or bot.config.get('prefixes'))
+    else:
+        valid.extend(bot.config.get('prefixes'))
 
     return valid
 
