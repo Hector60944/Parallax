@@ -17,12 +17,11 @@ async def get_prefix(bot, message):  # literal shit code send help
 
     if message.guild is not None:
         custom = (await bot.r.table('prefixes')
-                  .get(str(message.guild.id))
-                  .default({})
-                  .run(bot.connection)) \
-                  .get('prefix', None)
+                  .get(str(message.guild.id))['prefix']
+                  .default(bot.config.get('prefixes'))
+                  .run(bot.connection))
 
-        valid.extend(custom or bot.config.get('prefixes'))
+        valid.extend(custom)
     else:
         valid.extend(bot.config.get('prefixes'))
 
