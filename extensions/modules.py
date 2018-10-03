@@ -60,8 +60,6 @@ class Modules:
         if await self.helpers.ams_enabled(message.guild.id):
             await self.anti_mention_spam(message)
 
-        await self.slow_mode(message)
-
     async def on_member_update(self, old, new):
         if await self.helpers.auto_dehoist_enabled(new.guild.id):
             await self.auto_dehoist(old, new)
@@ -75,16 +73,6 @@ class Modules:
         try:
             await new.edit(nick='boobs', reason='[ AutoMod ] Auto-Dehoist')
         except (discord.Forbidden, discord.HTTPException, discord.NotFound):
-            pass
-
-    async def slow_mode(self, message):
-        if interaction.check_user_has(message, kick_members=True) or \
-                not await self.bot.db.should_slow(message.author.id, message.channel.id):
-            return
-
-        try:
-            await message.delete()
-        except (discord.Forbidden, discord.HTTPException):
             pass
 
     async def anti_mention_spam(self, ctx):
@@ -110,7 +98,11 @@ class Modules:
     async def anti_invite(self, ctx):
         invite = invite_rx.search(ctx.content)
         if isinstance(ctx.author, discord.User):
-            print(f'Encountered a user on anti_invite:\n\tAuthor Type: {type(ctx.author)}\n\tChannel Type: {type(ctx.channel)}\n\tUser: {str(ctx.author)}\n\tIs Bot: {ctx.author.bot}')
+            print(f'Encountered a user on anti_invite:\n'
+                  f'\tAuthor Type: {type(ctx.author)}\n'
+                  f'\tChannel Type: {type(ctx.channel)}\n'
+                  f'\tUser: {str(ctx.author)}\n'
+                  f'\tIs Bot: {ctx.author.bot}')
             return
 
         if not invite or \

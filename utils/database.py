@@ -101,54 +101,6 @@ class Database:
 
         return should_mute
 
-    async def enable_slow(self, channel_id: int, cd: int):
-        await self.bot.r.table('slowmode') \
-            .insert({'id': str(channel_id), 'every': cd}, conflict='update') \
-            .run(self.bot.connection)
-
-    async def disable_slow(self, channel_id: int):
-        await self.bot.r.table('slowmode') \
-            .get(str(channel_id)) \
-            .delete() \
-            .run(self.bot.connection)
-
-    async def get_slow(self, channel_id: int):
-        return await self.bot.r.table('slowmode') \
-            .get(str(channel_id))['every'] \
-            .default(None) \
-            .run(self.bot.connection)
-
-    async def set_slow(self, user_id: int, channel_id: int):
-        t = time()
-
-        await self.bot.r.table('slowmode') \
-            .insert({'id': str(user_id), str(channel_id): t}, conflict='update') \
-            .run(self.bot.connection)
-
-    async def should_slow(self, user_id: int, channel_id: int):
-        cd = await self.get_slow(channel_id)
-
-        if not cd:
-            return False
-
-        c_time = time()
-
-        last_message = await self.bot.r.table('slowmode') \
-            .get(str(user_id))[str(channel_id)] \
-            .default(None) \
-            .run(self.bot.connection)
-
-        if not last_message:
-            await self.set_slow(user_id, channel_id)
-            return False
-
-        triggered = c_time - last_message < cd
-
-        if not triggered:
-            await self.set_slow(user_id, channel_id)
-
-        return triggered
-
     async def _watch_reminders(self):
         while True:
             expired = await self.get_expired_reminders()

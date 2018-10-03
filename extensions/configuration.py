@@ -383,26 +383,6 @@ class Configuration:
 
         await self.helpers.set_config(ctx.guild.id, config)
 
-    @config.command(name='addcd', aliases=['slow'])
-    async def add_cd(self, ctx, cooldown: int, *, channel: discord.TextChannel):
-        """ Enables slowmode for the specified channel
-
-        Cooldown: The time before a user can send a message in seconds (1 message per X seconds)
-        Channel : The channel to apply the cooldown to"""
-        if cooldown <= 0:
-            return await ctx.send(f'Cooldown must be 1 second or higher. To disable slowmode for the channel, use `{ctx.prefix}config remcd <channel>`')
-
-        await self.bot.db.enable_slow(channel.id, cooldown)
-        await ctx.send(f'Enabled slowmode for **{channel.name}**. Users will be limited to **1 message/{cooldown}s**')
-
-    @config.command(name='remcd', aliases=['nocd'])
-    async def rem_cd(self, ctx, *, channel: discord.TextChannel):
-        """ Disables slowmode for the specified channel
-
-        Channel: The channel to disable the cooldown for"""
-        await self.bot.db.disable_slow(channel.id)
-        await ctx.send(f'Slowmode is no longer active for **{channel.name}**')
-
     @config.command(aliases=['overview'])
     async def show(self, ctx):
         """ Displays current server configuration """

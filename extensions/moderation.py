@@ -41,7 +41,8 @@ class Helpers:
             .insert({'id': str(user), str(guild_id): warns}, conflict='update') \
             .run(self.bot.connection)
 
-    async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User, reason: str, time: str='', color=0xbe2f2f):
+    async def post_modlog_entry(self, guild_id: int, action: str, target: discord.User, moderator: discord.User,
+                                reason: str, time: str='', color=0xbe2f2f):
         config = await self.bot.db.get_config(guild_id)
         log = interaction.get_channel(self.bot, config['logChannel'])
 
@@ -214,7 +215,8 @@ class Moderation:
         except discord.HTTPException:
             return await ctx.send('An error occurred while fetching the ban information')
         else:
-            prompt = await ctx.send(f'The user **{str(ban.user)}** was banned for **{ban.reason or "no reason specified"}**.\n\nAre you sure you want to revoke this ban? (`y`/`n`)')
+            prompt = await ctx.send(f'The user **{str(ban.user)}** was banned for **{ban.reason or "no reason specified"}**.\n\n'
+                                    'Are you sure you want to revoke this ban? (`y`/`n`)')
 
             try:
                 m = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.content.lower() in ['y', 'n'], timeout=15)
@@ -303,7 +305,8 @@ class Moderation:
     @clean.command()
     async def images(self, ctx, amount: int=100):
         """ Removes messages with image attachments """
-        await self.remove(ctx, amount, lambda m: len(m.attachments) > 0 and any(a for a in m.attachments if a.url[-3:].lower() in ['jpg', 'gif', 'png', 'webp']))  # noqa: E731
+        await self.remove(ctx, amount, lambda m: len(m.attachments) > 0 and
+                                                 any(a for a in m.attachments if a.url[-3:].lower() in ['jpg', 'gif', 'png', 'webp']))  # noqa: E731
 
     @clean.command()
     async def textonly(self, ctx, amount: int=100):
@@ -342,7 +345,8 @@ class Moderation:
         try:
             await ctx.channel.purge(limit=amount, check=predicate)
         except discord.HTTPException:
-            await ctx.send('An error occurred while cleaning the channel. Note that due to API limitations, messages older than 2 weeks *cannot* be deleted.')
+            await ctx.send('An error occurred while cleaning the channel.'
+                           'Note that due to API limitations, messages older than 2 weeks *cannot* be deleted.')
         except discord.NotFound:
             pass
         else:
@@ -540,6 +544,25 @@ class Moderation:
                 await ctx.author.add_roles(role, reason=f'Selfrole')
 
             await self.safe_react(ctx.message, '👌')
+
+    @commands.command(aliases=['slow', 'delay', 'ratelimit'])
+    @commands.bot_has_permissions(manage_channels=True)
+    @commands.guild_only()
+    async def slowmode(self, ctx, delay: int, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
+        """ Sets channel slowmode (delay is the time between messages)
+
+        The delay can be 0-120 seconds, where `0` is off/disabled.
+        E.g. if delay is 5 seconds, then users can send 1 message every 5 seconds"""
+        if delay > 120:
+            return await ctx.send('Delay cannot be higher than 120 seconds.')
+
+        if delay < 0:
+            return await ctx.send('Delay cannot be lower than 0 seconds.')
+
+        await ctx.channel.edit(slowmode_delay=delay, reason=f'[ {ctx.author} ] {reason}')
+
+        msg = 'disabled' if delay == 0 else f'set to {delay} seconds'
+        await ctx.send(f'Slowmode {msg}')
 
 
 def setup(bot):
