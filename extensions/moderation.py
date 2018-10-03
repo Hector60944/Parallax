@@ -546,6 +546,7 @@ class Moderation:
             await self.safe_react(ctx.message, '👌')
 
     @commands.command(aliases=['slow', 'delay', 'ratelimit'])
+    @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(manage_channels=True)
     @commands.guild_only()
     async def slowmode(self, ctx, delay: int, *, reason: commands.clean_content(fix_channel_mentions=True)='None specified'):
